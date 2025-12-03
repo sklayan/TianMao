@@ -1,0 +1,1644 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>双11全球狂欢节 - 实时数据大屏</title>
+
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+
+    <style>
+
+        * {
+
+            margin: 0;
+
+            padding: 0;
+
+            box-sizing: border-box;
+
+        }
+
+
+
+        body {
+
+            width: 100vw;
+
+            height: 100vh;
+
+            overflow: hidden;
+
+            background: radial-gradient(circle at 50% 10%, #ffefba 0%, #f9d976 15%, #f38f68 30%, #8b2ab2 60%, #0a0a1e 100%);
+
+            font-family: 'Microsoft YaHei', 'Arial', sans-serif;
+
+            position: relative;
+
+            color: #ffffff;
+
+        }
+
+
+
+        /* 主题背景 */
+
+        .festival-background {
+
+            position: absolute;
+
+            top: 0;
+
+            left: 0;
+
+            width: 100%;
+
+            height: 100%;
+
+            z-index: 0;
+
+            overflow: hidden;
+
+            animation: backgroundPulse 12s ease-in-out infinite;
+
+        }
+
+
+
+        .sun-halo {
+
+            position: absolute;
+
+            top: 5%;
+
+            left: 50%;
+
+            width: 60vw;
+
+            height: 60vw;
+
+            transform: translateX(-50%);
+
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.7) 0%, rgba(255, 153, 102, 0.2) 40%, transparent 70%);
+
+            filter: blur(10px);
+
+            opacity: 0.7;
+
+            animation: haloGlow 8s ease-in-out infinite;
+
+        }
+
+
+
+        .mountain-layer {
+
+            position: absolute;
+
+            bottom: 0;
+
+            left: -10%;
+
+            width: 120%;
+
+            height: 60%;
+
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, rgba(8, 12, 36, 0.9) 100%);
+
+            clip-path: polygon(0 60%, 15% 45%, 30% 55%, 45% 35%, 60% 50%, 75% 40%, 90% 55%, 100% 45%, 100% 100%, 0 100%);
+
+            opacity: 0.8;
+
+            animation: floatSlow 10s ease-in-out infinite;
+
+        }
+
+
+
+        .mountain-layer.layer-2 {
+
+            bottom: -5%;
+
+            background: linear-gradient(180deg, rgba(255, 95, 109, 0.4) 0%, rgba(21, 29, 59, 0.95) 80%);
+
+            clip-path: polygon(0 70%, 10% 50%, 25% 65%, 40% 40%, 55% 60%, 70% 45%, 85% 65%, 100% 50%, 100% 100%, 0 100%);
+
+            animation-delay: -3s;
+
+        }
+
+
+
+        .mountain-layer.layer-3 {
+
+            bottom: -10%;
+
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, rgba(12, 16, 42, 0.95) 70%);
+
+            clip-path: polygon(0 80%, 12% 65%, 30% 78%, 45% 55%, 60% 72%, 78% 60%, 92% 80%, 100% 65%, 100% 100%, 0 100%);
+
+            animation-delay: -6s;
+
+        }
+
+
+
+        .city-grid {
+
+            position: absolute;
+
+            bottom: -5%;
+
+            left: -5%;
+
+            width: 110%;
+
+            height: 35%;
+
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(255, 51, 153, 0.3) 30%, rgba(8, 12, 36, 0.95) 80%);
+
+            clip-path: polygon(0 40%, 5% 45%, 10% 43%, 15% 48%, 20% 44%, 25% 50%, 30% 46%, 35% 52%, 40% 45%, 45% 50%, 50% 47%, 55% 53%, 60% 46%, 65% 51%, 70% 48%, 75% 53%, 80% 45%, 85% 50%, 90% 46%, 95% 52%, 100% 40%, 100% 100%, 0 100%);
+
+            opacity: 0.7;
+
+            animation: shimmer 6s linear infinite;
+
+        }
+
+
+
+        .light-beam {
+
+            position: absolute;
+
+            bottom: 15%;
+
+            width: 12%;
+
+            height: 45%;
+
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 20, 147, 0.05) 80%);
+
+            filter: blur(2px);
+
+            opacity: 0.4;
+
+            animation: beamGlow 5s ease-in-out infinite;
+
+            transform-origin: bottom;
+
+        }
+
+
+
+        .light-beam.beam-left {
+
+            left: 18%;
+
+            transform: rotate(-6deg);
+
+        }
+
+
+
+        .light-beam.beam-right {
+
+            right: 15%;
+
+            transform: rotate(5deg);
+
+            animation-delay: -2s;
+
+        }
+
+
+
+        .floating-orb {
+
+            position: absolute;
+
+            width: 12px;
+
+            height: 12px;
+
+            border-radius: 50%;
+
+            background: radial-gradient(circle, #fffb9a 0%, rgba(255, 255, 255, 0) 70%);
+
+            box-shadow: 0 0 20px rgba(255, 255, 200, 0.7);
+
+            animation: orbFloat 7s ease-in-out infinite;
+
+        }
+
+
+
+        .floating-orb.orb-1 { left: 25%; bottom: 55%; animation-delay: 0s; }
+
+        .floating-orb.orb-2 { left: 60%; bottom: 50%; animation-delay: -2s; }
+
+        .floating-orb.orb-3 { left: 80%; bottom: 60%; animation-delay: -4s; }
+
+
+
+        .shopping-icons {
+
+            position: absolute;
+
+            top: 0;
+
+            left: 0;
+
+            width: 100%;
+
+            height: 100%;
+
+            pointer-events: none;
+
+            z-index: 2;
+
+        }
+
+
+
+        .shopping-icon {
+
+            position: absolute;
+
+            /* 增大图标尺寸以获得更好的比例 */
+
+            width: 80px; 
+
+            height: 80px;
+
+            opacity: 0.7;
+
+            animation: iconFloat 8s ease-in-out infinite;
+
+            filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.4));
+
+        }
+
+
+
+        /* 移除了旧的 .icon-bag, .icon-box, .icon-ticket 的 ::before 和 ::after 伪元素样式 */
+
+        /* 新的图标将由内联 SVG 定义 */
+
+
+
+        @keyframes backgroundPulse {
+
+            0%, 100% { filter: hue-rotate(0deg); }
+
+            50% { filter: hue-rotate(20deg); }
+
+        }
+
+
+
+        @keyframes haloGlow {
+
+            0%, 100% { opacity: 0.6; transform: translateX(-50%) scale(1); }
+
+            50% { opacity: 0.9; transform: translateX(-50%) scale(1.05); }
+
+        }
+
+
+
+        @keyframes floatSlow {
+
+            0%, 100% { transform: translateY(0); }
+
+            50% { transform: translateY(-12px); }
+
+        }
+
+
+
+        @keyframes shimmer {
+
+            0% { opacity: 0.4; }
+
+            50% { opacity: 0.7; }
+
+            100% { opacity: 0.4; }
+
+        }
+
+
+
+        @keyframes beamGlow {
+
+            0%, 100% { opacity: 0.3; }
+
+            50% { opacity: 0.55; }
+
+        }
+
+
+
+        @keyframes orbFloat {
+
+            0%, 100% { transform: translateY(0); opacity: 0.6; }
+
+            50% { transform: translateY(-20px); opacity: 1; }
+
+        }
+
+
+
+        @keyframes iconFloat {
+
+            0%, 100% { transform: translateY(0) scale(1); opacity: 0.6; }
+
+            50% { transform: translateY(-25px) scale(1.05); opacity: 0.95; }
+
+        }
+
+
+
+        /* 背景粒子效果 */
+
+        #particles {
+
+            position: absolute;
+
+            top: 0;
+
+            left: 0;
+
+            width: 100%;
+
+            height: 100%;
+
+            z-index: 1;
+
+            overflow: hidden;
+
+        }
+
+
+
+        .particle {
+
+            position: absolute;
+
+            width: 4px;
+
+            height: 4px;
+
+            background: #ff0033;
+
+            border-radius: 50%;
+
+            box-shadow: 0 0 10px #ff0033, 0 0 20px #ff0033;
+
+            opacity: 0.6;
+
+        }
+
+
+
+        /* 主容器 */
+
+        .dashboard-container {
+
+            position: relative;
+
+            z-index: 10;
+
+            width: 100%;
+
+            height: 100%;
+
+            display: flex;
+
+            flex-direction: column;
+
+            align-items: center;
+
+            justify-content: center;
+
+        }
+
+
+
+        /* 标题区域 */
+
+        .title-section {
+
+            text-align: center;
+
+            margin-bottom: 40px;
+
+        }
+
+
+
+        .title-chinese {
+
+            font-size: 56px;
+
+            font-weight: 900;
+
+            /* 艺术渐变文字效果 - 红到金黄到红的多彩渐变 */
+
+            background: linear-gradient(135deg, 
+
+                #FF1744 0%, 
+
+                #FF6B6B 15%, 
+
+                #FF8E53 30%, 
+
+                #FFD93D 45%, 
+
+                #FFB347 60%, 
+
+                #FF8E53 75%, 
+
+                #FF6B6B 90%, 
+
+                #FF1744 100%);
+
+            background-size: 300% 300%;
+
+            -webkit-background-clip: text;
+
+            background-clip: text;
+
+            -webkit-text-fill-color: transparent;
+
+            /* 多层发光和3D阴影效果 - 创造强烈的视觉冲击 */
+
+            text-shadow: 
+
+                /* 红色光晕层 */
+
+                0 0 25px rgba(255, 23, 68, 1),
+
+                0 0 50px rgba(255, 107, 107, 0.8),
+
+                0 0 75px rgba(255, 142, 83, 0.6),
+
+                /* 金色光晕层 */
+
+                0 0 100px rgba(255, 217, 61, 0.5),
+
+                /* 3D立体阴影层 */
+
+                2px 2px 0px rgba(255, 23, 68, 0.5),
+
+                4px 4px 0px rgba(255, 23, 68, 0.4),
+
+                6px 6px 0px rgba(255, 23, 68, 0.3),
+
+                8px 8px 0px rgba(255, 23, 68, 0.2),
+
+                /* 底部深度阴影 */
+
+                0 5px 15px rgba(0, 0, 0, 0.6);
+
+            letter-spacing: 12px;
+
+            margin-bottom: 10px;
+
+            font-family: 'Microsoft YaHei', 'SimHei', 'STHeiti', 'Arial Black', sans-serif;
+
+            /* 文字描边增强立体感 */
+
+            -webkit-text-stroke: 2px rgba(255, 255, 255, 0.15);
+
+            /* 渐变动画和呼吸效果 */
+
+            animation: artisticGradientShift 5s ease-in-out infinite, 
+
+                       titlePulse 3s ease-in-out infinite;
+
+            position: relative;
+
+            display: inline-block;
+
+            /* 3D透视效果 */
+
+            transform: perspective(800px) rotateX(2deg);
+
+        }
+
+
+
+        /* 艺术渐变动画 - 让颜色流动起来 */
+
+        @keyframes artisticGradientShift {
+
+            0%, 100% { 
+
+                background-position: 0% 50%;
+
+            }
+
+            25% { 
+
+                background-position: 50% 50%;
+
+            }
+
+            50% { 
+
+                background-position: 100% 50%;
+
+            }
+
+            75% { 
+
+                background-position: 50% 50%;
+
+            }
+
+        }
+
+
+
+        /* 标题呼吸动画 - 轻微缩放增强动感 */
+
+        @keyframes titlePulse {
+
+            0%, 100% { 
+
+                transform: perspective(800px) rotateX(2deg) scale(1);
+
+                filter: brightness(1);
+
+            }
+
+            50% { 
+
+                transform: perspective(800px) rotateX(2deg) scale(1.015);
+
+                filter: brightness(1.1);
+
+            }
+
+        }
+
+
+
+        .title-english {
+
+            font-size: 24px;
+
+            color: #ffffff;
+
+            letter-spacing: 4px;
+
+            opacity: 0.9;
+
+        }
+
+
+
+        /* 交易额主显示区 */
+
+        #sales-display {
+
+            text-align: center;
+
+            min-height: 200px;
+
+            position: relative;
+
+        }
+
+
+
+        /* 底部数据行容器 */
+
+        .bottom-data-row {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            width: 100%;
+
+            margin-top: 10px;
+
+            position: relative;
+
+        }
+
+
+
+        /* 人民币金额显示 */
+
+        #cny-amount {
+
+            font-size: 80px;
+
+            font-weight: 900;
+
+            color: #ffcc00;
+
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8), 0 0 30px rgba(255, 204, 0, 0.8), 0 0 60px rgba(255, 204, 0, 0.4);
+
+            letter-spacing: 2px;
+
+            margin: 10px 0 5px 0; /* 上移：从20px改为10px */
+
+            line-height: 1.2;
+
+            font-family: 'Arial Black', 'Microsoft YaHei', sans-serif;
+
+            text-rendering: optimizeLegibility;
+
+            -webkit-font-smoothing: antialiased;
+
+        }
+
+
+
+        /* 人民币金额直接显示，无翻页效果 */
+
+        #cny-amount {
+
+            transition: none; /* 移除所有过渡效果 */
+
+        }
+
+
+
+        /* 底部数据显示样式 */
+
+        .bottom-data {
+
+            font-size: 32px;
+
+            font-weight: 700;
+
+            color: #ffffff;
+
+            text-shadow: 
+
+                0 0 15px rgba(255, 255, 255, 0.8),
+
+                0 0 30px rgba(255, 255, 255, 0.5),
+
+                0 0 45px rgba(255, 255, 255, 0.3),
+
+                1px 1px 2px rgba(0, 0, 0, 0.8);
+
+            letter-spacing: 2px;
+
+            font-family: 'Arial', 'Microsoft YaHei', sans-serif;
+
+            text-rendering: optimizeLegibility;
+
+            -webkit-font-smoothing: antialiased;
+
+            opacity: 0.95;
+
+            white-space: nowrap;
+
+        }
+
+
+
+        /* 左侧 - 美元总金额 */
+
+        .bottom-data.data-left {
+
+            text-align: left;
+
+        }
+
+
+
+        /* 右侧 - 无线成交占比 */
+
+        .bottom-data.data-right {
+
+            text-align: right;
+
+        }
+
+
+
+        /* 无线成交占比统一白色 */
+
+        #growth-rate span {
+
+            color: #ffffff;
+
+            text-shadow: 
+
+                0 0 10px rgba(255, 255, 255, 0.6),
+
+                0 0 20px rgba(255, 255, 255, 0.4),
+
+                1px 1px 2px rgba(0, 0, 0, 0.8);
+
+        }
+
+
+
+        /* 时间戳 */
+
+        .timestamp {
+
+            position: absolute;
+
+            top: 30px;
+
+            right: 50px;
+
+            color: #ffffff;
+
+            font-size: 24px;
+
+            font-family: 'Courier New', monospace;
+
+        }
+
+
+
+        /* 加载提示 */
+
+        .loading {
+
+            text-align: center;
+
+            color: #ffffff;
+
+            font-size: 20px;
+
+            margin-top: 30px;
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+
+
+    <!-- 主题背景 -->
+
+    <div class="festival-background">
+
+        <div class="sun-halo"></div>
+
+        <div class="light-beam beam-left"></div>
+
+        <div class="light-beam beam-right"></div>
+
+        <div class="mountain-layer"></div>
+
+        <div class="mountain-layer layer-2"></div>
+
+        <div class="mountain-layer layer-3"></div>
+
+        <div class="city-grid"></div>
+
+        <div class="floating-orb orb-1"></div>
+
+        <div class="floating-orb orb-2"></div>
+
+        <div class="floating-orb orb-3"></div>
+
+    </div>
+
+
+
+    <!-- 背景粒子（已禁用） -->
+
+    <!-- <div id="particles"></div> -->
+
+
+
+    <!-- 时间戳 -->
+
+    <div class="timestamp" id="timestamp"></div>
+
+
+
+    <!-- 主内容区 -->
+
+    <div class="dashboard-container">
+
+        <div class="title-section">
+
+            <div class="title-chinese">双11全球狂欢节</div>
+
+            <div class="title-english">2025 11.11 GLOBAL SHOPPING FESTIVAL</div>
+
+        </div>
+
+
+
+        <div id="sales-display">
+
+            <div id="cny-amount">¥0</div>
+
+            <div class="bottom-data-row">
+
+                <div id="usd-amount" class="bottom-data data-left">$0</div>
+
+                <div id="growth-rate" class="bottom-data data-right">无线成交占比 0%</div>
+
+            </div>
+
+        </div>
+
+
+
+        <div class="loading" id="loading">正在加载实时数据...</div>
+
+    </div>
+
+
+
+    <script>
+
+        // ========== 背景粒子效果 ==========
+
+        function createParticles() {
+
+            const particlesContainer = d3.select("#particles");
+
+            const particleCount = 100;
+
+
+
+            for (let i = 0; i < particleCount; i++) {
+
+                particlesContainer.append("div")
+
+                    .attr("class", "particle")
+
+                    .style("left", Math.random() * 100 + "%")
+
+                    .style("top", Math.random() * 100 + "%")
+
+                    .style("animation-delay", Math.random() * 5 + "s")
+
+                    .transition()
+
+                    .duration(5000 + Math.random() * 5000)
+
+                    .ease(d3.easeLinear)
+
+                    .style("transform", `translate(${(Math.random() - 0.5) * 200}px, ${(Math.random() - 0.5) * 200}px)`)
+
+                    .on("end", function repeat() {
+
+                        d3.select(this)
+
+                            .style("transform", `translate(${(Math.random() - 0.5) * 200}px, ${(Math.random() - 0.5) * 200}px)`)
+
+                            .transition()
+
+                            .duration(5000 + Math.random() * 5000)
+
+                            .ease(d3.easeLinear)
+
+                            .on("end", repeat);
+
+                    });
+
+            }
+
+        }
+
+
+
+        // ========== 数字格式化工具 ==========
+
+        const formatCNY = d3.format(",");
+
+        const formatUSD = d3.format(",.0f");
+
+
+
+        // ========== 实时交易额滚动组件 ==========
+
+        class RealtimeSalesRoller {
+
+            constructor(containerSelector, options = {}) {
+
+                this.container = d3.select(containerSelector);
+
+                this.cnyElement = d3.select("#cny-amount");
+
+                this.usdElement = d3.select("#usd-amount");
+
+                this.growthElement = d3.select("#growth-rate");
+
+                this.loadingElement = d3.select("#loading");
+
+
+
+                // 配置参数
+
+                this.options = {
+
+                    startValue: options.startValue || 0,
+
+                    lastYearValue: options.lastYearValue || 0, // 去年同期数据（用于计算同比增长）
+
+                    animationDuration: options.animationDuration || 2000 // 数字滚动动画时长（增加以减慢滚动速度）
+
+                };
+
+
+
+                this.currentValue = this.options.startValue;
+
+                this.isRunning = false;
+
+                this.dataCallback = null; // 用于接收流数据的回调函数
+
+                this.currentAnimation = null; // 当前金额动画 D3 Timer
+
+                this.currentUsdAnimation = null; // 当前美元金额动画定时器
+
+                this.currentGrowthAnimation = null; // 当前无线成交占比动画定时器
+
+            }
+
+
+
+            // 启动组件（接收流数据）
+
+            start() {
+
+                if (this.isRunning) return;
+
+                this.isRunning = true;
+
+                this.loadingElement.style("display", "none");
+
+                
+
+                // 初始化显示（直接显示数字，无翻页结构）
+
+                this.updateDisplay(this.currentValue);
+
+            }
+
+
+
+            // 停止更新
+
+            stop() {
+
+                this.isRunning = false;
+
+                if (this.currentAnimation) {
+
+                    this.currentAnimation.stop();
+
+                    this.currentAnimation = null;
+
+                }
+
+                if (this.currentUsdAnimation) {
+
+                    this.currentUsdAnimation.stop();
+
+                    this.currentUsdAnimation = null;
+
+                }
+
+                if (this.currentGrowthAnimation) {
+
+                    this.currentGrowthAnimation.stop();
+
+                    this.currentGrowthAnimation = null;
+
+                }
+
+            }
+
+
+
+            // 接收流数据推送（模拟WebSocket接收数据）
+
+            receiveData(newValue) {
+
+                if (!this.isRunning) return;
+
+                
+
+                // 使用平滑滚动动画更新到新值
+
+                this.currentValue = newValue;
+
+                this.updateDisplay(newValue);
+
+            }
+
+
+
+            // 更新显示（直接更新数字，无翻页动画）
+
+            updateDisplay(targetValue) {
+
+                // 直接格式化并更新数字显示
+
+                const formattedValue = this.formatCNYValue(targetValue);
+
+                this.cnyElement.text(formattedValue);
+
+                
+
+                // 计算美元总交易额（假设汇率为 1 CNY = 0.14 USD）
+
+                const usdAmount = targetValue * 0.14;
+
+                this.updateUsdAmount(usdAmount);
+
+                
+
+                // 计算无线成交占比（基于交易金额计算，与交易金额同步变化）
+
+                // 根据交易金额计算占比，金额越大占比略高（60%-70%之间）
+
+                const ratioBase = 60 + (targetValue / 1000000000000) * 10; // 基于金额计算基础占比
+
+                const unlimitedRatio = Math.min(70, Math.max(60, ratioBase + (Math.random() * 2 - 1))); // 60%-70%之间，小幅波动
+
+                this.updateGrowthRate(unlimitedRatio);
+
+            }
+
+            
+
+            // 格式化人民币金额（带逗号分隔）
+
+            formatCNYValue(value) {
+
+                const numValue = Math.floor(Math.abs(value));
+
+                // 使用d3.format添加逗号分隔符
+
+                const formatted = d3.format(",")(numValue);
+
+                return `¥${formatted}`;
+
+            }
+
+
+
+            // 获取当前显示的数字值（从文本中解析）
+
+            getCurrentDisplayValue(element) {
+
+                const currentText = element.text();
+
+                return this.parseValue(currentText);
+
+            }
+
+
+
+            // 缓动函数（三次缓出）- 用于同比增长动画
+
+            easeOutCubic(t) {
+
+                return 1 - Math.pow(1 - t, 3);
+
+            }
+
+
+
+            // 计算同比增长百分比
+
+            calculateGrowthRate(currentValue, lastYearValue) {
+
+                if (!lastYearValue || lastYearValue === 0) {
+
+                    return 0;
+
+                }
+
+                const growth = ((currentValue - lastYearValue) / lastYearValue) * 100;
+
+                return growth;
+
+            }
+
+
+
+            // 更新美元总交易额显示（直接更新，与交易金额同步）
+
+            updateUsdAmount(usdAmount) {
+
+                // 直接更新，不使用动画，与交易金额同步变化
+
+                this.usdElement.text(this.formatUsdAmount(usdAmount));
+
+            }
+
+
+
+            // 美元金额动画
+
+            animateUsdAmount(startAmount, targetAmount) {
+
+                // 停止之前的动画
+
+                if (this.currentUsdAnimation) {
+
+                    this.currentUsdAnimation.stop();
+
+                    this.currentUsdAnimation = null;
+
+                }
+
+                
+
+                const interpolator = d3.interpolateNumber(startAmount, targetAmount);
+
+                const self = this;
+
+                const duration = 1500; // 1.5秒动画
+
+
+
+                this.currentUsdAnimation = d3.timer(function(elapsed) {
+
+                    const progress = Math.min(1, elapsed / duration);
+
+                    const currentAmount = Math.floor(interpolator(self.easeOutCubic(progress)));
+
+                    
+
+                    self.usdElement.text(self.formatUsdAmount(currentAmount));
+
+                    
+
+                    if (progress === 1) {
+
+                        self.currentUsdAnimation.stop();
+
+                        self.currentUsdAnimation = null;
+
+                        self.usdElement.text(self.formatUsdAmount(targetAmount)); // 确保最终值
+
+                    }
+
+                });
+
+            }
+
+
+
+            // 解析美元金额
+
+            parseUsdAmount(text) {
+
+                const numericStr = text.replace(/[^\d]/g, '');
+
+                return parseFloat(numericStr) || 0;
+
+            }
+
+
+
+            // 格式化美元金额
+
+            formatUsdAmount(value) {
+
+                const formatted = d3.format(",")(Math.floor(value));
+
+                return `$${formatted}`;
+
+            }
+
+
+
+            // 更新无线成交占比显示（直接更新，与交易金额同步）
+
+            updateGrowthRate(ratio) {
+
+                // 直接更新，不使用动画，与交易金额同步变化
+
+                this.growthElement.html(this.formatGrowthRate(ratio));
+
+            }
+
+
+
+            // 无线成交占比动画
+
+            animateGrowthRate(startRatio, targetRatio) {
+
+                // 停止之前的动画
+
+                if (this.currentGrowthAnimation) {
+
+                    this.currentGrowthAnimation.stop();
+
+                    this.currentGrowthAnimation = null;
+
+                }
+
+                
+
+                const interpolator = d3.interpolateNumber(startRatio, targetRatio);
+
+                const self = this;
+
+                const duration = 1500; // 1.5秒动画
+
+
+
+                this.currentGrowthAnimation = d3.timer(function(elapsed) {
+
+                    const progress = Math.min(1, elapsed / duration);
+
+                    const currentRatio = interpolator(self.easeOutCubic(progress));
+
+                    
+
+                    self.growthElement.html(self.formatGrowthRate(currentRatio));
+
+                    
+
+                    if (progress === 1) {
+
+                        self.currentGrowthAnimation.stop();
+
+                        self.currentGrowthAnimation = null;
+
+                        self.growthElement.html(self.formatGrowthRate(targetRatio)); // 确保最终值
+
+                    }
+
+                });
+
+            }
+
+
+
+            // 解析无线成交占比（从HTML中提取纯文本后解析）
+
+            parseGrowthRate(text) {
+
+                // 从HTML文本中提取纯文本，移除HTML标签
+
+                const plainText = text.replace(/<[^>]*>/g, '');
+
+                const numericStr = plainText.replace(/[^\d.]/g, '');
+
+                return parseFloat(numericStr) || 0;
+
+            }
+
+
+
+            // 格式化无线成交占比（统一白色）
+
+            formatGrowthRate(value) {
+
+                const formatted = d3.format('.1f')(value);
+
+                // 统一使用白色
+
+                return `<span style="color: #ffffff;">无线成交占比 ${formatted}%</span>`;
+
+            }
+
+
+
+            // 解析当前显示的值
+
+            parseValue(text) {
+
+                // 移除所有非数字字符（除了小数点）
+
+                const numericStr = text.replace(/[^\d.]/g, '');
+
+                return parseFloat(numericStr) || 0;
+
+            }
+
+
+
+        }
+
+
+
+        // ========== 模拟数据流（模拟后端WebSocket推送） ==========
+
+        class MockDataStream {
+
+            constructor(salesRoller) {
+
+                this.salesRoller = salesRoller;
+
+                // 初始值从亿级别开始（9120亿，符合2025年天猫双11背景）
+
+                this.currentValue = 912000000000; // 起始值（9120亿，更多位数的亿级别数据）
+
+                // 双11当天的实际增长速度非常快，高峰期每秒可增长上亿元
+
+                // 这里模拟一个相对合理的增长速度（每秒5000万-2亿之间波动）
+
+                // this.baseIncrementPerSecond = 50000000; // 基础每秒增长5000万（符合双11快速增长背景）
+
+                // this.baseIncrementPerSecond = 5000000; // **已修改:** 调慢10倍，基础每秒增长500万，让肉眼能看清
+
+                // this.baseIncrementPerSecond = 1000000; // **已修改:** 再次调慢5倍，基础每秒增长100万
+
+                this.baseIncrementPerSecond = 20000000; // **已修改:** 基础每秒增长2000万，每0.5秒增长1000万，确保变化明显
+
+                this.isRunning = false;
+
+                this.pushInterval = null;
+
+                this.lastPushTime = Date.now();
+
+            }
+
+
+
+            start() {
+
+                if (this.isRunning) return;
+
+                this.isRunning = true;
+
+                this.lastPushTime = Date.now();
+
+
+
+                // 初始化显示
+
+                this.salesRoller.receiveData(this.currentValue);
+
+
+
+                // 模拟数据流推送（类似WebSocket推送）
+
+                // 每隔一定时间推送一次新数据，而不是连续增长
+
+                this.pushData();
+
+            }
+
+            
+
+            stop() {
+
+                this.isRunning = false;
+
+                if (this.pushInterval) {
+
+                    clearTimeout(this.pushInterval);
+
+                }
+
+            }
+
+
+
+            // 模拟推送数据（类似WebSocket.onmessage）
+
+            pushData() {
+
+                if (!this.isRunning) return;
+
+
+
+                // 计算距离上次推送的时间间隔
+
+                const now = Date.now();
+
+                // 使用固定的0.5秒间隔，确保更新频率稳定
+
+                const elapsed = 0.5; // 固定0.5秒
+
+                this.lastPushTime = now;
+
+
+
+                // 根据时间段计算增长倍数（符合双11实际增长曲线）
+
+                const hour = new Date().getHours();
+
+                let multiplier = 1;
+
+
+
+                // 双11当天的高峰期倍数（实际情况：高峰期每秒可增长上亿元）
+
+                // 晚上8-12点是最高峰（双11零点开启后的第20-24小时）
+
+                if (hour >= 20 && hour <= 23) {
+
+                    multiplier = 3.5; // 高峰期增长更快
+
+                } else if (hour >= 12 && hour <= 14) {
+
+                    multiplier = 2.2; // 下午时段较高
+
+                } else if (hour >= 19 && hour <= 20) {
+
+                    multiplier = 3.0; // 接近高峰期
+
+                } else if (hour >= 0 && hour <= 6) {
+
+                    multiplier = 0.8; // 凌晨时段较低但仍保持增长
+
+                } else if (hour >= 6 && hour <= 10) {
+
+                    multiplier = 1.5; // 上午时段
+
+                } else {
+
+                    multiplier = 1.8; // 其他时段
+
+                }
+
+
+
+                // 计算本次增长量（符合双11快速增长背景）
+
+                const increment = this.baseIncrementPerSecond * elapsed * multiplier;
+
+                
+
+                // 添加一些随机波动，使数据更真实（增大波动范围，让变化更明显）
+
+                const randomFactor = 1 + (Math.random() - 0.5) * 0.3; // 增大波动范围到±15%
+
+                const actualIncrement = Math.floor(increment * randomFactor);
+
+
+
+                // 更新当前值
+
+                this.currentValue += actualIncrement;
+
+
+
+                // 模拟推送数据到前端（类似WebSocket推送）
+
+                // 这里使用随机间隔模拟真实的数据流推送（1-3秒推送一次）
+
+                // const pushDelay = 1000 + Math.random() * 2000; // 1-3秒随机间隔
+
+                const pushDelay = 500; // **已修改:** 固定0.5秒间隔更新
+
+
+
+                // 推送数据
+
+                this.salesRoller.receiveData(this.currentValue);
+
+
+
+                // 安排下次推送
+
+                this.pushInterval = setTimeout(() => {
+
+                    this.pushData();
+
+                }, pushDelay);
+
+            }
+
+
+
+            // 模拟WebSocket连接（可以扩展为真实WebSocket）
+
+            connect() {
+
+                console.log("模拟数据流连接已建立...");
+
+                this.start();
+
+            }
+
+
+
+            // 模拟WebSocket断开
+
+            disconnect() {
+
+                console.log("模拟数据流连接已断开");
+
+                this.stop();
+
+            }
+
+        }
+
+
+
+        // ========== 更新时间戳 ==========
+
+        function updateTimestamp() {
+
+            const now = new Date();
+
+            const hours = String(now.getHours()).padStart(2, '0');
+
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+
+            d3.select("#timestamp").text(`${hours}:${minutes}:${seconds}`);
+
+        }
+
+
+
+        // ========== 初始化 ==========
+
+        function init() {
+
+
+            // createParticles();
+
+
+
+            // 初始化交易额滚动组件（符合2025年天猫双11背景）
+
+            // 初始数据确保是亿级别，位数更多（模拟2025年双11当天）
+
+            const startValue = 912000000000; // 9120亿，更多位数的亿级别初始数据
+
+            // 计算去年同期数据（假设同比增长15%，即去年同期约7930亿）
+
+            const lastYearValue = Math.floor(startValue / 1.15); // 去年同期数据，用于计算同比增长
+
+            
+
+            const salesRoller = new RealtimeSalesRoller("#sales-display", {
+
+                startValue: startValue, // 从9120亿开始（亿级别，更多位数，符合2025年双11背景）
+
+                lastYearValue: lastYearValue, // 去年同期数据（约7930亿，用于计算同比增长）
+
+                // animationDuration: 2000 // 增加到2秒，让滚动更慢更平滑
+
+                animationDuration: 3000 // **已修改:** 增加到3秒，让滚动更慢更平滑
+
+            });
+
+
+
+            // 启动组件
+
+            salesRoller.start();
+
+
+
+            // 启动模拟数据流（模拟WebSocket推送）
+
+            const dataStream = new MockDataStream(salesRoller);
+
+            dataStream.connect(); // 模拟建立连接并开始推送数据
+
+
+
+            // 更新时间戳
+
+            updateTimestamp();
+
+            setInterval(updateTimestamp, 1000);
+
+
+
+            // 将实例保存到全局，方便调试
+
+            window.salesRoller = salesRoller;
+
+            window.dataStream = dataStream;
+
+        }
+
+
+
+        // 页面加载完成后初始化
+
+        d3.select(window).on("load", init);
+
+    </script>
+
+</body>
+
+</html>  
