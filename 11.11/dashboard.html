@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>双11全球狂欢节 - 监控大屏</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: linear-gradient(135deg, #0f1c3c 0%, #1a2a6c 100%);
+            color: #fff;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(15, 28, 60, 0.8);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: bold;
+            color: #fff;
+            letter-spacing: 3px;
+            font-style: italic;
+            text-shadow: 0 0 10px rgba(64, 158, 255, 0.5);
+        }
+
+        .main-content {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 25% 50% 25%;
+            gap: 15px;
+            padding: 15px;
+            overflow: hidden;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            height: 100%;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+            color: #409eff;
+            text-shadow: 0 0 5px rgba(64, 158, 255, 0.3);
+        }
+
+        /* Left Column Specifics */
+        .resource-status {
+            flex: 1;
+        }
+        .progress-bar-container {
+            margin: 15px 0;
+        }
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 12px;
+            color: #ccc;
+        }
+        .progress-bar {
+            height: 10px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #409eff, #36cfc9);
+            width: 82.5%;
+            transition: width 0.5s ease;
+        }
+        .resource-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+        .stat-item {
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .stat-value.red { color: #f56c6c; text-shadow: 0 0 10px rgba(245, 108, 108, 0.5); }
+        .stat-value.green { color: #67c23a; text-shadow: 0 0 10px rgba(103, 194, 58, 0.5); }
+        .stat-label { font-size: 12px; color: #aaa; }
+
+        .schedule-monitor {
+            flex: 1;
+        }
+        .monitor-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #ddd;
+        }
+        .monitor-value {
+            font-weight: bold;
+            font-size: 20px;
+        }
+        .monitor-value.blue { color: #409eff; }
+        .monitor-value.orange { color: #e6a23c; }
+        .monitor-value.gray { color: #909399; }
+
+        .performance-metrics {
+            flex: 1;
+        }
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            color: #ddd;
+        }
+        .metric-label { font-size: 14px; }
+        .metric-right { text-align: right; }
+        .metric-value { font-size: 24px; font-weight: bold; color: #409eff; }
+        .metric-sub { font-size: 10px; color: #aaa; }
+        .metric-value.green { color: #67c23a; }
+        .metric-value.orange { color: #e6a23c; }
+
+        /* Center Column */
+        .map-container {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 8px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        #chinaMap {
+            width: 100%;
+            height: 100%;
+        }
+        .map-legend {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(15, 28, 60, 0.8);
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #ccc;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        .dot { width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; }
+        .line { width: 15px; height: 2px; margin-right: 5px; }
+
+        /* Right Column */
+        .chart-card {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .chart-container {
+            flex: 1;
+            width: 100%;
+            min-height: 0;
+        }
+
+        .inventory-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            color: #ddd;
+        }
+        .inventory-table th { text-align: left; color: #aaa; padding: 8px 5px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+        .inventory-table td { padding: 10px 5px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+        .status-tag { padding: 2px 6px; border-radius: 3px; font-size: 10px; }
+        .status-red { color: #fff; background: #f56c6c; }
+        .status-green { color: #fff; background: #67c23a; }
+        .status-orange { color: #fff; background: #e6a23c; }
+
+        /* Footer */
+        .footer {
+            height: 40px;
+            background: rgba(15, 28, 60, 0.9);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            font-size: 14px;
+            overflow: hidden;
+        }
+        .footer-title {
+            font-weight: bold;
+            margin-right: 20px;
+            color: #409eff;
+            white-space: nowrap;
+            z-index: 10;
+            background: rgba(15, 28, 60, 0.9);
+            padding-right: 10px;
+        }
+        .footer-content-wrapper {
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+            height: 100%;
+            display: flex;
+            align-items: center;
+        }
+        .footer-content {
+            display: flex;
+            white-space: nowrap;
+            will-change: transform;
+        }
+        .footer-item {
+            margin-right: 50px;
+            display: inline-flex;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        
+        .alert-text { color: #f56c6c; }
+        .success-text { color: #67c23a; }
+        .warning-text { color: #e6a23c; }
+
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>双11全球狂欢节</h1>
+    </div>
+
+    <div class="main-content">
+        <!-- Left Column -->
+        <div class="column">
+            <div class="card resource-status">
+                <div class="card-title">全局资源态势</div>
+                <div class="progress-bar-container">
+                    <div class="progress-label">
+                        <span>总仓库利用率</span>
+                        <span id="warehouse-util-text" style="color: #409eff;">82.5%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div id="warehouse-util-bar" class="progress-fill"></div>
+                    </div>
+                </div>
+                <div class="resource-stats">
+                    <div class="stat-item">
+                        <div id="high-load-count" class="stat-value red">18</div>
+                        <div class="stat-label">高负载仓库</div>
+                    </div>
+                    <div class="stat-item">
+                        <div id="idle-count" class="stat-value green">35</div>
+                        <div class="stat-label">空闲资源仓库</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card schedule-monitor">
+                <div class="card-title">实时调度监控</div>
+                <div class="monitor-row">
+                    <span>今日调度任务总数</span>
+                    <span id="total-tasks" class="monitor-value blue">1,482</span>
+                </div>
+                <div class="monitor-row">
+                    <span>正在进行</span>
+                    <span id="active-tasks" class="monitor-value orange">205</span>
+                </div>
+                <div class="monitor-row">
+                    <span>等待执行</span>
+                    <span id="pending-tasks" class="monitor-value gray">512</span>
+                </div>
+            </div>
+
+            <div class="card performance-metrics">
+                <div class="card-title">性能指标</div>
+                <div class="metric-row">
+                    <span class="metric-label">平均响应时间 (ms)</span>
+                    <div class="metric-right">
+                        <div id="avg-response" class="metric-value">127</div>
+                        <div class="metric-sub">+1.2% (近1H)</div>
+                    </div>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">调度成功率 (%)</span>
+                    <div class="metric-right">
+                        <div id="success-rate" class="metric-value green">99.9</div>
+                        <div class="metric-sub">保持高位</div>
+                    </div>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">成本节约 (%)</span>
+                    <div class="metric-right">
+                        <div id="cost-saving" class="metric-value orange">3.7</div>
+                        <div class="metric-sub">高于目标值</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Center Column -->
+        <div class="column">
+            <div class="map-container">
+                <div id="chinaMap"></div>
+                <div class="map-legend">
+                    <div style="font-weight: bold; margin-bottom: 5px; color: #fff;">地图图例</div>
+                    <div class="legend-item">仓库: <span class="dot" style="background:#67c23a"></span><70% <span class="dot" style="background:#e6a23c; margin-left:5px;"></span>70-90% <span class="dot" style="background:#f56c6c; margin-left:5px;"></span>>90%</div>
+                    <div class="legend-item">运输: <span class="line" style="background:#409eff"></span>正常 <span class="line" style="background:#e6a23c"></span>延迟 <span class="line" style="background:#f56c6c"></span>紧急</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column -->
+        <div class="column">
+            <div class="card chart-card">
+                <div class="card-title">调度-轨迹对比</div>
+                <div id="trajectoryChart" class="chart-container"></div>
+            </div>
+
+            <div class="card chart-card">
+                <div class="card-title">库存容量实时监控</div>
+                <table class="inventory-table">
+                    <thead>
+                        <tr>
+                            <th>仓库</th>
+                            <th>容量</th>
+                            <th>利用率</th>
+                            <th>状态</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inventory-body">
+                        <tr>
+                            <td>上海仓</td>
+                            <td>1113 / 1200</td>
+                            <td>92.8%</td>
+                            <td><span class="status-tag status-red">过载</span></td>
+                        </tr>
+                        <tr>
+                            <td>广州仓</td>
+                            <td>580 / 900</td>
+                            <td>64.4%</td>
+                            <td><span class="status-tag status-green">正常</span></td>
+                        </tr>
+                        <tr>
+                            <td>成都仓</td>
+                            <td>1265 / 1500</td>
+                            <td>84.3%</td>
+                            <td><span class="status-tag status-orange">警告</span></td>
+                        </tr>
+                        <tr>
+                            <td>武汉仓</td>
+                            <td>494 / 800</td>
+                            <td>61.8%</td>
+                            <td><span class="status-tag status-green">正常</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card chart-card">
+                <div class="card-title">运输方式占比</div>
+                <div id="transportChart" class="chart-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="footer-title">实时事件</div>
+        <div class="footer-content-wrapper">
+            <div class="footer-content" id="scrolling-events">
+                <span class="footer-item alert-text">仓负载已达 92%</span>
+                <span class="footer-item success-text">[19:40:23] 完成: 订单 774H 完成签收</span>
+                <span class="footer-item warning-text">[19:40:53] 预警: 北京-上海航线延误</span>
+                <span class="footer-item success-text">[19:41:10] 完成: 订单 882K 出库成功</span>
+                <span class="footer-item alert-text">[19:41:35] 警告: 成都仓库存不足</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Common Chart Config for Dark Theme
+        const darkThemeText = { color: '#ccc' };
+        const darkThemeAxis = { lineStyle: { color: '#555' } };
+        const darkThemeSplit = { lineStyle: { color: 'rgba(255,255,255,0.05)' } };
+
+        // 1. Trajectory Chart (Bar Chart)
+        const trajectoryChart = echarts.init(document.getElementById('trajectoryChart'));
+        const trajectoryOption = {
+            tooltip: { trigger: 'axis' },
+            legend: { 
+                data: ['实时轨迹 (响应时间)', '系统推荐 (预估时间)'],
+                top: 0,
+                textStyle: { fontSize: 10, color: '#ccc' }
+            },
+            grid: { top: 30, bottom: 20, left: 40, right: 10 },
+            xAxis: {
+                type: 'category',
+                data: ['0-10m', '10-20m', '20-30m', '30-40m', '40-50m', '50-60m'],
+                axisLabel: { fontSize: 10, color: '#ccc' },
+                axisLine: darkThemeAxis
+            },
+            yAxis: {
+                type: 'value',
+                name: '响应时间(ms)',
+                nameTextStyle: { fontSize: 10, color: '#aaa' },
+                axisLabel: { color: '#ccc' },
+                splitLine: darkThemeSplit
+            },
+            series: [
+                {
+                    name: '实时轨迹 (响应时间)',
+                    type: 'bar',
+                    data: [120, 132, 101, 134, 90, 130],
+                    itemStyle: { color: '#f56c6c' }
+                },
+                {
+                    name: '系统推荐 (预估时间)',
+                    type: 'bar',
+                    data: [110, 120, 90, 120, 80, 120],
+                    itemStyle: { color: '#409eff' }
+                }
+            ]
+        };
+        trajectoryChart.setOption(trajectoryOption);
+
+        // 2. Transport Chart (Donut Chart)
+        const transportChart = echarts.init(document.getElementById('transportChart'));
+        const transportOption = {
+            tooltip: { trigger: 'item' },
+            legend: { bottom: 0, left: 'center', icon: 'circle', textStyle: { color: '#ccc' } },
+            series: [
+                {
+                    name: '运输方式',
+                    type: 'pie',
+                    radius: ['40%', '70%'],
+                    avoidLabelOverlap: false,
+                    label: { show: false },
+                    data: [
+                        { value: 1048, name: '陆运 (Road)', itemStyle: { color: '#409eff' } },
+                        { value: 735, name: '海运 (Sea)', itemStyle: { color: '#67c23a' } },
+                        { value: 580, name: '空运 (Air)', itemStyle: { color: '#e6a23c' } }
+                    ]
+                }
+            ]
+        };
+        transportChart.setOption(transportOption);
+
+        // 3. China Map
+        const chinaMap = echarts.init(document.getElementById('chinaMap'));
+        
+        // Fetch China map data
+        fetch('https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json')
+            .then(response => response.json())
+            .then(geoJson => {
+                echarts.registerMap('china', geoJson);
+                const mapOption = {
+                    geo: {
+                        map: 'china',
+                        roam: true,
+                        zoom: 1.2,
+                        label: {
+                            show: true,
+                            color: '#ccc',
+                            fontSize: 10
+                        },
+                        itemStyle: {
+                            areaColor: '#323c48',
+                            borderColor: '#111'
+                        },
+                        emphasis: {
+                            itemStyle: {
+                                areaColor: '#2a333d'
+                            },
+                            label: {
+                                show: true,
+                                color: '#fff'
+                            }
+                        }
+                    },
+                    series: [
+                        {
+                            name: '主要城市',
+                            type: 'effectScatter',
+                            coordinateSystem: 'geo',
+                            data: [
+                                {name: '北京', value: [116.4074, 39.9042]},
+                                {name: '上海', value: [121.4737, 31.2304]},
+                                {name: '广州', value: [113.2644, 23.1291]},
+                                {name: '深圳', value: [114.0579, 22.5431]},
+                                {name: '杭州', value: [120.1551, 30.2741]},
+                                {name: '成都', value: [104.0668, 30.5728]},
+                                {name: '武汉', value: [114.3054, 30.5931]},
+                                {name: '西安', value: [108.9398, 34.3416]}
+                            ],
+                            symbolSize: 10,
+                            itemStyle: { color: '#f56c6c' },
+                            rippleEffect: {
+                                brushType: 'stroke'
+                            },
+                            label: {
+                                show: true,
+                                position: 'right',
+                                formatter: '{b}',
+                                fontSize: 10,
+                                color: '#fff'
+                            }
+                        }
+                    ]
+                };
+                chinaMap.setOption(mapOption);
+            })
+            .catch(e => {
+                console.log('Map load failed', e);
+                chinaMap.setOption({
+                    title: { text: '地图加载失败', left: 'center', top: 'center', textStyle: { color: '#fff' } }
+                });
+            });
+
+        window.addEventListener('resize', () => {
+            trajectoryChart.resize();
+            transportChart.resize();
+            chinaMap.resize();
+        });
+
+        // --- Real-time Simulation Logic ---
+
+        function randomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function updateMockData() {
+            // 1. Update Resource Status
+            const util = (Math.random() * 10 + 75).toFixed(1); // 75% - 85%
+            document.getElementById('warehouse-util-text').innerText = util + '%';
+            document.getElementById('warehouse-util-bar').style.width = util + '%';
+            
+            document.getElementById('high-load-count').innerText = randomInt(15, 25);
+            document.getElementById('idle-count').innerText = randomInt(30, 40);
+
+            // 2. Update Schedule Monitor
+            let total = parseInt(document.getElementById('total-tasks').innerText.replace(',', ''));
+            total += randomInt(0, 5);
+            document.getElementById('total-tasks').innerText = total.toLocaleString();
+            
+            document.getElementById('active-tasks').innerText = randomInt(180, 220);
+            document.getElementById('pending-tasks').innerText = randomInt(480, 550);
+
+            // 3. Update Performance Metrics
+            document.getElementById('avg-response').innerText = randomInt(110, 140);
+            document.getElementById('success-rate').innerText = (99 + Math.random()).toFixed(1);
+            document.getElementById('cost-saving').innerText = (3 + Math.random()).toFixed(1);
+
+            // 4. Update Trajectory Chart Data
+            const newTrajData1 = Array.from({length: 6}, () => randomInt(80, 150));
+            const newTrajData2 = Array.from({length: 6}, () => randomInt(80, 140));
+            trajectoryChart.setOption({
+                series: [
+                    { data: newTrajData1 },
+                    { data: newTrajData2 }
+                ]
+            });
+
+            // 5. Update Inventory Table (Randomly update one row)
+            const rows = document.getElementById('inventory-body').getElementsByTagName('tr');
+            const randomRowIndex = randomInt(0, rows.length - 1);
+            const row = rows[randomRowIndex];
+            const capacityCell = row.cells[1];
+            const utilCell = row.cells[2];
+            
+            // Parse capacity "1113 / 1200"
+            const parts = capacityCell.innerText.split(' / ');
+            const max = parseInt(parts[1]);
+            const current = Math.min(max, Math.max(0, parseInt(parts[0]) + randomInt(-50, 50)));
+            const newUtil = ((current / max) * 100).toFixed(1);
+            
+            capacityCell.innerText = `${current} / ${max}`;
+            utilCell.innerText = `${newUtil}%`;
+            
+            // Update status tag based on util
+            const statusCell = row.cells[3];
+            if (newUtil > 90) {
+                statusCell.innerHTML = '<span class="status-tag status-red">过载</span>';
+            } else if (newUtil > 80) {
+                statusCell.innerHTML = '<span class="status-tag status-orange">警告</span>';
+            } else {
+                statusCell.innerHTML = '<span class="status-tag status-green">正常</span>';
+            }
+        }
+
+        // Run simulation every 2 seconds
+        setInterval(updateMockData, 2000);
+
+        // --- Optimized Scrolling Logic ---
+        const scrollWrapper = document.querySelector('.footer-content-wrapper');
+        const scrollContent = document.getElementById('scrolling-events');
+        let scrollOffset = scrollWrapper.offsetWidth; // Start from right edge
+        const scrollSpeed = 1; // Pixels per frame (adjust for speed)
+
+        function animateScroll() {
+            scrollOffset -= scrollSpeed;
+            scrollContent.style.transform = `translateX(${scrollOffset}px)`;
+
+            // Check if first item is completely out of view
+            if (scrollContent.children.length > 0) {
+                const firstItem = scrollContent.children[0];
+                const itemStyle = window.getComputedStyle(firstItem);
+                const itemWidth = firstItem.offsetWidth + parseFloat(itemStyle.marginRight);
+                
+                // If the item's right edge is to the left of the container's left edge
+                if (scrollOffset + itemWidth < 0) {
+                    scrollContent.removeChild(firstItem);
+                    scrollOffset += itemWidth; // Adjust offset to prevent jump
+                    scrollContent.style.transform = `translateX(${scrollOffset}px)`;
+                }
+            }
+            
+            requestAnimationFrame(animateScroll);
+        }
+        
+        // Start animation
+        requestAnimationFrame(animateScroll);
+
+        // Add new events to footer occasionally
+        const eventTemplates = [
+            { text: "完成: 订单 {id} 完成签收", type: "success-text" },
+            { text: "预警: {loc} 航线延误", type: "warning-text" },
+            { text: "警告: {loc} 库存不足", type: "alert-text" },
+            { text: "通知: 新增调度任务 {id}", type: "footer-item" } // default color
+        ];
+        const locations = ["北京", "上海", "广州", "深圳", "杭州", "成都", "武汉", "西安"];
+        
+        setInterval(() => {
+            const template = eventTemplates[randomInt(0, eventTemplates.length - 1)];
+            const loc = locations[randomInt(0, locations.length - 1)];
+            const id = randomInt(100, 999) + "X";
+            const text = `[${new Date().toLocaleTimeString()}] ` + template.text.replace("{id}", id).replace("{loc}", loc);
+            
+            const span = document.createElement('span');
+            span.className = `footer-item ${template.type}`;
+            span.innerText = text;
+            
+            const container = document.getElementById('scrolling-events');
+            container.appendChild(span);
+            
+            // No need to remove old items here, the animation loop handles it
+        }, 3000);
+
+    </script>
+</body>
+</html>
