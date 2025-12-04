@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>双11全球狂欢节 - 实时数据大屏</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-cloud/1.2.5/d3.layout.cloud.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            background: radial-gradient(circle at 50% 10%, #ffefba 0%, #f9d976 15%, #f38f68 30%, #8b2ab2 60%, #0a0a1e 100%);
+            font-family: 'Microsoft YaHei', 'Arial', sans-serif;
+            position: relative;
+            color: #ffffff;
+        }
+
+        /* 主题背景 */
+        .festival-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
+            animation: backgroundPulse 12s ease-in-out infinite;
+        }
+
+        .sun-halo {
+            position: absolute;
+            top: 5%;
+            left: 50%;
+            width: 60vw;
+            height: 60vw;
+            transform: translateX(-50%);
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.7) 0%, rgba(255, 153, 102, 0.2) 40%, transparent 70%);
+            filter: blur(10px);
+            opacity: 0.7;
+            animation: haloGlow 8s ease-in-out infinite;
+        }
+
+        .mountain-layer {
+            position: absolute;
+            bottom: 0;
+            left: -10%;
+            width: 120%;
+            height: 60%;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, rgba(8, 12, 36, 0.9) 100%);
+            clip-path: polygon(0 60%, 15% 45%, 30% 55%, 45% 35%, 60% 50%, 75% 40%, 90% 55%, 100% 45%, 100% 100%, 0 100%);
+            opacity: 0.8;
+            animation: floatSlow 10s ease-in-out infinite;
+        }
+
+        .mountain-layer.layer-2 {
+            bottom: -5%;
+            background: linear-gradient(180deg, rgba(255, 95, 109, 0.4) 0%, rgba(21, 29, 59, 0.95) 80%);
+            clip-path: polygon(0 70%, 10% 50%, 25% 65%, 40% 40%, 55% 60%, 70% 45%, 85% 65%, 100% 50%, 100% 100%, 0 100%);
+            animation-delay: -3s;
+        }
+
+        .mountain-layer.layer-3 {
+            bottom: -10%;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, rgba(12, 16, 42, 0.95) 70%);
+            clip-path: polygon(0 80%, 12% 65%, 30% 78%, 45% 55%, 60% 72%, 78% 60%, 92% 80%, 100% 65%, 100% 100%, 0 100%);
+            animation-delay: -6s;
+        }
+
+        .city-grid {
+            position: absolute;
+            bottom: -5%;
+            left: -5%;
+            width: 110%;
+            height: 35%;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(255, 51, 153, 0.3) 30%, rgba(8, 12, 36, 0.95) 80%);
+            clip-path: polygon(0 40%, 5% 45%, 10% 43%, 15% 48%, 20% 44%, 25% 50%, 30% 46%, 35% 52%, 40% 45%, 45% 50%, 50% 47%, 55% 53%, 60% 46%, 65% 51%, 70% 48%, 75% 53%, 80% 45%, 85% 50%, 90% 46%, 95% 52%, 100% 40%, 100% 100%, 0 100%);
+            opacity: 0.7;
+            animation: shimmer 6s linear infinite;
+        }
+
+        .light-beam {
+            position: absolute;
+            bottom: 15%;
+            width: 12%;
+            height: 45%;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 20, 147, 0.05) 80%);
+            filter: blur(2px);
+            opacity: 0.4;
+            animation: beamGlow 5s ease-in-out infinite;
+            transform-origin: bottom;
+        }
+
+        .light-beam.beam-left {
+            left: 18%;
+            transform: rotate(-6deg);
+        }
+
+        .light-beam.beam-right {
+            right: 15%;
+            transform: rotate(5deg);
+            animation-delay: -2s;
+        }
+
+        .floating-orb {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #fffb9a 0%, rgba(255, 255, 255, 0) 70%);
+            box-shadow: 0 0 20px rgba(255, 255, 200, 0.7);
+            animation: orbFloat 7s ease-in-out infinite;
+        }
+
+        .floating-orb.orb-1 { left: 25%; bottom: 55%; animation-delay: 0s; }
+        .floating-orb.orb-2 { left: 60%; bottom: 50%; animation-delay: -2s; }
+        .floating-orb.orb-3 { left: 80%; bottom: 60%; animation-delay: -4s; }
+
+        .shopping-icons {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .shopping-icon {
+            position: absolute;
+            width: 80px; 
+            height: 80px;
+            opacity: 0.7;
+            animation: iconFloat 8s ease-in-out infinite;
+            filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.4));
+        }
+
+        @keyframes backgroundPulse {
+            0%, 100% { filter: hue-rotate(0deg); }
+            50% { filter: hue-rotate(20deg); }
+        }
+
+        @keyframes haloGlow {
+            0%, 100% { opacity: 0.6; transform: translateX(-50%) scale(1); }
+            50% { opacity: 0.9; transform: translateX(-50%) scale(1.05); }
+        }
+
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-12px); }
+        }
+
+        @keyframes shimmer {
+            0% { opacity: 0.4; }
+            50% { opacity: 0.7; }
+            100% { opacity: 0.4; }
+        }
+
+        @keyframes beamGlow {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.55; }
+        }
+
+        @keyframes orbFloat {
+            0%, 100% { transform: translateY(0); opacity: 0.6; }
+            50% { transform: translateY(-20px); opacity: 1; }
+        }
+
+        @keyframes iconFloat {
+            0%, 100% { transform: translateY(0) scale(1); opacity: 0.6; }
+            50% { transform: translateY(-25px) scale(1.05); opacity: 0.95; }
+        }
+
+        /* 背景粒子效果 */
+        #particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #ff0033;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #ff0033, 0 0 20px #ff0033;
+            opacity: 0.6;
+        }
+
+        /* 主容器 */
+        .dashboard-container {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 标题区域 */
+        .title-section {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .title-chinese {
+            font-size: 56px;
+            font-weight: 900;
+            background: linear-gradient(135deg, 
+                #FF1744 0%, 
+                #FF6B6B 15%, 
+                #FF8E53 30%, 
+                #FFD93D 45%, 
+                #FFB347 60%, 
+                #FF8E53 75%, 
+                #FF6B6B 90%, 
+                #FF1744 100%);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 
+                0 0 25px rgba(255, 23, 68, 1),
+                0 0 50px rgba(255, 107, 107, 0.8),
+                0 0 75px rgba(255, 142, 83, 0.6),
+                0 0 100px rgba(255, 217, 61, 0.5),
+                2px 2px 0px rgba(255, 23, 68, 0.5),
+                4px 4px 0px rgba(255, 23, 68, 0.4),
+                6px 6px 0px rgba(255, 23, 68, 0.3),
+                8px 8px 0px rgba(255, 23, 68, 0.2),
+                0 5px 15px rgba(0, 0, 0, 0.6);
+            letter-spacing: 12px;
+            margin-bottom: 10px;
+            font-family: 'Microsoft YaHei', 'SimHei', 'STHeiti', 'Arial Black', sans-serif;
+            -webkit-text-stroke: 2px rgba(255, 255, 255, 0.15);
+            animation: artisticGradientShift 5s ease-in-out infinite, 
+                       titlePulse 3s ease-in-out infinite;
+            position: relative;
+            display: inline-block;
+            transform: perspective(800px) rotateX(2deg);
+        }
+
+        @keyframes artisticGradientShift {
+            0%, 100% { 
+                background-position: 0% 50%;
+            }
+            25% { 
+                background-position: 50% 50%;
+            }
+            50% { 
+                background-position: 100% 50%;
+            }
+            75% { 
+                background-position: 50% 50%;
+            }
+        }
+
+        @keyframes titlePulse {
+            0%, 100% { 
+                transform: perspective(800px) rotateX(2deg) scale(1);
+                filter: brightness(1);
+            }
+            50% { 
+                transform: perspective(800px) rotateX(2deg) scale(1.015);
+                filter: brightness(1.1);
+            }
+        }
+
+        .title-english {
+            font-size: 24px;
+            color: #ffffff;
+            letter-spacing: 4px;
+            opacity: 0.9;
+        }
+
+        /* 交易额主显示区 */
+        #sales-display {
+            text-align: center;
+            min-height: 200px;
+            position: relative;
+        }
+
+        /* 底部数据行容器 */
+        .bottom-data-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-top: 10px;
+            position: relative;
+        }
+
+        /* 人民币金额显示 */
+        #cny-amount {
+            font-size: 80px;
+            font-weight: 900;
+            color: #ffcc00;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8), 0 0 30px rgba(255, 204, 0, 0.8), 0 0 60px rgba(255, 204, 0, 0.4);
+            letter-spacing: 2px;
+            margin: 10px 0 5px 0;
+            line-height: 1.2;
+            font-family: 'Arial Black', 'Microsoft YaHei', sans-serif;
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* 底部数据显示样式 */
+        .bottom-data {
+            font-size: 32px;
+            font-weight: 700;
+            color: #ffffff;
+            text-shadow: 
+                0 0 15px rgba(255, 255, 255, 0.8),
+                0 0 30px rgba(255, 255, 255, 0.5),
+                0 0 45px rgba(255, 255, 255, 0.3),
+                1px 1px 2px rgba(0, 0, 0, 0.8);
+            letter-spacing: 2px;
+            font-family: 'Arial', 'Microsoft YaHei', sans-serif;
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+            opacity: 0.95;
+            white-space: nowrap;
+        }
+
+        /* 左侧 - 美元总金额 */
+        .bottom-data.data-left {
+            text-align: left;
+        }
+
+        /* 右侧 - 无线成交占比 */
+        .bottom-data.data-right {
+            text-align: right;
+        }
+
+        /* 无线成交占比统一白色 */
+        #growth-rate span {
+            color: #ffffff;
+            text-shadow: 
+                0 0 10px rgba(255, 255, 255, 0.6),
+                0 0 20px rgba(255, 255, 255, 0.4),
+                1px 1px 2px rgba(0, 0, 0, 0.8);
+        }
+
+        /* 时间戳 */
+        .timestamp {
+            position: absolute;
+            top: 30px;
+            right: 50px;
+            color: #ffffff;
+            font-size: 24px;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* 加载提示 */
+        .loading {
+            text-align: center;
+            color: #ffffff;
+            font-size: 20px;
+            margin-top: 30px;
+        }
+
+        /* 侧边四板块布局 */
+        .side-panels {
+            position: absolute;
+            top: 180px;
+            left: 20px;
+            right: 20px;
+            bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            z-index: 12;
+            pointer-events: none;
+        }
+
+        .side-column {
+            width: 360px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            pointer-events: auto;
+        }
+
+        .panel {
+            flex: 1;
+            background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+            border-radius: 12px;
+            padding: 14px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.45);
+            backdrop-filter: blur(6px);
+            overflow: hidden;
+            position: relative;
+            color: #fff;
+            font-size: 14px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .panel .panel-title {
+            font-weight: 700;
+            margin-bottom: 8px;
+            font-size: 16px;
+            letter-spacing: 1px;
+            border-left: 4px solid #ff0033;
+            padding-left: 10px;
+        }
+
+        /* 右上面板可点击跳转 */
+        .panel.clickable { 
+            cursor: pointer; 
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .panel.clickable:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 0, 51, 0.3);
+            border-color: rgba(255, 0, 51, 0.5);
+        }
+
+        /* 占位 SVG 区域 */
+        .viz-area { width: 100%; height: calc(100% - 28px); position: relative; }
+    </style>
+</head>
+<body>
+    <!-- 主题背景 -->
+    <div class="festival-background">
+        <div class="sun-halo"></div>
+        <div class="light-beam beam-left"></div>
+        <div class="light-beam beam-right"></div>
+        <div class="mountain-layer"></div>
+        <div class="mountain-layer layer-2"></div>
+        <div class="mountain-layer layer-3"></div>
+        <div class="city-grid"></div>
+        <div class="floating-orb orb-1"></div>
+        <div class="floating-orb orb-2"></div>
+        <div class="floating-orb orb-3"></div>
+    </div>
+
+    <!-- 时间戳 -->
+    <div class="timestamp" id="timestamp"></div>
+
+    <!-- 主内容区 -->
+    <div class="dashboard-container">
+        <div class="title-section">
+            <div class="title-chinese">双11全球狂欢节</div>
+            <div class="title-english">2025 11.11 GLOBAL SHOPPING FESTIVAL</div>
+        </div>
+
+        <div id="sales-display">
+            <div id="cny-amount">¥0</div>
+            <div class="bottom-data-row">
+                <div id="usd-amount" class="bottom-data data-left">$0</div>
+                <div id="growth-rate" class="bottom-data data-right">无线成交占比 0%</div>
+            </div>
+        </div>
+
+        <!-- 侧边四个板块 -->
+        <div class="side-panels" id="side-panels">
+            <!-- 左列 -->
+            <div class="side-column">
+                <div class="panel" id="sales-structure">
+                    <div class="panel-title">销售结构</div>
+                    <div class="viz-area" id="wordcloud"></div>
+                </div>
+                <div class="panel" id="user-heatmap">
+                    <div class="panel-title">用户热力图</div>
+                    <div class="viz-area" id="heatmap"></div>
+                </div>
+            </div>
+
+            <!-- 右列 -->
+            <div class="side-column">
+                <div class="panel clickable" id="package-total" title="点击进入大盘">
+                    <div class="panel-title">包裹总量</div>
+                    <div class="viz-area" style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap: 15px;">
+                        <svg viewBox="0 0 24 24" width="64" height="64" stroke="#00eaff" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 10px rgba(0,234,255,0.6));">
+                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                            <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                        </svg>
+                        <div id="package-total-value" style="font-size:40px; font-weight:800; color:#00eaff; text-shadow:0 0 10px rgba(0,234,255,0.5);">--</div>
+                    </div>
+                </div>
+                <div class="panel" id="channel-pie">
+                    <div class="panel-title">渠道销售占比</div>
+                    <div class="viz-area" id="channel-pie-chart"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="loading" id="loading">正在加载实时数据...</div>
+    </div>
+
+    <script>
+        // ========== 背景粒子效果 ==========
+        function createParticles() {
+            const particlesContainer = d3.select("#particles");
+            const particleCount = 100;
+
+            for (let i = 0; i < particleCount; i++) {
+                particlesContainer.append("div")
+                    .attr("class", "particle")
+                    .style("left", Math.random() * 100 + "%")
+                    .style("top", Math.random() * 100 + "%")
+                    .style("animation-delay", Math.random() * 5 + "s")
+                    .transition()
+                    .duration(5000 + Math.random() * 5000)
+                    .ease(d3.easeLinear)
+                    .style("transform", `translate(${(Math.random() - 0.5) * 200}px, ${(Math.random() - 0.5) * 200}px)`)
+                    .on("end", function repeat() {
+                        d3.select(this)
+                            .style("transform", `translate(${(Math.random() - 0.5) * 200}px, ${(Math.random() - 0.5) * 200}px)`)
+                            .transition()
+                            .duration(5000 + Math.random() * 5000)
+                            .ease(d3.easeLinear)
+                            .on("end", repeat);
+                    });
+            }
+        }
+
+        // ========== 数字格式化工具 ==========
+        const formatCNY = d3.format(",");
+        const formatUSD = d3.format(",.0f");
+
+        // ========== 实时交易额滚动组件 ==========
+        class RealtimeSalesRoller {
+            constructor(containerSelector, options = {}) {
+                this.container = d3.select(containerSelector);
+                this.cnyElement = d3.select("#cny-amount");
+                this.usdElement = d3.select("#usd-amount");
+                this.growthElement = d3.select("#growth-rate");
+                this.loadingElement = d3.select("#loading");
+
+                // 配置参数
+                this.options = {
+                    startValue: options.startValue || 0,
+                    lastYearValue: options.lastYearValue || 0,
+                    animationDuration: options.animationDuration || 2000
+                };
+
+                this.currentValue = this.options.startValue;
+                this.isRunning = false;
+                this.dataCallback = null;
+                this.currentAnimation = null;
+                this.currentUsdAnimation = null;
+                this.currentGrowthAnimation = null;
+            }
+
+            // 启动组件（接收流数据）
+            start() {
+                if (this.isRunning) return;
+                this.isRunning = true;
+                this.loadingElement.style("display", "none");
+                
+                // 初始化显示（直接显示数字，无翻页结构）
+                this.updateDisplay(this.currentValue);
+            }
+
+            // 停止更新
+            stop() {
+                this.isRunning = false;
+                if (this.currentAnimation) {
+                    this.currentAnimation.stop();
+                    this.currentAnimation = null;
+                }
+                if (this.currentUsdAnimation) {
+                    this.currentUsdAnimation.stop();
+                    this.currentUsdAnimation = null;
+                }
+                if (this.currentGrowthAnimation) {
+                    this.currentGrowthAnimation.stop();
+                    this.currentGrowthAnimation = null;
+                }
+            }
+
+            // 接收流数据推送（模拟WebSocket接收数据）
+            receiveData(newValue) {
+                if (!this.isRunning) return;
+                
+                // 使用平滑滚动动画更新到新值
+                this.currentValue = newValue;
+                this.updateDisplay(newValue);
+            }
+
+            // 更新显示（直接更新数字，无翻页动画）
+            updateDisplay(targetValue) {
+                // 直接格式化并更新数字显示
+                const formattedValue = this.formatCNYValue(targetValue);
+                this.cnyElement.text(formattedValue);
+                
+                // 计算美元总交易额（假设汇率为 1 CNY = 0.14 USD）
+                const usdAmount = targetValue * 0.14;
+                this.updateUsdAmount(usdAmount);
+                
+                // 计算无线成交占比（基于交易金额计算，与交易金额同步变化）
+                const ratioBase = 60 + (targetValue / 1000000000000) * 10;
+                const unlimitedRatio = Math.min(70, Math.max(60, ratioBase + (Math.random() * 2 - 1)));
+                this.updateGrowthRate(unlimitedRatio);
+            }
+            
+            // 格式化人民币金额（带逗号分隔）
+            formatCNYValue(value) {
+                const numValue = Math.floor(Math.abs(value));
+                const formatted = d3.format(",")(numValue);
+                return `¥${formatted}`;
+            }
+
+            // 获取当前显示的数字值（从文本中解析）
+            getCurrentDisplayValue(element) {
+                const currentText = element.text();
+                return this.parseValue(currentText);
+            }
+
+            // 缓动函数（三次缓出）- 用于同比增长动画
+            easeOutCubic(t) {
+                return 1 - Math.pow(1 - t, 3);
+            }
+
+            // 计算同比增长百分比
+            calculateGrowthRate(currentValue, lastYearValue) {
+                if (!lastYearValue || lastYearValue === 0) {
+                    return 0;
+                }
+                const growth = ((currentValue - lastYearValue) / lastYearValue) * 100;
+                return growth;
+            }
+
+            // 更新美元总交易额显示（直接更新，与交易金额同步）
+            updateUsdAmount(usdAmount) {
+                this.usdElement.text(this.formatUsdAmount(usdAmount));
+            }
+
+            // 美元金额动画
+            animateUsdAmount(startAmount, targetAmount) {
+                if (this.currentUsdAnimation) {
+                    this.currentUsdAnimation.stop();
+                    this.currentUsdAnimation = null;
+                }
+                
+                const interpolator = d3.interpolateNumber(startAmount, targetAmount);
+                const self = this;
+                const duration = 1500;
+
+                this.currentUsdAnimation = d3.timer(function(elapsed) {
+                    const progress = Math.min(1, elapsed / duration);
+                    const currentAmount = Math.floor(interpolator(self.easeOutCubic(progress)));
+                    
+                    self.usdElement.text(self.formatUsdAmount(currentAmount));
+                    
+                    if (progress === 1) {
+                        self.currentUsdAnimation.stop();
+                        self.currentUsdAnimation = null;
+                        self.usdElement.text(self.formatUsdAmount(targetAmount));
+                    }
+                });
+            }
+
+            // 解析美元金额
+            parseUsdAmount(text) {
+                const numericStr = text.replace(/[^\d]/g, '');
+                return parseFloat(numericStr) || 0;
+            }
+
+            // 格式化美元金额
+            formatUsdAmount(value) {
+                const formatted = d3.format(",")(Math.floor(value));
+                return `$${formatted}`;
+            }
+
+            // 更新无线成交占比显示（直接更新，与交易金额同步）
+            updateGrowthRate(ratio) {
+                this.growthElement.html(this.formatGrowthRate(ratio));
+            }
+
+            // 无线成交占比动画
+            animateGrowthRate(startRatio, targetRatio) {
+                if (this.currentGrowthAnimation) {
+                    this.currentGrowthAnimation.stop();
+                    this.currentGrowthAnimation = null;
+                }
+                
+                const interpolator = d3.interpolateNumber(startRatio, targetRatio);
+                const self = this;
+                const duration = 1500;
+
+                this.currentGrowthAnimation = d3.timer(function(elapsed) {
+                    const progress = Math.min(1, elapsed / duration);
+                    const currentRatio = interpolator(self.easeOutCubic(progress));
+                    
+                    self.growthElement.html(self.formatGrowthRate(currentRatio));
+                    
+                    if (progress === 1) {
+                        self.currentGrowthAnimation.stop();
+                        self.currentGrowthAnimation = null;
+                        self.growthElement.html(self.formatGrowthRate(targetRatio));
+                    }
+                });
+            }
+
+            // 解析无线成交占比（从HTML中提取纯文本后解析）
+            parseGrowthRate(text) {
+                const plainText = text.replace(/<[^>]*>/g, '');
+                const numericStr = plainText.replace(/[^\d.]/g, '');
+                return parseFloat(numericStr) || 0;
+            }
+
+            // 格式化无线成交占比（统一白色）
+            formatGrowthRate(value) {
+                const formatted = d3.format('.1f')(value);
+                return `<span style="color: #ffffff;">无线成交占比 ${formatted}%</span>`;
+            }
+
+            // 解析当前显示的值
+            parseValue(text) {
+                const numericStr = text.replace(/[^\d.]/g, '');
+                return parseFloat(numericStr) || 0;
+            }
+        }
+
+        // ========== 模拟数据流（模拟后端WebSocket推送） ==========
+        class MockDataStream {
+            constructor(salesRoller) {
+                this.salesRoller = salesRoller;
+                this.currentValue = 912000000000;
+                this.baseIncrementPerSecond = 20000000;
+                this.isRunning = false;
+                this.pushInterval = null;
+                this.lastPushTime = Date.now();
+            }
+
+            start() {
+                if (this.isRunning) return;
+                this.isRunning = true;
+                this.lastPushTime = Date.now();
+
+                // 初始化显示
+                this.salesRoller.receiveData(this.currentValue);
+
+                // 模拟数据流推送
+                this.pushData();
+            }
+            
+            stop() {
+                this.isRunning = false;
+                if (this.pushInterval) {
+                    clearTimeout(this.pushInterval);
+                }
+            }
+
+            // 模拟推送数据（类似WebSocket.onmessage）
+            pushData() {
+                if (!this.isRunning) return;
+
+                const now = Date.now();
+                const elapsed = 0.5;
+                this.lastPushTime = now;
+
+                const hour = new Date().getHours();
+                let multiplier = 1;
+
+                if (hour >= 20 && hour <= 23) {
+                    multiplier = 3.5;
+                } else if (hour >= 12 && hour <= 14) {
+                    multiplier = 2.2;
+                } else if (hour >= 19 && hour <= 20) {
+                    multiplier = 3.0;
+                } else if (hour >= 0 && hour <= 6) {
+                    multiplier = 0.8;
+                } else if (hour >= 6 && hour <= 10) {
+                    multiplier = 1.5;
+                } else {
+                    multiplier = 1.8;
+                }
+
+                const increment = this.baseIncrementPerSecond * elapsed * multiplier;
+                const randomFactor = 1 + (Math.random() - 0.5) * 0.3;
+                const actualIncrement = Math.floor(increment * randomFactor);
+
+                this.currentValue += actualIncrement;
+
+                const pushDelay = 500;
+
+                this.salesRoller.receiveData(this.currentValue);
+
+                this.pushInterval = setTimeout(() => {
+                    this.pushData();
+                }, pushDelay);
+            }
+
+            // 模拟WebSocket连接（可以扩展为真实WebSocket）
+            connect() {
+                console.log("模拟数据流连接已建立...");
+                this.start();
+            }
+
+            // 模拟WebSocket断开
+            disconnect() {
+                console.log("模拟数据流连接已断开");
+                this.stop();
+            }
+        }
+
+        // ========== 侧边面板初始化 ==========
+        function initSidePanels() {
+            // 1. 销售结构（词云模拟）
+            renderWordCloud();
+            
+            // 2. 用户热力图
+            renderHeatmap();
+            
+            // 3. 包裹总量（模拟数据更新）
+            startPackageTotalUpdate();
+            
+            // 4. 渠道销售占比（饼图）
+            renderChannelPie();
+
+            // 5. 交互跳转
+            d3.select("#package-total").on("click", function() {
+                window.location.href = "dashboard/index_bundled.html";
+            });
+        }
+
+        function renderWordCloud() {
+            const container = d3.select("#wordcloud");
+            // 确保容器有尺寸
+            if (container.empty()) return;
+            container.html(""); // 清空旧内容
+            
+            const width = container.node().getBoundingClientRect().width || 330;
+            const height = container.node().getBoundingClientRect().height || 200;
+            
+            // 扩展词汇量并调整权重
+            const words = [
+                {text: "美妆", size: 40}, {text: "手机", size: 36}, {text: "运动", size: 32},
+                {text: "食品", size: 28}, {text: "母婴", size: 26}, {text: "家电", size: 24},
+                {text: "服饰", size: 22}, {text: "个护", size: 20}, {text: "鞋包", size: 18},
+                {text: "家居", size: 16}, {text: "电脑", size: 16}, {text: "生鲜", size: 14},
+                {text: "医药", size: 14}, {text: "图书", size: 12}, {text: "汽车", size: 12},
+                {text: "珠宝", size: 12}, {text: "数码", size: 10}, {text: "内衣", size: 10},
+                {text: "箱包", size: 10}, {text: "洗护", size: 10}, {text: "零食", size: 10},
+                {text: "宠物", size: 10}, {text: "乐器", size: 10}, {text: "鲜花", size: 10}
+            ];
+            
+            // 双11主题色系
+            const colors = ["#ff0033", "#ff6600", "#ffcc00", "#ffffff", "#00ccff"];
+            
+            // 使用 d3-cloud 布局
+            const layout = d3.layout.cloud()
+                .size([width, height])
+                .words(words.map(d => ({text: d.text, size: d.size})))
+                .padding(5)
+                .rotate(function() { return ~~(Math.random() * 2) * 0; }) // 减少旋转，保持水平更易读，或者设为 0
+                .font("Microsoft YaHei")
+                .fontSize(function(d) { return d.size; })
+                .on("end", draw);
+
+            layout.start();
+
+            function draw(words) {
+                const svg = container.append("svg")
+                    .attr("width", layout.size()[0])
+                    .attr("height", layout.size()[1])
+                    .append("g")
+                    .attr("transform", "translate(" + layout.size()[0] / 2 + "," + layout.size()[1] / 2 + ")");
+
+                svg.selectAll("text")
+                    .data(words)
+                    .enter().append("text")
+                    .style("font-size", function(d) { return d.size + "px"; })
+                    .style("font-family", "Microsoft YaHei")
+                    .style("font-weight", "bold")
+                    .style("fill", (d, i) => colors[i % colors.length])
+                    .attr("text-anchor", "middle")
+                    .attr("transform", function(d) {
+                        return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
+                    })
+                    .text(function(d) { return d.text; })
+                    .style("opacity", 0)
+                    .style("text-shadow", "0 0 5px rgba(0,0,0,0.5)") // 增加阴影提高可读性
+                    .transition().duration(800).style("opacity", 1);
+            }
+        }
+
+        async function renderHeatmap() {
+            const container = d3.select("#heatmap");
+            if (container.empty()) return;
+            container.html("");
+
+            const width = container.node().getBoundingClientRect().width || 330;
+            const height = container.node().getBoundingClientRect().height || 200;
+            
+            const svg = container.append("svg")
+                .attr("width", width)
+                .attr("height", height)
+                .style("background", "transparent");
+            
+            const defs = svg.append("defs");
+            const filter = defs.append("filter").attr("id", "heat-glow");
+            filter.append("feGaussianBlur").attr("stdDeviation", "3").attr("result", "coloredBlur");
+            const feMerge = filter.append("feMerge");
+            feMerge.append("feMergeNode").attr("in", "coloredBlur");
+            feMerge.append("feMergeNode").attr("in", "SourceGraphic");
+
+            const projection = d3.geoMercator()
+                .scale(width / 6.5)
+                .translate([width / 2, height / 1.6]);
+            
+            const path = d3.geoPath().projection(projection);
+            
+            const mapGroup = svg.append("g").attr("class", "map");
+            const heatGroup = svg.append("g").attr("class", "heat");
+
+            try {
+                const res = await fetch('https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson');
+                const geoData = await res.json();
+                
+                mapGroup.selectAll("path")
+                    .data(geoData.features.filter(d => d.properties.name !== "Antarctica"))
+                    .enter().append("path")
+                    .attr("d", path)
+                    .attr("fill", "rgba(255,255,255,0.05)")
+                    .attr("stroke", "rgba(255,255,255,0.1)")
+                    .attr("stroke-width", 0.5);
+                    
+                const centers = [
+                    {lon: 105, lat: 35, v: 1.0, count: 15},
+                    {lon: -100, lat: 40, v: 0.8, count: 8},
+                    {lon: 10, lat: 50, v: 0.7, count: 8},
+                    {lon: 135, lat: -25, v: 0.5, count: 3},
+                    {lon: -60, lat: -15, v: 0.5, count: 3}
+                ];
+                
+                const points = [];
+                centers.forEach(c => {
+                    for(let i=0; i<c.count; i++) {
+                        points.push({
+                            lon: c.lon + (Math.random() - 0.5) * 30,
+                            lat: c.lat + (Math.random() - 0.5) * 20,
+                            value: Math.random() * c.v
+                        });
+                    }
+                });
+                
+                heatGroup.selectAll("circle")
+                    .data(points)
+                    .enter().append("circle")
+                    .attr("cx", d => projection([d.lon, d.lat])[0])
+                    .attr("cy", d => projection([d.lon, d.lat])[1])
+                    .attr("r", 0)
+                    .attr("fill", d => d3.interpolateInferno(d.value))
+                    .style("opacity", 0.6)
+                    .style("filter", "url(#heat-glow)")
+                    .transition().duration(1000)
+                    .attr("r", d => 3 + d.value * 5);
+                    
+                setInterval(() => {
+                    heatGroup.selectAll("circle")
+                        .transition().duration(2000)
+                        .style("opacity", () => 0.3 + Math.random() * 0.5)
+                        .attr("r", d => (3 + d.value * 5) * (0.8 + Math.random() * 0.4));
+                }, 2000);
+                
+            } catch(e) {
+                console.error("Map load error", e);
+                container.append("text").attr("x", width/2).attr("y", height/2).attr("fill", "#fff").text("Map Data Error");
+            }
+        }
+
+        function startPackageTotalUpdate() {
+            const el = d3.select("#package-total-value");
+            let count = 1254300000;
+            
+            setInterval(() => {
+                count += Math.floor(Math.random() * 500);
+                el.text(d3.format(",")(count));
+            }, 100);
+        }
+
+        function renderChannelPie() {
+            const container = d3.select("#channel-pie-chart");
+            if (container.empty()) return;
+
+            const width = container.node().getBoundingClientRect().width || 330;
+            const height = container.node().getBoundingClientRect().height || 200;
+            const radius = Math.min(width, height) / 2 - 10;
+            
+            const svg = container.append("svg")
+                .attr("width", width)
+                .attr("height", height)
+                .append("g")
+                .attr("transform", `translate(${width/2},${height/2})`);
+                
+            const data = [
+                {label: "APP", value: 65},
+                {label: "小程序", value: 25},
+                {label: "其他", value: 10}
+            ];
+            
+            const color = d3.scaleOrdinal()
+                .domain(data.map(d => d.label))
+                .range(["#ff0033", "#ff9900", "#00ccff"]);
+                
+            const pie = d3.pie().value(d => d.value);
+            const arc = d3.arc().innerRadius(radius * 0.5).outerRadius(radius);
+            
+            const arcs = svg.selectAll("arc")
+                .data(pie(data))
+                .enter().append("g");
+                
+            arcs.append("path")
+                .attr("d", arc)
+                .attr("fill", d => color(d.data.label))
+                .attr("stroke", "rgba(255,255,255,0.2)")
+                .style("stroke-width", "1px");
+                
+            arcs.append("text")
+                .attr("transform", d => `translate(${arc.centroid(d)})`)
+                .attr("text-anchor", "middle")
+                .text(d => d.data.label)
+                .style("fill", "#fff")
+                .style("font-size", "12px")
+                .style("text-shadow", "0 1px 2px black");
+        }
+
+        // ========== 更新时间戳 ==========
+        function updateTimestamp() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            d3.select("#timestamp").text(`${hours}:${minutes}:${seconds}`);
+        }
+
+        // ========== 初始化 ==========
+        function init() {
+            // 初始化侧边面板
+            initSidePanels();
+
+            const startValue = 912000000000;
+            const lastYearValue = Math.floor(startValue / 1.15);
+            
+            const salesRoller = new RealtimeSalesRoller("#sales-display", {
+                startValue: startValue,
+                lastYearValue: lastYearValue,
+                animationDuration: 3000
+            });
+
+            // 启动组件
+            salesRoller.start();
+
+            // 启动模拟数据流
+            const dataStream = new MockDataStream(salesRoller);
+            dataStream.connect();
+
+            // 更新时间戳
+            updateTimestamp();
+            setInterval(updateTimestamp, 1000);
+
+            // 将实例保存到全局，方便调试
+            window.salesRoller = salesRoller;
+            window.dataStream = dataStream;
+        }
+
+        // 页面加载完成后初始化
+        d3.select(window).on("load", init);
+    </script>
+</body>
+</html>
