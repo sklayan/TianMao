@@ -202,6 +202,17 @@
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
       display: inline-block;
     }
+
+    .clickable-panel {
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    }
+
+    .clickable-panel:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 20px rgba(0, 234, 255, 0.3);
+      border-color: rgba(0, 234, 255, 0.6);
+    }
   </style>
 </head>
 
@@ -221,7 +232,8 @@
     </header>
 
     <main class="dashboard-grid">
-      <aside class="left-panel" id="left-panel">
+      <aside class="left-panel clickable-panel" id="left-panel" onclick="window.location.href='scheduling.html'"
+        title="点击进入全局调度管理">
         <!-- Operations Components will be injected here -->
       </aside>
 
@@ -229,7 +241,8 @@
         <!-- Map will be injected here -->
       </section>
 
-      <aside class="right-panel" id="right-panel">
+      <aside class="right-panel clickable-panel" id="right-panel" onclick="window.location.href='analysis.html'"
+        title="点击进入深度分析">
         <!-- Analytics Components will be injected here -->
       </aside>
     </main>
@@ -741,7 +754,7 @@
           </div>
 
           <div class="panel-card">
-            <h3 class="panel-title">实时调度监控</h3>
+            <h3 class="panel-title">实时调度监控 <span style="font-size:12px; float:right; color:#00eaff;">↗</span></h3>
             <div class="monitor-grid">
               <div class="monitor-row main">
                 <span>今日调度任务总数</span>

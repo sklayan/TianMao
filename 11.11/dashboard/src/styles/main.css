@@ -79,27 +79,31 @@ body {
 .right-panel {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 20px;
   overflow-y: auto;
-  padding-bottom: 5px;
+  padding: 15px;
   min-height: 0;
-  /* Fix for nested flex scrolling */
+  /* Unified Panel Look */
+  background: var(--panel-bg);
+  border: 1px solid rgba(0, 242, 255, 0.2);
+  border-radius: 8px;
+  backdrop-filter: blur(5px);
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
 }
 
 /* Panel Cards */
 .panel-card {
-  background: var(--panel-bg);
-  border: 1px solid rgba(0, 242, 255, 0.2);
-  border-radius: 8px;
-  padding: 12px;
-  backdrop-filter: blur(5px);
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+  /* Panel Cards (Now just spacing containers) */
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 5px 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   flex: 0 0 auto;
   min-height: auto;
-  margin-bottom: 15px;
+  margin-bottom: 10px;
 }
 
 .panel-card:last-child {
@@ -495,4 +499,150 @@ body {
     -1px 1px 0 #ff0033,
     1px 1px 0 #ff0033;
   letter-spacing: 2px;
+}
+
+/* Scheduling Interface Modal */
+.scheduling-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(5, 10, 20, 0.98);
+  backdrop-filter: blur(15px);
+  z-index: 4000;
+  display: none;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.scheduling-modal.active {
+  display: block;
+  opacity: 1;
+}
+
+.scheduling-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  height: 100%;
+  gap: 20px;
+}
+
+.scheduling-map-container {
+  background: rgba(0, 20, 40, 0.6);
+  border: 1px solid #00eaff;
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+.layer-controls {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 10;
+}
+
+.layer-btn {
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid #00eaff;
+  color: #00eaff;
+  padding: 8px 15px;
+  cursor: pointer;
+  font-family: inherit;
+  border-radius: 4px;
+  text-align: left;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.layer-btn:hover,
+.layer-btn.active {
+  background: rgba(0, 234, 255, 0.2);
+  box-shadow: 0 0 10px rgba(0, 234, 255, 0.3);
+}
+
+.layer-checkbox {
+  width: 12px;
+  height: 12px;
+  border: 1px solid #00eaff;
+  display: inline-block;
+  background: transparent;
+}
+
+.layer-btn.active .layer-checkbox {
+  background: #00eaff;
+}
+
+.scheduling-info {
+  background: rgba(10, 20, 35, 0.8);
+  border-left: 1px solid rgba(0, 234, 255, 0.2);
+  padding: 20px;
+  overflow-y: auto;
+  color: #dfdfdf;
+  font-family: "Microsoft YaHei", sans-serif;
+}
+
+.scheduling-title {
+  font-size: 1.5rem;
+  color: #ff3333;
+  /* Red highlight as per image */
+  margin-bottom: 5px;
+  font-weight: bold;
+  border-bottom: 2px solid #ff3333;
+  padding-bottom: 10px;
+  display: inline-block;
+}
+
+.scheduling-subtitle {
+  color: #ff9900;
+  font-size: 1rem;
+  margin-top: 15px;
+  margin-bottom: 10px;
+}
+
+.scheduling-desc {
+  line-height: 1.6;
+  font-size: 0.95rem;
+  margin-bottom: 15px;
+}
+
+.task-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  background: transparent;
+  /* Fixed: was white */
+  color: #fff;
+  font-family: var(--font-body);
+}
+
+.task-table th,
+.task-table td {
+  border-bottom: 1px solid rgba(0, 242, 255, 0.2);
+  /* Subtle blue separator */
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  padding: 12px 8px;
+  text-align: left;
+}
+
+.task-table th {
+  font-size: 0.9rem;
+  color: var(--accent-blue);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.task-table td {
+  font-size: 0.95rem;
+  color: #dfdfdf;
 }
