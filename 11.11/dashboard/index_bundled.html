@@ -12,97 +12,6 @@
     rel="stylesheet">
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <style>
-    /* Map Legend Styles */
-    .map-legend {
-      position: absolute;
-      bottom: 20px;
-      right: 20px;
-      background: rgba(20, 30, 48, 0.85);
-      border: 1px solid rgba(0, 242, 255, 0.3);
-      border-radius: 6px;
-      padding: 8px 12px;
-      font-size: 0.75rem;
-      color: #fff;
-      backdrop-filter: blur(2px);
-      display: grid;
-      grid-template-columns: auto 1fr;
-      grid-template-rows: auto auto;
-      gap: 2px 15px;
-      align-items: center;
-      z-index: 100;
-    }
-
-    .legend-title {
-      font-weight: bold;
-      color: var(--accent-blue);
-      font-size: 0.9rem;
-      grid-row: 1 / span 2;
-      margin: 0;
-      padding-right: 5px;
-      border-right: 1px solid rgba(255, 255, 255, 0.2);
-      display: flex;
-      align-items: center;
-      height: 100%;
-    }
-
-    .legend-section {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      gap: 12px;
-      margin: 0;
-    }
-
-    .legend-subtitle {
-      display: none;
-    }
-
-    .legend-item {
-      display: flex;
-      align-items: center;
-      margin-bottom: 0;
-      white-space: nowrap;
-    }
-
-    .legend-item .dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      margin-right: 4px;
-      display: inline-block;
-    }
-
-    .legend-item .line {
-      width: 12px;
-      height: 2px;
-      margin-right: 4px;
-      display: inline-block;
-    }
-
-    .dot.normal {
-      background: var(--success-green);
-    }
-
-    .dot.warning {
-      background: var(--accent-orange);
-    }
-
-    .dot.critical {
-      background: var(--alert-red);
-    }
-
-    .line.normal {
-      background: var(--accent-blue);
-    }
-
-    .line.delayed {
-      background: var(--accent-orange);
-    }
-
-    .line.urgent {
-      background: var(--alert-red);
-    }
-
     /* Back Button Styles */
     .back-button {
       position: absolute;
@@ -243,8 +152,13 @@
       font-weight: bold;
     }
 
-    .info-value.warning { color: var(--accent-orange); }
-    .info-value.success { color: var(--success-green); }
+    .info-value.warning {
+      color: var(--accent-orange);
+    }
+
+    .info-value.success {
+      color: var(--success-green);
+    }
 
     .tag {
       display: inline-block;
@@ -257,7 +171,7 @@
       cursor: pointer;
     }
 
-    .chart-container {
+    .modal-chart-container {
       flex: 1;
       background: rgba(0, 0, 0, 0.2);
       border: 1px solid rgba(255, 255, 255, 0.1);
@@ -267,58 +181,26 @@
       display: flex;
       flex-direction: column;
     }
-    
-    .chart-area {
-        flex: 1;
-        width: 100%;
-        position: relative;
-    }
 
-    /* Fix Right Panel Layout */
-    #right-panel {
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      overflow: hidden;
-    }
-
-    #right-panel .panel-card {
+    .modal-chart-area {
       flex: 1;
-      min-height: 0;
-      display: flex;
-      flex-direction: column;
-      margin-bottom: 15px;
-    }
-    
-    #right-panel .panel-card:last-child {
-        margin-bottom: 0;
-    }
-
-    #right-panel .chart-container {
-      flex: 1;
-      height: auto !important;
-      min-height: 0;
       width: 100%;
       position: relative;
     }
-    
-    #right-panel .table-container {
-        flex: 1;
-        overflow-y: auto;
-        min-height: 0;
-    }
+
+
 
     .status-badge {
-        padding: 4px 12px;
-        border-radius: 20px;
-        border: 1px solid;
-        font-weight: bold;
-        font-size: 0.9rem;
-        letter-spacing: 1px;
-        text-transform: uppercase;
-        background: rgba(0, 0, 0, 0.3);
-        box-shadow: 0 0 10px rgba(0,0,0,0.5);
-        display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      border: 1px solid;
+      font-weight: bold;
+      font-size: 0.9rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      background: rgba(0, 0, 0, 0.3);
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+      display: inline-block;
     }
   </style>
 </head>
@@ -326,7 +208,8 @@
 <body>
   <div id="app">
     <a href="../index.html" class="back-button">
-      <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"
+        stroke-linecap="round" stroke-linejoin="round">
         <polyline points="15 18 9 12 15 6"></polyline>
       </svg>
       返回大屏
@@ -357,63 +240,72 @@
 
     <!-- Warehouse Detail Modal -->
     <div id="warehouse-modal" class="warehouse-modal">
-        <div class="modal-content">
-            <div class="modal-close" onclick="closeWarehouseDetail()">×</div>
-            
-            <div class="modal-left">
-                <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
-                    <h2 id="modal-title" style="font-size: 2rem; color: #fff; margin: 0; text-shadow: 0 0 10px rgba(0,234,255,0.5);">上海一号仓</h2>
-                    <div id="modal-status-badge" class="status-badge">NORMAL</div>
-                </div>
-                
-                <div class="detail-section">
-                    <div class="detail-title">基础信息</div>
-                    <div class="info-grid">
-                        <div class="info-item"><span class="info-label">总面积</span><span class="info-value" id="info-area">50,000 m²</span></div>
-                        <div class="info-item"><span class="info-label">可用容量</span><span class="info-value" id="info-capacity">12,400 m²</span></div>
-                        <div class="info-item"><span class="info-label">当前库存</span><span class="info-value" id="info-stock">75%</span></div>
-                        <div class="info-item"><span class="info-label">在岗人数</span><span class="info-value" id="info-staff">142 人</span></div>
-                    </div>
-                </div>
+      <div class="modal-content">
+        <div class="modal-close" onclick="closeWarehouseDetail()">×</div>
 
-                <div class="detail-section">
-                    <div class="detail-title">实时运营</div>
-                    <div class="info-grid">
-                        <div class="info-item"><span class="info-label">今日入库</span><span class="info-value" id="op-inbound">4,520 单</span></div>
-                        <div class="info-item"><span class="info-label">今日出库</span><span class="info-value" id="op-outbound">3,890 单</span></div>
-                        <div class="info-item"><span class="info-label">待处理订单</span><span class="info-value warning" id="op-pending">125</span></div>
-                        <div class="info-item"><span class="info-label">作业效率</span><span class="info-value success" id="op-efficiency">98.5%</span></div>
-                    </div>
-                </div>
+        <div class="modal-left">
+          <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
+            <h2 id="modal-title"
+              style="font-size: 2rem; color: #fff; margin: 0; text-shadow: 0 0 10px rgba(0,234,255,0.5);">上海一号仓</h2>
+            <div id="modal-status-badge" class="status-badge">NORMAL</div>
+          </div>
 
-                 <div class="detail-section">
-                    <div class="detail-title">调度关联</div>
-                    <div style="margin-bottom: 10px;">
-                        <span class="info-label">可支援仓库</span>
-                        <div style="display: flex; gap: 10px; margin-top: 5px;" id="support-warehouses">
-                            <span class="tag">杭州仓</span>
-                            <span class="tag">苏州仓</span>
-                            <span class="tag">南京仓</span>
-                        </div>
-                    </div>
-                    <div>
-                        <span class="info-label">本月被支援记录</span>
-                        <span class="info-value" id="support-history">15 次</span>
-                    </div>
-                </div>
+          <div class="detail-section">
+            <div class="detail-title">基础信息</div>
+            <div class="info-grid">
+              <div class="info-item"><span class="info-label">总面积</span><span class="info-value" id="info-area">50,000
+                  m²</span></div>
+              <div class="info-item"><span class="info-label">可用容量</span><span class="info-value"
+                  id="info-capacity">12,400 m²</span></div>
+              <div class="info-item"><span class="info-label">当前库存</span><span class="info-value"
+                  id="info-stock">75%</span></div>
+              <div class="info-item"><span class="info-label">在岗人数</span><span class="info-value" id="info-staff">142
+                  人</span></div>
             </div>
+          </div>
 
-            <div class="modal-right">
-                <div class="chart-container">
-                    <div class="detail-title">库存风险时序图表</div>
-                    <div id="inventory-chart" class="chart-area"></div>
-                </div>
-                <div class="chart-container">
-                    <div class="detail-title">调度网络拓扑图</div>
-                    <div id="network-chart" class="chart-area"></div>
-                </div>
+          <div class="detail-section">
+            <div class="detail-title">实时运营</div>
+            <div class="info-grid">
+              <div class="info-item"><span class="info-label">今日入库</span><span class="info-value" id="op-inbound">4,520
+                  单</span></div>
+              <div class="info-item"><span class="info-label">今日出库</span><span class="info-value" id="op-outbound">3,890
+                  单</span></div>
+              <div class="info-item"><span class="info-label">待处理订单</span><span class="info-value warning"
+                  id="op-pending">125</span></div>
+              <div class="info-item"><span class="info-label">作业效率</span><span class="info-value success"
+                  id="op-efficiency">98.5%</span></div>
             </div>
+          </div>
+
+          <div class="detail-section">
+            <div class="detail-title">调度关联</div>
+            <div style="margin-bottom: 10px;">
+              <span class="info-label">可支援仓库</span>
+              <div style="display: flex; gap: 10px; margin-top: 5px;" id="support-warehouses">
+                <span class="tag">杭州仓</span>
+                <span class="tag">苏州仓</span>
+                <span class="tag">南京仓</span>
+              </div>
+            </div>
+            <div>
+              <span class="info-label">本月被支援记录</span>
+              <span class="info-value" id="support-history">15 次</span>
+            </div>
+          </div>
         </div>
+
+        <div class="modal-right">
+          <div class="modal-chart-container">
+            <div class="detail-title">库存风险时序图表</div>
+            <div id="inventory-chart" class="modal-chart-area"></div>
+          </div>
+          <div class="modal-chart-container">
+            <div class="detail-title">调度网络拓扑图</div>
+            <div id="network-chart" class="modal-chart-area"></div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -557,180 +449,233 @@
     // Map.js
     // ==========================================
     class MapComponent {
-        constructor(containerId, dataStream) {
-            this.containerId = containerId;
-            this.container = document.getElementById(containerId);
-            this.dataStream = dataStream;
-            this.width = this.container.clientWidth;
-            this.height = this.container.clientHeight;
-            this.svg = null;
-            this.projection = null;
-            this.path = null;
-            this.mapGroup = null;
-            this.routesGroup = null;
-            this.warehousesGroup = null;
+      constructor(containerId, dataStream) {
+        this.containerId = containerId;
+        this.container = document.getElementById(containerId);
+        this.dataStream = dataStream;
+        this.width = this.container.clientWidth;
+        this.height = this.container.clientHeight;
+        this.svg = null;
+        this.projection = null;
+        this.path = null;
+        this.mapGroup = null;
+        this.routesGroup = null;
+        this.warehousesGroup = null;
 
-            this.init();
+        this.init();
+      }
+
+      async init() {
+        this.svg = d3.select(`#${this.containerId}`)
+          .append('svg')
+          .attr('width', '100%')
+          .attr('height', '100%')
+          .attr('viewBox', `0 0 ${this.width} ${this.height}`)
+          .style('background', 'transparent');
+
+        this.mapGroup = this.svg.append('g').attr('class', 'map-layer');
+        this.routesGroup = this.svg.append('g').attr('class', 'routes-layer');
+        this.warehousesGroup = this.svg.append('g').attr('class', 'warehouses-layer');
+
+        // Load GeoJSON
+        try {
+          const response = await fetch('https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson');
+          const geoData = await response.json();
+          this.renderMap(geoData);
+          this.addLegend(); // Add legend after map render
+        } catch (error) {
+          console.error('Error loading map data:', error);
+          this.container.innerHTML = '<div class="error">Map Data Loading Failed</div>';
         }
 
-        async init() {
-            this.svg = d3.select(`#${this.containerId}`)
-                .append('svg')
-                .attr('width', '100%')
-                .attr('height', '100%')
-                .attr('viewBox', `0 0 ${this.width} ${this.height}`)
-                .style('background', 'transparent');
+        // Subscribe to data updates
+        this.dataStream.subscribe(this.update.bind(this));
 
-            this.mapGroup = this.svg.append('g').attr('class', 'map-layer');
-            this.routesGroup = this.svg.append('g').attr('class', 'routes-layer');
-            this.warehousesGroup = this.svg.append('g').attr('class', 'warehouses-layer');
+        // Handle Resize
+        window.addEventListener('resize', () => this.resize());
+      }
 
-            // Load GeoJSON
-            try {
-                const response = await fetch('https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson');
-                const geoData = await response.json();
-                this.renderMap(geoData);
-                this.addLegend(); // Add legend after map render
-            } catch (error) {
-                console.error('Error loading map data:', error);
-                this.container.innerHTML = '<div class="error">Map Data Loading Failed</div>';
-            }
+      renderMap(geoData) {
+        // Filter out Antarctica to save space
+        const features = geoData.features.filter(d => d.properties.name !== 'Antarctica' && d.id !== 'ATA');
 
-            // Subscribe to data updates
-            this.dataStream.subscribe(this.update.bind(this));
+        this.projection = d3.geoMercator()
+          .center([0, 25]) // Center North to move map down further
+          .scale(100)
+          .translate([this.width / 2, this.height / 2]);
 
-            // Handle Resize
-            window.addEventListener('resize', () => this.resize());
+        this.path = d3.geoPath().projection(this.projection);
+
+        this.mapGroup.selectAll('path')
+          .data(features) // Use filtered features
+          .enter()
+          .append('path')
+          .attr('d', this.path)
+          .attr('fill', '#0f4c81')
+          .attr('stroke', '#1e3a8a')
+          .attr('stroke-width', 0.5)
+          .style('opacity', 0.9);
+      }
+
+      update(data) {
+        if (!this.projection) return;
+
+        // Update Warehouses
+        const warehouses = this.warehousesGroup.selectAll('.warehouse')
+          .data(data.warehouses, d => d.id);
+
+        warehouses.exit().remove();
+
+        const warehousesEnter = warehouses.enter()
+          .append('g')
+          .attr('class', 'warehouse')
+          .style('cursor', 'pointer')
+          .on('click', (event, d) => {
+            openWarehouseDetail(d);
+            event.stopPropagation();
+          });
+
+        warehousesEnter.append('circle')
+          .attr('r', 4)
+          .attr('fill', d => this.getWarehouseColor(d.status))
+          .attr('stroke', '#fff')
+          .attr('stroke-width', 1.5);
+
+        // Add ripple effect for critical/warning
+        warehousesEnter.filter(d => d.status !== 'normal')
+          .append('circle')
+          .attr('r', 4)
+          .attr('fill', 'none')
+          .attr('stroke', d => this.getWarehouseColor(d.status))
+          .attr('stroke-width', 1)
+          .attr('class', 'ripple')
+          .append('animate')
+          .attr('attributeName', 'r')
+          .attr('from', 4)
+          .attr('to', 12)
+          .attr('dur', '1.5s')
+          .attr('repeatCount', 'indefinite');
+
+        warehousesEnter.filter(d => d.status !== 'normal')
+          .select('.ripple')
+          .append('animate')
+          .attr('attributeName', 'opacity')
+          .attr('from', 0.8)
+          .attr('to', 0)
+          .attr('dur', '1.5s')
+          .attr('repeatCount', 'indefinite');
+
+        // Update positions & styles
+        const allWarehouses = warehouses.merge(warehousesEnter);
+
+        // Update position
+        allWarehouses.attr('transform', d => {
+          const coords = this.projection([d.lon, d.lat]);
+          return `translate(${coords[0]}, ${coords[1]})`;
+        });
+
+        // Update main circle color
+        allWarehouses.select('circle:not(.ripple)')
+          .attr('fill', d => this.getWarehouseColor(d.status));
+
+        // Update ripples: remove all first, then add to those who need it
+        allWarehouses.select('.ripple').remove();
+
+        allWarehouses.filter(d => d.status !== 'normal')
+          .append('circle')
+          .attr('r', 4)
+          .attr('fill', 'none')
+          .attr('stroke', d => this.getWarehouseColor(d.status))
+          .attr('stroke-width', 1)
+          .attr('class', 'ripple')
+          .append('animate')
+          .attr('attributeName', 'r')
+          .attr('from', 4)
+          .attr('to', 12)
+          .attr('dur', '1.5s')
+          .attr('repeatCount', 'indefinite');
+
+        allWarehouses.filter(d => d.status !== 'normal')
+          .select('.ripple')
+          .append('animate')
+          .attr('attributeName', 'opacity')
+          .attr('from', 0.8)
+          .attr('to', 0)
+          .attr('dur', '1.5s')
+          .attr('repeatCount', 'indefinite');
+
+        // Update Routes
+        const routes = this.routesGroup.selectAll('.route')
+          .data(data.routes, d => d.from + '-' + d.to);
+
+        routes.exit().remove();
+
+        const routesEnter = routes.enter()
+          .append('path')
+          .attr('class', 'route')
+          .attr('fill', 'none')
+          .attr('stroke-width', d => d.volume === 'high' ? 2 : 1)
+          .attr('stroke-opacity', 0.6);
+
+        this.routesGroup.selectAll('.route')
+          .attr('stroke', d => this.getRouteColor(d.status))
+          .attr('stroke-width', d => d.status === 'urgent' ? 3 : 2)
+          .style('filter', d => `drop-shadow(0 0 ${d.status === 'urgent' ? '5px' : '3px'} ${this.getRouteColor(d.status)})`)
+          .attr('d', d => {
+            const source = data.warehouses.find(w => w.id === d.from);
+            const target = data.warehouses.find(w => w.id === d.to);
+            if (!source || !target) return null;
+            return this.generateCurve(source, target);
+          });
+      }
+
+      generateCurve(source, target) {
+        const sourceCoords = this.projection([source.lon, source.lat]);
+        const targetCoords = this.projection([target.lon, target.lat]);
+
+        const dx = targetCoords[0] - sourceCoords[0];
+        const dy = targetCoords[1] - sourceCoords[1];
+        const dr = Math.sqrt(dx * dx + dy * dy);
+
+        // Quadratic Bezier: Start, Control, End
+        // Control point is perpendicular to the midpoint
+        const midX = (sourceCoords[0] + targetCoords[0]) / 2;
+        const midY = (sourceCoords[1] + targetCoords[1]) / 2;
+
+        // Curve height depends on distance
+        const curveHeight = dr * 0.2;
+
+        // Calculate normal vector
+        const normX = -dy / dr;
+        const normY = dx / dr;
+
+        const controlX = midX + normX * curveHeight;
+        const controlY = midY + normY * curveHeight;
+
+        return `M${sourceCoords[0]},${sourceCoords[1]} Q${controlX},${controlY} ${targetCoords[0]},${targetCoords[1]}`;
+      }
+
+
+      getWarehouseColor(status) {
+        switch (status) {
+          case 'critical': return '#ff3333'; // Red
+          case 'warning': return '#ff9900'; // Orange
+          default: return '#33ff33'; // Green
         }
+      }
 
-        renderMap(geoData) {
-            // Filter out Antarctica to save space
-            const features = geoData.features.filter(d => d.properties.name !== 'Antarctica' && d.id !== 'ATA');
-
-            this.projection = d3.geoMercator()
-                .center([0, 25]) // Center North to move map down further
-                .scale(100)
-                .translate([this.width / 2, this.height / 2]);
-
-            this.path = d3.geoPath().projection(this.projection);
-
-            this.mapGroup.selectAll('path')
-                .data(features) // Use filtered features
-                .enter()
-                .append('path')
-                .attr('d', this.path)
-                .attr('fill', '#0f4c81')
-                .attr('stroke', '#1e3a8a')
-                .attr('stroke-width', 0.5)
-                .style('opacity', 0.9);
+      getRouteColor(status) {
+        switch (status) {
+          case 'urgent': return '#ff3333'; // Red
+          case 'delayed': return '#ff9900'; // Orange
+          default: return '#00f2ff'; // Cyan
         }
+      }
 
-        update(data) {
-            if (!this.projection) return;
-
-            // Update Warehouses
-            const warehouses = this.warehousesGroup.selectAll('.warehouse')
-                .data(data.warehouses, d => d.id);
-
-            warehouses.exit().remove();
-
-            const warehousesEnter = warehouses.enter()
-                .append('g')
-                .attr('class', 'warehouse')
-                .style('cursor', 'pointer')
-                .on('click', (event, d) => {
-                    openWarehouseDetail(d);
-                    event.stopPropagation();
-                });
-
-            warehousesEnter.append('circle')
-                .attr('r', 4)
-                .attr('fill', d => this.getWarehouseColor(d.status))
-                .attr('stroke', '#fff')
-                .attr('stroke-width', 1.5);
-
-            // Add ripple effect for critical/warning
-            warehousesEnter.filter(d => d.status !== 'normal')
-                .append('circle')
-                .attr('r', 4)
-                .attr('fill', 'none')
-                .attr('stroke', d => this.getWarehouseColor(d.status))
-                .attr('stroke-width', 1)
-                .attr('class', 'ripple')
-                .append('animate')
-                .attr('attributeName', 'r')
-                .attr('from', 4)
-                .attr('to', 12)
-                .attr('dur', '1.5s')
-                .attr('repeatCount', 'indefinite');
-            
-            warehousesEnter.filter(d => d.status !== 'normal')
-                .select('.ripple')
-                .append('animate')
-                .attr('attributeName', 'opacity')
-                .attr('from', 0.8)
-                .attr('to', 0)
-                .attr('dur', '1.5s')
-                .attr('repeatCount', 'indefinite');
-
-            // Update positions
-            this.warehousesGroup.selectAll('.warehouse')
-                .attr('transform', d => {
-                    const coords = this.projection([d.lon, d.lat]);
-                    return `translate(${coords[0]}, ${coords[1]})`;
-                });
-
-            // Update Routes
-            const routes = this.routesGroup.selectAll('.route')
-                .data(data.routes, d => d.from + '-' + d.to);
-
-            routes.exit().remove();
-
-            const routesEnter = routes.enter()
-                .append('path')
-                .attr('class', 'route')
-                .attr('fill', 'none')
-                .attr('stroke-width', d => d.volume === 'high' ? 2 : 1)
-                .attr('stroke-opacity', 0.6);
-
-            this.routesGroup.selectAll('.route')
-                .attr('d', d => {
-                    const source = data.warehouses.find(w => w.id === d.from);
-                    const target = data.warehouses.find(w => w.id === d.to);
-                    if (!source || !target) return null;
-
-                    const sourceCoords = this.projection([source.lon, source.lat]);
-                    const targetCoords = this.projection([target.lon, target.lat]);
-
-                    // Simple curve
-                    const dx = targetCoords[0] - sourceCoords[0];
-                    const dy = targetCoords[1] - sourceCoords[1];
-                    const dr = Math.sqrt(dx * dx + dy * dy);
-                    return `M${sourceCoords[0]},${sourceCoords[1]}A${dr},${dr} 0 0,1 ${targetCoords[0]},${targetCoords[1]}`;
-                })
-                .attr('stroke', d => this.getRouteColor(d.status));
-        }
-
-        getWarehouseColor(status) {
-            switch (status) {
-                case 'critical': return '#ff3333'; // Red
-                case 'warning': return '#ff9900'; // Orange
-                default: return '#33ff33'; // Green
-            }
-        }
-
-        getRouteColor(status) {
-            switch (status) {
-                case 'urgent': return '#ff3333'; // Red
-                case 'delayed': return '#ff9900'; // Orange
-                default: return '#00f2ff'; // Cyan
-            }
-        }
-
-        addLegend() {
-            const legendContainer = document.createElement('div');
-            legendContainer.className = 'map-legend';
-            legendContainer.innerHTML = `
+      addLegend() {
+        const legendContainer = document.createElement('div');
+        legendContainer.className = 'map-legend';
+        legendContainer.innerHTML = `
                 <div class="legend-title">图例</div>
                 <div class="legend-section">
                     <div class="legend-subtitle">仓库状态</div>
@@ -745,19 +690,19 @@
                     <div class="legend-item"><span class="line urgent"></span>加急</div>
                 </div>
             `;
-            this.container.appendChild(legendContainer);
-        }
+        this.container.appendChild(legendContainer);
+      }
 
-        resize() {
-            this.width = this.container.clientWidth;
-            this.height = this.container.clientHeight;
-            this.svg.attr('viewBox', `0 0 ${this.width} ${this.height}`);
-            if (this.projection) {
-                this.projection.translate([this.width / 2, this.height / 2]);
-                this.path.projection(this.projection);
-                this.mapGroup.selectAll('path').attr('d', this.path);
-            }
+      resize() {
+        this.width = this.container.clientWidth;
+        this.height = this.container.clientHeight;
+        this.svg.attr('viewBox', `0 0 ${this.width} ${this.height}`);
+        if (this.projection) {
+          this.projection.translate([this.width / 2, this.height / 2]);
+          this.path.projection(this.projection);
+          this.mapGroup.selectAll('path').attr('d', this.path);
         }
+      }
     }
 
     // ==========================================
@@ -932,12 +877,12 @@
 
         this.renderCharts();
         this.dataStream.subscribe(this.update.bind(this));
-        
+
         // Handle Resize
         window.addEventListener('resize', () => {
-            // Debounce resize
-            if (this.resizeTimeout) clearTimeout(this.resizeTimeout);
-            this.resizeTimeout = setTimeout(() => this.renderCharts(), 200);
+          // Debounce resize
+          if (this.resizeTimeout) clearTimeout(this.resizeTimeout);
+          this.resizeTimeout = setTimeout(() => this.renderCharts(), 200);
         });
       }
 
@@ -1179,295 +1124,295 @@
     // BottomPanel.js
     // ==========================================
     class BottomPanel {
-        constructor(containerId, dataStream) {
-            this.container = document.getElementById(containerId);
-            this.dataStream = dataStream;
-            this.init();
-        }
+      constructor(containerId, dataStream) {
+        this.container = document.getElementById(containerId);
+        this.dataStream = dataStream;
+        this.init();
+      }
 
-        init() {
-            this.container.innerHTML = `
+      init() {
+        this.container.innerHTML = `
           <div class="ticker-content" id="ticker-content">
             <!-- Events will be injected here -->
           </div>
         `;
-            this.dataStream.subscribe(this.update.bind(this));
-        }
+        this.dataStream.subscribe(this.update.bind(this));
+      }
 
-        update(data) {
-            const ticker = document.getElementById('ticker-content');
-            // In a real app, we'd append new events. For this demo, we'll just refresh the list or add if not present
-            // To keep it simple and smooth, we'll just ensure the ticker has content
+      update(data) {
+        const ticker = document.getElementById('ticker-content');
+        // In a real app, we'd append new events. For this demo, we'll just refresh the list or add if not present
+        // To keep it simple and smooth, we'll just ensure the ticker has content
 
-            if (ticker.children.length < 10) {
-                data.events.forEach(event => {
-                    const span = document.createElement('span');
-                    span.className = `ticker-item ${event.type}`;
-                    span.innerText = `[${event.time}] ${event.message}`;
-                    ticker.appendChild(span);
-                });
-            }
+        if (ticker.children.length < 10) {
+          data.events.forEach(event => {
+            const span = document.createElement('span');
+            span.className = `ticker-item ${event.type}`;
+            span.innerText = `[${event.time}] ${event.message}`;
+            ticker.appendChild(span);
+          });
         }
+      }
     }
 
     // ==========================================
     // Warehouse Detail Logic
     // ==========================================
     function closeWarehouseDetail() {
-        document.getElementById('warehouse-modal').classList.remove('active');
+      document.getElementById('warehouse-modal').classList.remove('active');
     }
 
     function openWarehouseDetail(warehouse) {
-        const modal = document.getElementById('warehouse-modal');
-        document.getElementById('modal-title').innerText = warehouse.name + '详情';
-        
-        // Update Status Badge
-        const badge = document.getElementById('modal-status-badge');
-        const statusMap = {
-            'critical': { text: 'CRITICAL', color: 'var(--alert-red)' },
-            'warning': { text: 'WARNING', color: 'var(--accent-orange)' },
-            'normal': { text: 'NORMAL', color: 'var(--success-green)' }
-        };
-        const statusInfo = statusMap[warehouse.status] || statusMap['normal'];
-        
-        badge.innerText = statusInfo.text;
-        badge.style.color = statusInfo.color;
-        badge.style.borderColor = statusInfo.color;
-        badge.style.boxShadow = `0 0 8px ${statusInfo.color}40`;
-        
-        // Randomize data for demo
-        document.getElementById('info-area').innerText = Math.floor(Math.random() * 50000 + 10000).toLocaleString() + ' m²';
-        document.getElementById('info-capacity').innerText = Math.floor(Math.random() * 10000 + 5000).toLocaleString() + ' m²';
-        document.getElementById('info-stock').innerText = Math.floor(Math.random() * 40 + 50) + '%';
-        document.getElementById('info-staff').innerText = Math.floor(Math.random() * 200 + 50) + ' 人';
-        
-        document.getElementById('op-inbound').innerText = Math.floor(Math.random() * 5000 + 1000).toLocaleString() + ' 单';
-        document.getElementById('op-outbound').innerText = Math.floor(Math.random() * 5000 + 1000).toLocaleString() + ' 单';
-        document.getElementById('op-pending').innerText = Math.floor(Math.random() * 200);
-        document.getElementById('op-efficiency').innerText = (90 + Math.random() * 10).toFixed(1) + '%';
+      const modal = document.getElementById('warehouse-modal');
+      document.getElementById('modal-title').innerText = warehouse.name + '详情';
 
-        modal.classList.add('active');
-        
-        // Render Charts after modal is visible (for correct sizing)
-        setTimeout(() => {
-            renderInventoryChart();
-            renderNetworkChart(warehouse.name);
-        }, 100);
+      // Update Status Badge
+      const badge = document.getElementById('modal-status-badge');
+      const statusMap = {
+        'critical': { text: 'CRITICAL', color: 'var(--alert-red)' },
+        'warning': { text: 'WARNING', color: 'var(--accent-orange)' },
+        'normal': { text: 'NORMAL', color: 'var(--success-green)' }
+      };
+      const statusInfo = statusMap[warehouse.status] || statusMap['normal'];
+
+      badge.innerText = statusInfo.text;
+      badge.style.color = statusInfo.color;
+      badge.style.borderColor = statusInfo.color;
+      badge.style.boxShadow = `0 0 8px ${statusInfo.color}40`;
+
+      // Randomize data for demo
+      document.getElementById('info-area').innerText = Math.floor(Math.random() * 50000 + 10000).toLocaleString() + ' m²';
+      document.getElementById('info-capacity').innerText = Math.floor(Math.random() * 10000 + 5000).toLocaleString() + ' m²';
+      document.getElementById('info-stock').innerText = Math.floor(Math.random() * 40 + 50) + '%';
+      document.getElementById('info-staff').innerText = Math.floor(Math.random() * 200 + 50) + ' 人';
+
+      document.getElementById('op-inbound').innerText = Math.floor(Math.random() * 5000 + 1000).toLocaleString() + ' 单';
+      document.getElementById('op-outbound').innerText = Math.floor(Math.random() * 5000 + 1000).toLocaleString() + ' 单';
+      document.getElementById('op-pending').innerText = Math.floor(Math.random() * 200);
+      document.getElementById('op-efficiency').innerText = (90 + Math.random() * 10).toFixed(1) + '%';
+
+      modal.classList.add('active');
+
+      // Render Charts after modal is visible (for correct sizing)
+      setTimeout(() => {
+        renderInventoryChart();
+        renderNetworkChart(warehouse.name);
+      }, 100);
     }
 
     function renderInventoryChart() {
-        const container = document.getElementById('inventory-chart');
-        container.innerHTML = '';
-        const width = container.clientWidth;
-        const height = container.clientHeight;
-        
-        const svg = d3.select('#inventory-chart')
-            .append('svg')
-            .attr('width', width)
-            .attr('height', height);
-            
-        const margin = {top: 20, right: 20, bottom: 30, left: 40};
-        const innerWidth = width - margin.left - margin.right;
-        const innerHeight = height - margin.top - margin.bottom;
-        
-        const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
-        
-        // Generate dummy time series data
-        const data = [];
-        for(let i=0; i<24; i++) {
-            data.push({
-                hour: i,
-                inbound: Math.floor(Math.random() * 100),
-                outbound: Math.floor(Math.random() * 100),
-                stock: Math.floor(Math.random() * 50 + 50)
-            });
-        }
-        
-        const x = d3.scaleLinear().domain([0, 23]).range([0, innerWidth]);
-        const y = d3.scaleLinear().domain([0, 150]).range([innerHeight, 0]);
-        
-        // Axes
-        g.append('g').attr('transform', `translate(0,${innerHeight})`)
-            .call(d3.axisBottom(x).ticks(6))
-            .attr('color', '#88a');
-            
-        g.append('g').call(d3.axisLeft(y).ticks(5)).attr('color', '#88a');
-        
-        // Lines
-        const lineIn = d3.line().x(d => x(d.hour)).y(d => y(d.inbound)).curve(d3.curveMonotoneX);
-        const lineOut = d3.line().x(d => x(d.hour)).y(d => y(d.outbound)).curve(d3.curveMonotoneX);
-        const lineStock = d3.line().x(d => x(d.hour)).y(d => y(d.stock)).curve(d3.curveMonotoneX);
-        
-        g.append('path').datum(data).attr('fill', 'none').attr('stroke', '#00eaff').attr('stroke-width', 2).attr('d', lineIn);
-        g.append('path').datum(data).attr('fill', 'none').attr('stroke', '#ff3333').attr('stroke-width', 2).attr('d', lineOut);
-        g.append('path').datum(data).attr('fill', 'none').attr('stroke', '#ffcc00').attr('stroke-width', 2).attr('stroke-dasharray', '5,5').attr('d', lineStock);
-        
-        // Legend
-        const legend = svg.append('g').attr('transform', `translate(${width - 100}, 10)`);
-        legend.append('rect').attr('x', 0).attr('y', 0).attr('width', 10).attr('height', 2).attr('fill', '#00eaff');
-        legend.append('text').attr('x', 15).attr('y', 5).text('入库').attr('fill', '#ccc').style('font-size', '10px');
-        
-        legend.append('rect').attr('x', 0).attr('y', 15).attr('width', 10).attr('height', 2).attr('fill', '#ff3333');
-        legend.append('text').attr('x', 15).attr('y', 20).text('出库').attr('fill', '#ccc').style('font-size', '10px');
+      const container = document.getElementById('inventory-chart');
+      container.innerHTML = '';
+      const width = container.clientWidth;
+      const height = container.clientHeight;
+
+      const svg = d3.select('#inventory-chart')
+        .append('svg')
+        .attr('width', width)
+        .attr('height', height);
+
+      const margin = { top: 20, right: 20, bottom: 30, left: 40 };
+      const innerWidth = width - margin.left - margin.right;
+      const innerHeight = height - margin.top - margin.bottom;
+
+      const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+      // Generate dummy time series data
+      const data = [];
+      for (let i = 0; i < 24; i++) {
+        data.push({
+          hour: i,
+          inbound: Math.floor(Math.random() * 100),
+          outbound: Math.floor(Math.random() * 100),
+          stock: Math.floor(Math.random() * 50 + 50)
+        });
+      }
+
+      const x = d3.scaleLinear().domain([0, 23]).range([0, innerWidth]);
+      const y = d3.scaleLinear().domain([0, 150]).range([innerHeight, 0]);
+
+      // Axes
+      g.append('g').attr('transform', `translate(0,${innerHeight})`)
+        .call(d3.axisBottom(x).ticks(6))
+        .attr('color', '#88a');
+
+      g.append('g').call(d3.axisLeft(y).ticks(5)).attr('color', '#88a');
+
+      // Lines
+      const lineIn = d3.line().x(d => x(d.hour)).y(d => y(d.inbound)).curve(d3.curveMonotoneX);
+      const lineOut = d3.line().x(d => x(d.hour)).y(d => y(d.outbound)).curve(d3.curveMonotoneX);
+      const lineStock = d3.line().x(d => x(d.hour)).y(d => y(d.stock)).curve(d3.curveMonotoneX);
+
+      g.append('path').datum(data).attr('fill', 'none').attr('stroke', '#00eaff').attr('stroke-width', 2).attr('d', lineIn);
+      g.append('path').datum(data).attr('fill', 'none').attr('stroke', '#ff3333').attr('stroke-width', 2).attr('d', lineOut);
+      g.append('path').datum(data).attr('fill', 'none').attr('stroke', '#ffcc00').attr('stroke-width', 2).attr('stroke-dasharray', '5,5').attr('d', lineStock);
+
+      // Legend
+      const legend = svg.append('g').attr('transform', `translate(${width - 100}, 10)`);
+      legend.append('rect').attr('x', 0).attr('y', 0).attr('width', 10).attr('height', 2).attr('fill', '#00eaff');
+      legend.append('text').attr('x', 15).attr('y', 5).text('入库').attr('fill', '#ccc').style('font-size', '10px');
+
+      legend.append('rect').attr('x', 0).attr('y', 15).attr('width', 10).attr('height', 2).attr('fill', '#ff3333');
+      legend.append('text').attr('x', 15).attr('y', 20).text('出库').attr('fill', '#ccc').style('font-size', '10px');
     }
 
     function renderNetworkChart(centerName) {
-        const container = document.getElementById('network-chart');
-        // Clear previous interval if exists
-        if (container.dataset.interval) {
-            clearInterval(parseInt(container.dataset.interval));
-        }
-        container.innerHTML = '';
-        
-        const width = container.clientWidth;
-        const height = container.clientHeight;
-        
-        const svg = d3.select('#network-chart')
-            .append('svg')
-            .attr('width', width)
-            .attr('height', height);
-            
-        // Define gradients and markers
-        const defs = svg.append('defs');
-        
-        // Arrow marker
-        defs.append('marker')
-            .attr('id', 'arrowhead')
-            .attr('viewBox', '0 -5 10 10')
-            .attr('refX', 25) // Position away from node center
-            .attr('refY', 0)
-            .attr('orient', 'auto')
-            .attr('markerWidth', 6)
-            .attr('markerHeight', 6)
-            .append('path')
-            .attr('d', 'M0,-5L10,0L0,5')
-            .attr('fill', '#555');
+      const container = document.getElementById('network-chart');
+      // Clear previous interval if exists
+      if (container.dataset.interval) {
+        clearInterval(parseInt(container.dataset.interval));
+      }
+      container.innerHTML = '';
 
-        // Glow filter
-        const filter = defs.append("filter")
-            .attr("id", "glow");
-        filter.append("feGaussianBlur")
-            .attr("stdDeviation", "2.5")
-            .attr("result", "coloredBlur");
-        const feMerge = filter.append("feMerge");
-        feMerge.append("feMergeNode").attr("in", "coloredBlur");
-        feMerge.append("feMergeNode").attr("in", "SourceGraphic");
+      const width = container.clientWidth;
+      const height = container.clientHeight;
 
-        const nodes = [
-            {id: 'center', name: centerName, type: 'warehouse'},
-            {id: 's1', name: '供应商A', type: 'supplier'},
-            {id: 's2', name: '供应商B', type: 'supplier'},
-            {id: 'c1', name: '客户X', type: 'customer'},
-            {id: 'c2', name: '客户Y', type: 'customer'},
-            {id: 'w1', name: '兄弟仓1', type: 'warehouse'},
-        ];
-        
-        const links = [
-            {source: 's1', target: 'center', type: 'supply'},
-            {source: 's2', target: 'center', type: 'supply'},
-            {source: 'center', target: 'c1', type: 'distribute'},
-            {source: 'center', target: 'c2', type: 'distribute'},
-            {source: 'center', target: 'w1', type: 'transfer'},
-        ];
-        
-        const simulation = d3.forceSimulation(nodes)
-            .force('link', d3.forceLink(links).id(d => d.id).distance(100))
-            .force('charge', d3.forceManyBody().strength(-500))
-            .force('center', d3.forceCenter(width / 2, height / 2));
-            
-        const link = svg.append('g')
-            .selectAll('line')
-            .data(links)
-            .enter().append('line')
-            .attr('stroke', '#333')
-            .attr('stroke-width', 1)
-            .attr('marker-end', 'url(#arrowhead)');
-            
-        const particleGroup = svg.append('g').attr('class', 'particles');
+      const svg = d3.select('#network-chart')
+        .append('svg')
+        .attr('width', width)
+        .attr('height', height);
 
-        const node = svg.append('g')
-            .selectAll('g')
-            .data(nodes)
-            .enter().append('g')
-            .call(d3.drag()
-                .on("start", dragstarted)
-                .on("drag", dragged)
-                .on("end", dragended));
-            
-        node.append('circle')
-            .attr('r', d => d.type === 'warehouse' && d.id === 'center' ? 25 : 12)
-            .attr('fill', d => d.type === 'warehouse' ? '#00eaff' : (d.type === 'supplier' ? '#ffcc00' : '#ff3333'))
-            .attr('stroke', '#fff')
-            .attr('stroke-width', 2)
-            .style('filter', 'url(#glow)');
-            
-        node.append('text')
-            .text(d => d.name)
-            .attr('x', 18)
-            .attr('y', 5)
-            .attr('fill', '#fff')
-            .style('font-size', '12px')
-            .style('text-shadow', '0 0 3px #000')
-            .style('pointer-events', 'none');
-            
-        simulation.on('tick', () => {
-            link
-                .attr('x1', d => d.source.x)
-                .attr('y1', d => d.source.y)
-                .attr('x2', d => d.target.x)
-                .attr('y2', d => d.target.y);
-                
-            node.attr('transform', d => `translate(${d.x},${d.y})`);
+      // Define gradients and markers
+      const defs = svg.append('defs');
+
+      // Arrow marker
+      defs.append('marker')
+        .attr('id', 'arrowhead')
+        .attr('viewBox', '0 -5 10 10')
+        .attr('refX', 25) // Position away from node center
+        .attr('refY', 0)
+        .attr('orient', 'auto')
+        .attr('markerWidth', 6)
+        .attr('markerHeight', 6)
+        .append('path')
+        .attr('d', 'M0,-5L10,0L0,5')
+        .attr('fill', '#555');
+
+      // Glow filter
+      const filter = defs.append("filter")
+        .attr("id", "glow");
+      filter.append("feGaussianBlur")
+        .attr("stdDeviation", "2.5")
+        .attr("result", "coloredBlur");
+      const feMerge = filter.append("feMerge");
+      feMerge.append("feMergeNode").attr("in", "coloredBlur");
+      feMerge.append("feMergeNode").attr("in", "SourceGraphic");
+
+      const nodes = [
+        { id: 'center', name: centerName, type: 'warehouse' },
+        { id: 's1', name: '供应商A', type: 'supplier' },
+        { id: 's2', name: '供应商B', type: 'supplier' },
+        { id: 'c1', name: '客户X', type: 'customer' },
+        { id: 'c2', name: '客户Y', type: 'customer' },
+        { id: 'w1', name: '兄弟仓1', type: 'warehouse' },
+      ];
+
+      const links = [
+        { source: 's1', target: 'center', type: 'supply' },
+        { source: 's2', target: 'center', type: 'supply' },
+        { source: 'center', target: 'c1', type: 'distribute' },
+        { source: 'center', target: 'c2', type: 'distribute' },
+        { source: 'center', target: 'w1', type: 'transfer' },
+      ];
+
+      const simulation = d3.forceSimulation(nodes)
+        .force('link', d3.forceLink(links).id(d => d.id).distance(100))
+        .force('charge', d3.forceManyBody().strength(-500))
+        .force('center', d3.forceCenter(width / 2, height / 2));
+
+      const link = svg.append('g')
+        .selectAll('line')
+        .data(links)
+        .enter().append('line')
+        .attr('stroke', '#333')
+        .attr('stroke-width', 1)
+        .attr('marker-end', 'url(#arrowhead)');
+
+      const particleGroup = svg.append('g').attr('class', 'particles');
+
+      const node = svg.append('g')
+        .selectAll('g')
+        .data(nodes)
+        .enter().append('g')
+        .call(d3.drag()
+          .on("start", dragstarted)
+          .on("drag", dragged)
+          .on("end", dragended));
+
+      node.append('circle')
+        .attr('r', d => d.type === 'warehouse' && d.id === 'center' ? 25 : 12)
+        .attr('fill', d => d.type === 'warehouse' ? '#00eaff' : (d.type === 'supplier' ? '#ffcc00' : '#ff3333'))
+        .attr('stroke', '#fff')
+        .attr('stroke-width', 2)
+        .style('filter', 'url(#glow)');
+
+      node.append('text')
+        .text(d => d.name)
+        .attr('x', 18)
+        .attr('y', 5)
+        .attr('fill', '#fff')
+        .style('font-size', '12px')
+        .style('text-shadow', '0 0 3px #000')
+        .style('pointer-events', 'none');
+
+      simulation.on('tick', () => {
+        link
+          .attr('x1', d => d.source.x)
+          .attr('y1', d => d.source.y)
+          .attr('x2', d => d.target.x)
+          .attr('y2', d => d.target.y);
+
+        node.attr('transform', d => `translate(${d.x},${d.y})`);
+      });
+
+      function dragstarted(event, d) {
+        if (!event.active) simulation.alphaTarget(0.3).restart();
+        d.fx = d.x;
+        d.fy = d.y;
+      }
+
+      function dragged(event, d) {
+        d.fx = event.x;
+        d.fy = event.y;
+      }
+
+      function dragended(event, d) {
+        if (!event.active) simulation.alphaTarget(0);
+        d.fx = null;
+        d.fy = null;
+      }
+
+      // Particle Animation
+      function emitParticle(l) {
+        if (!l.source.x || !l.target.x) return; // Wait for simulation
+
+        const color = l.type === 'supply' ? '#ffcc00' : (l.type === 'distribute' ? '#ff3333' : '#00eaff');
+        const particle = particleGroup.append('circle')
+          .attr('r', 3)
+          .attr('fill', color)
+          .attr('cx', l.source.x)
+          .attr('cy', l.source.y)
+          .style('filter', 'url(#glow)');
+
+        particle.transition()
+          .duration(1000 + Math.random() * 500)
+          .ease(d3.easeLinear)
+          .attr('cx', l.target.x)
+          .attr('cy', l.target.y)
+          .on('end', function () {
+            d3.select(this).remove();
+          });
+      }
+
+      const interval = setInterval(() => {
+        links.forEach(l => {
+          if (Math.random() > 0.3) { // 70% chance to emit per link per tick
+            emitParticle(l);
+          }
         });
+      }, 800);
 
-        function dragstarted(event, d) {
-            if (!event.active) simulation.alphaTarget(0.3).restart();
-            d.fx = d.x;
-            d.fy = d.y;
-        }
-
-        function dragged(event, d) {
-            d.fx = event.x;
-            d.fy = event.y;
-        }
-
-        function dragended(event, d) {
-            if (!event.active) simulation.alphaTarget(0);
-            d.fx = null;
-            d.fy = null;
-        }
-
-        // Particle Animation
-        function emitParticle(l) {
-            if (!l.source.x || !l.target.x) return; // Wait for simulation
-
-            const color = l.type === 'supply' ? '#ffcc00' : (l.type === 'distribute' ? '#ff3333' : '#00eaff');
-            const particle = particleGroup.append('circle')
-                .attr('r', 3)
-                .attr('fill', color)
-                .attr('cx', l.source.x)
-                .attr('cy', l.source.y)
-                .style('filter', 'url(#glow)');
-
-            particle.transition()
-                .duration(1000 + Math.random() * 500)
-                .ease(d3.easeLinear)
-                .attr('cx', l.target.x)
-                .attr('cy', l.target.y)
-                .on('end', function() {
-                    d3.select(this).remove();
-                });
-        }
-
-        const interval = setInterval(() => {
-            links.forEach(l => {
-                if (Math.random() > 0.3) { // 70% chance to emit per link per tick
-                    emitParticle(l);
-                }
-            });
-        }, 800);
-        
-        container.dataset.interval = interval;
+      container.dataset.interval = interval;
     }
 
     // ==========================================
