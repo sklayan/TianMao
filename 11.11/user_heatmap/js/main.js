@@ -12,17 +12,12 @@ function updateTimestamp() {
 setInterval(updateTimestamp, 1000);
 updateTimestamp();
 
-// Fetch China Map Data
+// Fetch World Map Data
 async function initMap() {
-    try {
-        const response = await fetch('https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json');
-        const geoJson = await response.json();
-        echarts.registerMap('china', geoJson);
-        initAllCharts();
-    } catch (error) {
-        console.error('Failed to load map data:', error);
-        initAllCharts();
-    }
+    // World map is loaded via script tag in index.html, so we can just init charts
+    // If we needed to fetch GeoJSON manually, we would do it here.
+    // But echarts world map js file registers 'world' automatically.
+    initAllCharts();
 }
 
 function initAllCharts() {
@@ -89,7 +84,7 @@ function initTimeHeatmap() {
     chart.setOption(option);
 }
 
-// 2. Geo Heatmap (China Map)
+// 2. Geo Heatmap (World Map)
 function initGeoHeatmap() {
     const chart = echarts.init(document.getElementById('geo-heatmap'));
     charts.geoHeatmap = chart;
@@ -105,15 +100,17 @@ function initGeoHeatmap() {
             calculable: true
         },
         geo: {
-            map: 'china',
+            map: 'world',
             roam: true,
+            zoom: 1.2,
+            label: { show: false },
             itemStyle: {
                 areaColor: '#323c48',
                 borderColor: '#111'
             },
             emphasis: {
                 itemStyle: { areaColor: '#2a333d' },
-                label: { show: true, color: '#fff' }
+                label: { show: false }
             }
         },
         series: [{
@@ -121,14 +118,16 @@ function initGeoHeatmap() {
             type: 'heatmap',
             coordinateSystem: 'geo',
             data: [
-                {name: '北京', value: [116.46, 39.92, 900]},
-                {name: '上海', value: [121.48, 31.22, 950]},
-                {name: '广州', value: [113.23, 23.16, 800]},
-                {name: '深圳', value: [114.07, 22.62, 850]},
-                {name: '杭州', value: [120.19, 30.26, 880]},
-                {name: '成都', value: [104.06, 30.67, 700]},
-                {name: '武汉', value: [114.31, 30.52, 600]},
-                {name: '西安', value: [108.94, 34.34, 500]}
+                {name: 'China', value: [104.19, 35.86, 950]},
+                {name: 'United States', value: [-95.71, 37.09, 800]},
+                {name: 'Japan', value: [138.25, 36.20, 750]},
+                {name: 'Germany', value: [10.45, 51.16, 600]},
+                {name: 'United Kingdom', value: [-3.43, 55.37, 550]},
+                {name: 'Australia', value: [133.77, -25.27, 400]},
+                {name: 'Canada', value: [-106.34, 56.13, 350]},
+                {name: 'Brazil', value: [-51.92, -14.23, 300]},
+                {name: 'Russia', value: [105.31, 61.52, 250]},
+                {name: 'India', value: [78.96, 20.59, 450]}
             ]
         }]
     };

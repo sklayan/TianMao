@@ -7,8 +7,8 @@
     <link rel="stylesheet" href="css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/echarts-wordcloud@2.1.0/dist/echarts-wordcloud.min.js"></script>
-    <!-- China Map Data -->
-    <script src="https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json"></script>
+    <!-- World Map Data -->
+    <script src="https://fastly.jsdelivr.net/npm/echarts@4.9.0/map/js/world.js"></script>
 </head>
 <body>
     <div class="container">
@@ -36,10 +36,6 @@
         <main class="main-content">
             <!-- Left Column: Sales Channel Analysis -->
             <div class="column left-column">
-                <div class="panel-box">
-                    <div class="panel-header">渠道销售占比</div>
-                    <div class="chart-container" id="channel-ratio-chart"></div>
-                </div>
                 <div class="panel-box">
                     <div class="panel-header">各渠道销售额对比</div>
                     <div class="chart-container" id="channel-sales-chart"></div>
@@ -80,10 +76,6 @@
 
             <!-- Right Column: Customer & Region Analysis -->
             <div class="column right-column">
-                <div class="panel-box">
-                    <div class="panel-header">客户层级分布</div>
-                    <div class="chart-container" id="customer-tier-chart"></div>
-                </div>
                 <div class="panel-box map-panel">
                     <div class="panel-header">区域销售热力图</div>
                     <div class="chart-container" id="map-chart"></div>
