@@ -174,16 +174,19 @@
 
         /* 趋势图容器 - 全屏覆盖 */
         /* 趋势图容器 - 悬浮在地球之上 */
+        /* 趋势图容器 - 全屏覆盖 */
+        /* 趋势图容器 - 悬浮在地球之上 */
         .trend-chart-container {
             position: absolute;
-            top: 55%;
-            /* Centered vertically relative to viewport to match globe */
+            top: 58%;
+            /* Moved down to be closer to bottom */
             left: 50%;
-            transform: translate(-50%, -30%);
-            /* Adjust to overlap globe correctly */
-            width: 55%;
-            /* Wider to cover globe */
-            height: 350px;
+            transform: translate(-50%, -50%);
+            /* Center both ways for better alignment with globe */
+            width: 45%;
+            /* Reduced from 58% to prevent overlap */
+            height: 450px;
+            /* Further increased height */
             background: transparent;
             pointer-events: none;
             z-index: 10;
@@ -195,9 +198,9 @@
             top: 60%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 550px;
-            /* Reduced from 650px */
-            height: 550px;
+            width: 400px;
+            /* Further reduced */
+            height: 400px;
             z-index: 0;
             opacity: 1;
         }
@@ -322,21 +325,12 @@
 
         .panel-content {
             height: calc(100% - 40px);
-            overflow-y: auto;
-        }
-
-        /* 滚动条样式 */
-        .panel-content::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .panel-content::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.2);
-        }
-
-        .panel-content::-webkit-scrollbar-thumb {
-            background: rgba(0, 234, 255, 0.5);
-            border-radius: 3px;
+            overflow: hidden;
+            /* Hide scrollbars as requested */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            /* Distribute content */
         }
 
         /* 热卖榜列表 */
@@ -522,7 +516,8 @@
         <!-- 角落面板 -->
         <div class="corner-panels">
             <!-- 左上:全球热卖榜 -->
-            <div class="panel top-left" id="hot-products">
+            <div class="panel top-left" id="hot-products" onclick="navigateTo('dashboard/sales_structure/index.html')"
+                style="cursor: pointer;">
                 <div class="panel-header">
                     <div class="panel-title">🏆 全球热卖榜</div>
                 </div>
@@ -542,7 +537,8 @@
             </div>
 
             <!-- 左下:菜鸟网络 -->
-            <div class="panel bottom-left" id="logistics" onclick="navigateTo('dashboard/index_bundled.html')">
+            <div class="panel bottom-left" id="logistics" onclick="navigateTo('dashboard/index_bundled.html')"
+                style="cursor: pointer;">
                 <div class="panel-header">
                     <div class="panel-title">🚚 菜鸟网络-仓配协同</div>
                 </div>
@@ -552,7 +548,8 @@
             </div>
 
             <!-- 右下:用户画像 -->
-            <div class="panel bottom-right" id="user-portrait">
+            <div class="panel bottom-right" id="user-portrait" onclick="navigateTo('dashboard/user_heatmap/index.html')"
+                style="cursor: pointer;">
                 <div class="panel-header">
                     <div class="panel-title">👥 用户画像分析</div>
                 </div>
@@ -626,12 +623,11 @@
             trendData.push({ hour: i, value: total });
         }
 
-        // 里程碑数据
+        // 里程碑数据 - increased spacing
         const milestones = [
             { x: 1, y: trendData[1].value, label: '00:01:12', amount: '¥10亿' },
-            { x: 3, y: trendData[3].value, label: '00:12:28', amount: '¥100亿' },
-            { x: 8, y: trendData[8].value, label: '07:45:42', amount: '¥656亿' },
-            { x: 14, y: trendData[14].value, label: '11:49:09', amount: '¥571亿' }
+            { x: 6, y: trendData[6].value, label: '07:45:42', amount: '¥656亿' },
+            { x: 12, y: trendData[12].value, label: '11:49:09', amount: '¥571亿' }
         ];
 
         // 绘制趋势图
@@ -643,7 +639,7 @@
 
             svg.selectAll('*').remove();
 
-            const margin = { top: 50, right: 50, bottom: 50, left: 80 };
+            const margin = { top: 60, right: 50, bottom: 50, left: 100 };
             const chartWidth = width - margin.left - margin.right;
             const chartHeight = height - margin.top - margin.bottom;
 
@@ -743,26 +739,26 @@
 
                 // 标签框
                 const labelGroup = g.append('g')
-                    .attr('transform', `translate(${mx - 30}, ${my + 40})`);
+                    .attr('transform', `translate(${mx - 35}, ${my + 45})`);
 
                 labelGroup.append('rect')
-                    .attr('width', 80)
-                    .attr('height', 40)
+                    .attr('width', 90)
+                    .attr('height', 45)
                     .attr('fill', '#aa0000')
                     .attr('stroke', '#ff0000');
 
                 labelGroup.append('text')
-                    .attr('x', 40).attr('y', 15)
+                    .attr('x', 45).attr('y', 17)
                     .attr('text-anchor', 'middle')
                     .attr('fill', '#fff')
-                    .attr('font-size', '10px')
+                    .attr('font-size', '11px')
                     .text(m.label);
 
                 labelGroup.append('text')
-                    .attr('x', 40).attr('y', 32)
+                    .attr('x', 45).attr('y', 35)
                     .attr('text-anchor', 'middle')
                     .attr('fill', '#fff')
-                    .attr('font-size', '14px')
+                    .attr('font-size', '15px')
                     .attr('font-weight', 'bold')
                     .text(m.amount);
             });
@@ -803,80 +799,100 @@
                 canvas.height = 1024;
                 const ctx = canvas.getContext('2d');
 
-                // Background: Dark Ocean
+                // Background: Deep Blue Ocean
                 ctx.fillStyle = '#0b1026';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-                // Simulate Continents (Simplified approximations)
-                ctx.fillStyle = '#1a3b6e';
+                // Continents - Tech Gold/Orange Style
+                // We use simplified shapes for continents
+                ctx.fillStyle = '#ffaa33'; // Golden Orange for continents (base)
 
-                // Helper to draw rough shapes
-                function drawBlob(x, y, w, h) {
-                    ctx.beginPath();
-                    ctx.ellipse(x, y, w, h, 0, 0, Math.PI * 2);
-                    ctx.fill();
+                function drawContinents() {
+                    // Helper to draw varied blobs
+                    function drawBlob(x, y, w, h) {
+                        ctx.beginPath();
+                        ctx.ellipse(x, y, w, h, 0, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+
+                    ctx.filter = 'blur(20px)'; // Soft glow effect
+                    ctx.globalAlpha = 0.4;
+                    // Americas
+                    drawBlob(300, 150, 100, 80);
+                    drawBlob(350, 350, 60, 100);
+                    // Europe/Africa
+                    drawBlob(550, 150, 60, 50);
+                    drawBlob(550, 280, 80, 90);
+                    // Asia
+                    drawBlob(800, 150, 140, 100);
+                    // Australia
+                    drawBlob(900, 380, 50, 40);
+
+                    ctx.filter = 'none';
+                    ctx.globalAlpha = 0.8;
+                    // Inner cores (brighter)
+                    // Americas
+                    drawBlob(300, 150, 80, 60);
+                    drawBlob(350, 350, 50, 80);
+                    // Europe/Africa
+                    drawBlob(550, 150, 50, 40);
+                    drawBlob(550, 280, 60, 70);
+                    // Asia
+                    drawBlob(800, 150, 110, 80);
+                    // Australia
+                    drawBlob(900, 380, 40, 30);
                 }
+                drawContinents();
 
-                // Americas
-                drawBlob(300, 150, 80, 60); // North America
-                drawBlob(350, 350, 50, 80); // South America
-
-                // Europe/Africa
-                drawBlob(550, 150, 50, 40); // Europe
-                drawBlob(550, 280, 60, 70); // Africa
-
-                // Asia
-                drawBlob(750, 150, 100, 80); // Asia
-
-                // Australia
-                drawBlob(850, 380, 40, 30);
-
-                // Grid overlay for tech look
-                ctx.strokeStyle = '#2a5a8a';
+                // Grid overlay
+                ctx.strokeStyle = '#336699';
                 ctx.lineWidth = 1;
+                ctx.globalAlpha = 0.3;
                 ctx.beginPath();
-                for (let i = 0; i < canvas.width; i += 40) {
-                    ctx.moveTo(i, 0);
-                    ctx.lineTo(i, canvas.height);
-                }
-                for (let i = 0; i < canvas.height; i += 40) {
+                for (let i = 0; i < canvas.height; i += 50) {
                     ctx.moveTo(0, i);
                     ctx.lineTo(canvas.width, i);
                 }
-                ctx.stroke();
-
-                // Cities (Random dots)
-                ctx.fillStyle = '#00ffff';
-                for (let i = 0; i < 100; i++) {
-                    const x = Math.random() * canvas.width;
-                    const y = Math.random() * canvas.height;
-                    // Simple check to keep dots roughly on "land" (very approximate)
-                    if ((x > 200 && x < 450) || (x > 500 && x < 900)) {
-                        if (y > 100 && y < 450) {
-                            ctx.beginPath();
-                            ctx.arc(x, y, 2, 0, Math.PI * 2);
-                            ctx.fill();
-                        }
-                    }
+                for (let i = 0; i < canvas.width; i += 50) {
+                    ctx.moveTo(i, 0);
+                    ctx.lineTo(i, canvas.height);
                 }
+                ctx.stroke();
 
                 return new THREE.CanvasTexture(canvas);
             }
 
-            const earthTexture = createWorldTexture();
+            const textureLoader = new THREE.TextureLoader(); /*
 
-            // Earth Material - Tech Style
+            // Earth Material - Glowing Style
             const earthMaterial = new THREE.MeshPhongMaterial({
                 map: earthTexture,
-                color: 0xffffff, // Use white to let texture colors show through
-                emissive: 0x112244,
+                color: 0xffffff,
+                emissive: 0xaa4400, // Warm orange glow
                 emissiveMap: earthTexture,
-                emissiveIntensity: 0.5,
-                shininess: 25
+                emissiveIntensity: 0.6,
+                shininess: 10,
+                specular: 0x333333
+            }); */
+
+            const earthMaterial = new THREE.MeshPhongMaterial({
+                color: 0x112244,
+                emissive: 0x001133,
+                shininess: 10
             });
 
-            // Earth Mesh
-            const geometry = new THREE.SphereGeometry(80, 64, 64);
+            textureLoader.load('assets/earth_map.jpg', function (texture) {
+                earthMaterial.map = texture;
+                earthMaterial.emissiveMap = texture;
+                earthMaterial.emissiveIntensity = 0.15;
+                earthMaterial.color.setHex(0x224466);
+                earthMaterial.needsUpdate = true;
+            }, undefined, function (err) {
+                console.error("Error loading texture:", err);
+            });
+
+            // Earth Mesh (smaller)
+            const geometry = new THREE.SphereGeometry(58, 64, 64);
             const earth = new THREE.Mesh(geometry, earthMaterial);
             globeGroup.add(earth);
 
@@ -884,32 +900,82 @@
             const atmosMaterial = new THREE.MeshPhongMaterial({
                 color: 0x00aaff,
                 transparent: true,
-                opacity: 0.2,
+                opacity: 0.15,
                 side: THREE.BackSide,
                 blending: THREE.AdditiveBlending
             });
-            const atmosphere = new THREE.Mesh(new THREE.SphereGeometry(84, 64, 64), atmosMaterial);
+            const atmosphere = new THREE.Mesh(new THREE.SphereGeometry(62, 64, 64), atmosMaterial);
             globeGroup.add(atmosphere);
 
             // Lights
-            const ambientLight = new THREE.AmbientLight(0x333333);
+            const ambientLight = new THREE.AmbientLight(0x111111);
             scene.add(ambientLight);
 
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-            directionalLight.position.set(50, 30, 50);
+            const directionalLight = new THREE.DirectionalLight(0xffeedd, 1.5);
+            directionalLight.position.set(100, 50, 100);
             scene.add(directionalLight);
 
-            // Add some point lights for tech effect
-            const pointLight1 = new THREE.PointLight(0x00aaff, 1.5, 300);
-            pointLight1.position.set(-100, 100, 100);
-            scene.add(pointLight1);
+            // Blue rim light
+            const spotLight = new THREE.SpotLight(0x0088ff, 2);
+            spotLight.position.set(-100, 50, 100);
+            spotLight.lookAt(earth);
+            scene.add(spotLight);
+
+            // Add Hotspots (Glowing cities)
+            const hotspotGeo = new THREE.SphereGeometry(0.8, 8, 8);
+            const hotspotMat = new THREE.MeshBasicMaterial({
+                color: 0xffffaa,
+                transparent: true,
+                opacity: 0.9,
+                blending: THREE.AdditiveBlending
+            });
+
+            // Create random hotspots mostly on continents
+            const hotspots = new THREE.Group();
+            for (let i = 0; i < 80; i++) {
+                // Random polar coords
+                const phi = Math.random() * Math.PI; // Latitude 0 to PI
+                const theta = Math.random() * Math.PI * 2; // Longitude 0 to 2PI
+
+                // Convert to Cartesian
+                // Simple filter to approximate continent clusters (very rough)
+                // Americas: theta ~ 4.5-5.5, Europe/Africa: ~ 0-1, Asia: ~ 1-3
+                let valid = false;
+                if ((theta > 4.5 && theta < 5.5) || (theta > 0 && theta < 3)) valid = true;
+
+                if (valid) {
+                    const r = 65; // Earth radius
+                    const x = r * Math.sin(phi) * Math.cos(theta);
+                    const y = r * Math.cos(phi);
+                    const z = r * Math.sin(phi) * Math.sin(theta);
+
+                    const mesh = new THREE.Mesh(hotspotGeo, hotspotMat);
+                    mesh.position.set(x, y, z);
+
+                    // Random scale pulse base
+                    mesh.userData = {
+                        baseScale: 0.5 + Math.random() * 1.5,
+                        pulseSpeed: 0.02 + Math.random() * 0.05,
+                        pulsePhase: Math.random() * Math.PI * 2
+                    };
+
+                    hotspots.add(mesh);
+                }
+            }
+            globeGroup.add(hotspots);
 
             // Animation Loop
             function animate() {
                 requestAnimationFrame(animate);
 
                 // Rotation
-                globeGroup.rotation.y += 0.002;
+                globeGroup.rotation.y += 0.003;
+
+                // Hotspot Pulse Animation
+                hotspots.children.forEach(mesh => {
+                    const s = mesh.userData.baseScale + Math.sin(Date.now() * 0.005 + mesh.userData.pulsePhase) * 0.3;
+                    mesh.scale.set(s, s, s);
+                });
 
                 renderer.render(scene, camera);
             }
@@ -944,7 +1010,8 @@
 
         function renderProducts() {
             const list = document.getElementById('product-list');
-            list.innerHTML = products.map((p, i) => `
+            // Limit to Top 5 for summary view
+            list.innerHTML = products.slice(0, 5).map((p, i) => `
                 <div class="product-item">
                     <span class="product-rank">${i + 1}</span>
                     <div class="product-info">
@@ -971,13 +1038,15 @@
         function renderRegions() {
             const maxValue = Math.max(...regions.map(r => r.value));
             const list = document.getElementById('region-list');
-            list.innerHTML = regions.map(r => `
+            // Limit to Top 5
+            list.innerHTML = regions.slice(0, 5).map(r => `
                 <div class="region-item">
                     <span class="region-name">${r.name}</span>
                     <span class="region-value">¥${(r.value / 100000000).toFixed(2)}亿</span>
-                    <div class="region-bar">
+                    
+                </div>
+                <div class="region-bar">
                         <div class="region-bar-fill" style="width: ${(r.value / maxValue * 100)}%"></div>
-                    </div>
                 </div>
             `).join('');
         }
@@ -1012,15 +1081,15 @@
             ];
 
             const svg = d3.select('#user-chart').append('svg')
-                .attr('width', 250)
-                .attr('height', 250);
+                .attr('width', 220) // Reduced size
+                .attr('height', 220);
 
-            const radius = 100;
+            const radius = 90;
             const g = svg.append('g')
-                .attr('transform', `translate(125, 125)`);
+                .attr('transform', `translate(110, 110)`);
 
             const pie = d3.pie().value(d => d.value);
-            const arc = d3.arc().innerRadius(40).outerRadius(radius);
+            const arc = d3.arc().innerRadius(35).outerRadius(radius);
 
             g.selectAll('path')
                 .data(pie(data))

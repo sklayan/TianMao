@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>双十一销售结构分析</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts-wordcloud@2.1.0/dist/echarts-wordcloud.min.js"></script>
+    <!-- World Map Data -->
+    <script src="https://fastly.jsdelivr.net/npm/echarts@4.9.0/map/js/world.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left"></div>
+            <div class="header-center">
+                <div class="title-container">
+                    <div class="header-title">双十一销售结构分析</div>
+                    <div class="header-subtitle">SALES STRUCTURE ANALYSIS</div>
+                </div>
+            </div>
+            <div class="header-right">
+                <select id="time-selector">
+                    <option value="realtime">实时数据</option>
+                    <option value="today">今日累计</option>
+                    <option value="total">全程数据</option>
+                </select>
+                <div class="refresh-time">数据更新于: <span id="timestamp">--:--:--</span></div>
+                <button id="back-btn" class="back-btn" onclick="window.location.href='../../index.html'">返回大屏</button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Left Column: Sales Channel Analysis -->
+            <div class="column left-column">
+                <div class="panel-box">
+                    <div class="panel-header">各渠道销售额对比</div>
+                    <div class="chart-container" id="channel-sales-chart"></div>
+                </div>
+                <div class="panel-box">
+                    <div class="panel-header">渠道转化指标</div>
+                    <div class="kpi-cards" id="conversion-cards">
+                        <!-- Cards will be injected by JS -->
+                    </div>
+                </div>
+                <div class="panel-box">
+                    <div class="panel-header">流量来源分布</div>
+                    <div class="chart-container" id="traffic-source-chart"></div>
+                </div>
+            </div>
+
+            <!-- Middle Column: Category Structure -->
+            <div class="column middle-column">
+                <div class="panel-box large-panel">
+                    <div class="panel-header">品类销售排行 TOP10</div>
+                    <div class="chart-container" id="category-rank-chart"></div>
+                </div>
+                <div class="panel-box">
+                    <div class="panel-header">品类销售趋势</div>
+                    <div class="chart-container" id="category-trend-chart"></div>
+                </div>
+                <div class="row-split">
+                    <div class="panel-box half-height">
+                        <div class="panel-header">热销品类词云</div>
+                        <div class="chart-container" id="wordcloud-chart"></div>
+                    </div>
+                    <div class="panel-box half-height">
+                        <div class="panel-header">毛利贡献度</div>
+                        <div class="chart-container" id="margin-gauge-chart"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Customer & Region Analysis -->
+            <div class="column right-column">
+                <div class="panel-box map-panel">
+                    <div class="panel-header">区域销售热力图</div>
+                    <div class="chart-container" id="map-chart"></div>
+                </div>
+                <div class="panel-box">
+                    <div class="panel-header">城市销售额 TOP10</div>
+                    <div class="chart-container" id="city-rank-chart"></div>
+                </div>
+                <div class="panel-box">
+                    <div class="panel-header">客户复购与客群</div>
+                    <div class="chart-container" id="repurchase-chart"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/main.js"></script>
+</body>
+
+</html>
