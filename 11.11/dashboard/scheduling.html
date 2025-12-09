@@ -78,7 +78,7 @@
             top: 80px;
             right: 30px;
             width: 400px;
-            bottom: 40px;
+            bottom: 60px;
             z-index: 10;
             pointer-events: auto;
             display: flex;
@@ -375,11 +375,10 @@
                 </table>
             </div>
 
-            <div class="effect-section">
+            <div class="effect-section" id="effectSection">
                 <div style="font-size: 12px; color: #88a; margin-bottom: 5px;">效果追踪</div>
-                <div class="effect-text">
-                    本次调度实际成本比预期节省了 <span class="highlight">3.2%</span><br>
-                    <span style="color: #ffcc00;">注意：因交通拥堵，部分线路时效延误约 45分钟</span>
+                <div class="effect-text" id="effectText">
+                    <span style="color: #888;">点击任务查看该路线的效果追踪详情</span>
                 </div>
             </div>
         </div>
@@ -399,12 +398,12 @@
                 .style("background", "#050a14");
 
             try {
-                const response = await fetch('src/data/world.geojson');
+                const response = await fetch('/dashboard/src/data/world.geojson');
                 const geoData = await response.json();
                 const features = geoData.features.filter(d => d.properties.name !== "Antarctica");
 
                 projection = d3.geoMercator()
-                    .fitExtent([[50, 50], [width - 400, height - 50]], { type: "FeatureCollection", features: features });
+                    .fitExtent([[-50, 50], [width - 450, height - 50]], { type: "FeatureCollection", features: features });
 
                 const path = d3.geoPath().projection(projection);
                 pathGroup = mapSvg.append("g").attr("class", "map-layer");
@@ -427,63 +426,95 @@
             }
         }
 
-        // Task data
+        // Task data with tracking effects
         const tasks = [
             {
                 id: "A001",
                 name: "调拨指令 #A001",
                 note: "上海 -> 北京 (急件)",
                 status: "transit",
-                route: { from: [121.4737, 31.2304], to: [116.4074, 39.9042] }
+                route: { from: [121.4737, 31.2304], to: [116.4074, 39.9042] },
+                effect: {
+                    savings: "2.8%",
+                    warning: "因天气原因,预计延误约 30分钟"
+                }
             },
             {
                 id: "B023",
                 name: "补货任务 #B023",
                 note: "广州仓库存预警",
                 status: "loading",
-                route: { from: [121.4737, 31.2304], to: [113.2644, 23.1291] }
+                route: { from: [121.4737, 31.2304], to: [113.2644, 23.1291] },
+                effect: {
+                    savings: "4.1%",
+                    warning: "注意：夜间装货,预计明早6点完成"
+                }
             },
             {
                 id: "R110",
                 name: "退货处理 #R110",
                 note: "批量退货归集",
                 status: "pending",
-                route: { from: [114.1095, 22.3964], to: [113.2644, 23.1291] }
+                route: { from: [114.1095, 22.3964], to: [113.2644, 23.1291] },
+                effect: {
+                    savings: "1.5%",
+                    warning: "等待仓库确认收货时间"
+                }
             },
             {
                 id: "T889",
                 name: "干线运输 #T889",
                 note: "武汉 -> 西安",
                 status: "done",
-                route: { from: [114.3054, 30.5931], to: [108.9398, 34.3416] }
+                route: { from: [114.3054, 30.5931], to: [108.9398, 34.3416] },
+                effect: {
+                    savings: "5.2%",
+                    warning: "已提前45分钟送达,客户满意度高"
+                }
             },
             {
                 id: "S992",
                 name: "临时调度 #S992",
                 note: "应对应急需求",
                 status: "transit",
-                route: { from: [113.2644, 23.1291], to: [121.4737, 31.2304] }
+                route: { from: [113.2644, 23.1291], to: [121.4737, 31.2304] },
+                effect: {
+                    savings: "3.2%",
+                    warning: "因交通拥堵，部分线路时效延误约 45分钟"
+                }
             },
             {
                 id: "K221",
                 name: "库存平衡 #K221",
                 note: "区域间调配",
                 status: "pending",
-                route: { from: [114.1095, 22.3964], to: [121.4737, 31.2304] }
+                route: { from: [114.1095, 22.3964], to: [121.4737, 31.2304] },
+                effect: {
+                    savings: "2.1%",
+                    warning: "库存平衡中,预计12小时内完成调配"
+                }
             },
             {
                 id: "F774",
                 name: "航运专线 #F774",
                 note: "北美航线加急",
                 status: "transit",
-                route: { from: [121.4737, 31.2304], to: [-118.2437, 34.0522] }
+                route: { from: [121.4737, 31.2304], to: [-118.2437, 34.0522] },
+                effect: {
+                    savings: "6.8%",
+                    warning: "海运航线顺利,预计提前2天抵达"
+                }
             },
             {
                 id: "D332",
                 name: "资源释放 #D332",
                 note: "大促结束释放",
                 status: "done",
-                route: { from: [139.6503, 35.6762], to: [121.4737, 31.2304] }
+                route: { from: [139.6503, 35.6762], to: [121.4737, 31.2304] },
+                effect: {
+                    savings: "3.9%",
+                    warning: "资源已全部释放,成本优化显著"
+                }
             }
         ];
 
@@ -519,6 +550,9 @@
                 }
             });
 
+            // Update effect tracking section
+            const effectText = document.getElementById('effectText');
+
             if (taskId) {
                 const selectedRoute = routeGroup.select(`#route-${taskId}`);
                 const task = tasks.find(t => t.id === taskId);
@@ -528,6 +562,16 @@
                     .attr("stroke-width", 4)
                     .attr("opacity", 1)
                     .style("filter", `drop-shadow(0 0 8px ${color})`);
+
+                // Update effect text with task-specific info
+                if (task.effect) {
+                    effectText.innerHTML = `
+                        本次调度实际成本比预期节省了 <span class="highlight">${task.effect.savings}</span><br>
+                        <span style="color: #ffcc00;">注意：${task.effect.warning}</span>
+                    `;
+                }
+            } else {
+                effectText.innerHTML = '<span style="color: #888;">点击任务查看该路线的效果追踪详情</span>';
             }
             selectedTaskId = taskId;
         }
@@ -604,20 +648,50 @@
 
                 const color = getStatusColor(task.status);
 
-                routeGroup.append("path")
+                // Create route path
+                const routePath = routeGroup.append("path")
                     .attr("id", `route-${task.id}`)
                     .attr("d", `M${p1[0]},${p1[1]} Q${cx},${cy} ${p2[0]},${p2[1]}`)
                     .attr("fill", "none")
                     .attr("stroke", color)
                     .attr("stroke-width", 1.5)
-                    .attr("stroke-dasharray", "4,4")
-                    .attr("opacity", 0.6)
-                    .append("animate")
-                    .attr("attributeName", "stroke-dashoffset")
-                    .attr("from", "100")
-                    .attr("to", "0")
-                    .attr("dur", "2s")
-                    .attr("repeatCount", "indefinite");
+                    .attr("opacity", 0.6);
+
+                // Add shipping icons along the path
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                const numIcons = Math.min(Math.floor(distance / 100), 8); // Limit to max 8 icons
+
+                if (numIcons > 0) {
+                    for (let i = 0; i <= numIcons; i++) {
+                        const t = i / numIcons;
+                        const pointOnCurve = [
+                            (1 - t) * (1 - t) * p1[0] + 2 * (1 - t) * t * cx + t * t * p2[0],
+                            (1 - t) * (1 - t) * p1[1] + 2 * (1 - t) * t * cy + t * t * p2[1]
+                        ];
+
+                        // Create shipping icon group
+                        const iconGroup = routeGroup.append("g")
+                            .attr("class", `route-icon route-${task.id}-icon`)
+                            .attr("transform", `translate(${pointOnCurve[0]},${pointOnCurve[1]})`);
+
+                        // Add shipping box/truck icon
+                        iconGroup.append("rect")
+                            .attr("x", -4)
+                            .attr("y", -4)
+                            .attr("width", 8)
+                            .attr("height", 8)
+                            .attr("fill", color)
+                            .attr("opacity", 0.8)
+                            .attr("rx", 1);
+
+                        iconGroup.append("circle")
+                            .attr("r", 6)
+                            .attr("fill", "none")
+                            .attr("stroke", color)
+                            .attr("stroke-width", 1)
+                            .attr("opacity", 0.4);
+                    }
+                }
             });
 
             // Additional background routes for visual richness
