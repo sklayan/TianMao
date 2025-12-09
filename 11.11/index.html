@@ -6,7 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>双11全球狂欢节 - 实时数据大屏</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-cloud/1.2.5/d3.layout.cloud.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -18,1157 +19,1172 @@
             width: 100vw;
             height: 100vh;
             overflow: hidden;
-            background: radial-gradient(circle at 50% 10%, #ffefba 0%, #f9d976 15%, #f38f68 30%, #8b2ab2 60%, #0a0a1e 100%);
+            background: linear-gradient(135deg, #0f1532 0%, #1a1f4a 50%, #0f1532 100%);
             font-family: 'Microsoft YaHei', 'Arial', sans-serif;
-            position: relative;
             color: #ffffff;
+            position: relative;
         }
 
-        ff
-
-        /* 主题背景 */
-        .festival-background {
+        /* 背景装饰 */
+        .bg-decoration {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             z-index: 0;
+            background: radial-gradient(circle at center, #1a2555 0%, #0b0e22 70%);
             overflow: hidden;
-            animation: backgroundPulse 12s ease-in-out infinite;
         }
 
-        .sun-halo {
+        .bg-grid {
             position: absolute;
-            top: 5%;
+            width: 100%;
+            height: 100%;
+            background-image: linear-gradient(rgba(0, 234, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 234, 255, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+        }
+
+        @keyframes gridMove {
+            0% {
+                transform: translate(0, 0);
+            }
+
+            100% {
+                transform: translate(50px, 50px);
+            }
+        }
+
+        /* 主容器 */
+        .container {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            height: 100%;
+            padding: 0;
+        }
+
+        /* 中心GMV区域 */
+        /* 中心GMV区域 */
+        .center-area {
+            position: absolute;
+            top: 8%;
+            /* Moved to upper area */
             left: 50%;
-            width: 60vw;
-            height: 60vw;
             transform: translateX(-50%);
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.7) 0%, rgba(255, 153, 102, 0.2) 40%, transparent 70%);
-            filter: blur(10px);
-            opacity: 0.7;
-            animation: haloGlow 8s ease-in-out infinite;
+            /* Only center horizontally */
+            width: 60%;
+            /* Increased width slightly for headers */
+            height: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 2;
+            pointer-events: none;
         }
 
-        .mountain-layer {
+        .main-title {
+            font-size: 36px;
+            /* Reduced from 56px */
+            font-weight: 900;
+            color: #fff;
+            text-shadow: 0 0 20px #ff0055, 0 0 40px #ff0055;
+            margin-bottom: 5px;
+            letter-spacing: 4px;
+            font-style: italic;
+            background: linear-gradient(to bottom, #fff, #ffcccc);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            position: relative;
+        }
+
+        /* 标题装饰线 */
+        .main-title::after {
+            content: '2015 11.11 GLOBAL SHOPPING FESTIVAL';
+            display: block;
+            font-size: 12px;
+            letter-spacing: 3px;
+            text-align: center;
+            -webkit-text-fill-color: #ff99aa;
+            margin-top: 5px;
+            font-style: normal;
+            font-weight: normal;
+        }
+
+        .gmv-display {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin: 10px 0 5px 0;
+        }
+
+        .currency-symbol {
+            font-size: 32px;
+            /* Reduced from 40px */
+            color: #ffd700;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .gmv-number-container {
+            display: flex;
+            gap: 3px;
+        }
+
+        .gmv-digit-box {
+            background: #2a2a2a;
+            color: #ffd700;
+            font-family: 'Orbitron', monospace;
+            font-size: 40px;
+            /* Reduced from 48px */
+            font-weight: bold;
+            padding: 2px 4px;
+            border-radius: 4px;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
+            position: relative;
+            min-width: 30px;
+            /* Reduced from 35px */
+            text-align: center;
+        }
+
+        .gmv-digit-comma {
+            font-size: 40px;
+            /* Reduced from 48px */
+            color: #ffd700;
+            font-family: 'Orbitron', monospace;
+            margin-top: -5px;
+        }
+
+        .sub-stats {
+            display: flex;
+            gap: 30px;
+            font-size: 16px;
+            /* Reduced from 24px */
+            color: #ffcccc;
+            margin-bottom: 20px;
+        }
+
+        .sub-stats span {
+            text-shadow: 0 0 5px rgba(255, 51, 102, 0.5);
+        }
+
+        /* 趋势图容器 - 全屏覆盖 */
+        /* 趋势图容器 - 悬浮在地球之上 */
+        .trend-chart-container {
             position: absolute;
-            bottom: 0;
-            left: -10%;
-            width: 120%;
-            height: 60%;
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, rgba(8, 12, 36, 0.9) 100%);
-            clip-path: polygon(0 60%, 15% 45%, 30% 55%, 45% 35%, 60% 50%, 75% 40%, 90% 55%, 100% 45%, 100% 100%, 0 100%);
-            opacity: 0.8;
-            animation: floatSlow 10s ease-in-out infinite;
+            top: 55%;
+            /* Centered vertically relative to viewport to match globe */
+            left: 50%;
+            transform: translate(-50%, -30%);
+            /* Adjust to overlap globe correctly */
+            width: 55%;
+            /* Wider to cover globe */
+            height: 350px;
+            background: transparent;
+            pointer-events: none;
+            z-index: 10;
         }
 
-        .mountain-layer.layer-2 {
-            bottom: -5%;
-            background: linear-gradient(180deg, rgba(255, 95, 109, 0.4) 0%, rgba(21, 29, 59, 0.95) 80%);
-            clip-path: polygon(0 70%, 10% 50%, 25% 65%, 40% 40%, 55% 60%, 70% 45%, 85% 65%, 100% 50%, 100% 100%, 0 100%);
-            animation-delay: -3s;
-        }
-
-        .mountain-layer.layer-3 {
-            bottom: -10%;
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, rgba(12, 16, 42, 0.95) 70%);
-            clip-path: polygon(0 80%, 12% 65%, 30% 78%, 45% 55%, 60% 72%, 78% 60%, 92% 80%, 100% 65%, 100% 100%, 0 100%);
-            animation-delay: -6s;
-        }
-
-        .city-grid {
+        /* 3D地球容器 */
+        #globe-container {
             position: absolute;
-            bottom: -5%;
-            left: -5%;
-            width: 110%;
-            height: 35%;
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(255, 51, 153, 0.3) 30%, rgba(8, 12, 36, 0.95) 80%);
-            clip-path: polygon(0 40%, 5% 45%, 10% 43%, 15% 48%, 20% 44%, 25% 50%, 30% 46%, 35% 52%, 40% 45%, 45% 50%, 50% 47%, 55% 53%, 60% 46%, 65% 51%, 70% 48%, 75% 53%, 80% 45%, 85% 50%, 90% 46%, 95% 52%, 100% 40%, 100% 100%, 0 100%);
-            opacity: 0.7;
-            animation: shimmer 6s linear infinite;
+            top: 60%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 550px;
+            /* Reduced from 650px */
+            height: 550px;
+            z-index: 0;
+            opacity: 1;
         }
 
-        .light-beam {
-            position: absolute;
-            bottom: 15%;
-            width: 12%;
-            height: 45%;
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 20, 147, 0.05) 80%);
-            filter: blur(2px);
-            opacity: 0.4;
-            animation: beamGlow 5s ease-in-out infinite;
-            transform-origin: bottom;
-        }
-
-        .light-beam.beam-left {
-            left: 18%;
-            transform: rotate(-6deg);
-        }
-
-        .light-beam.beam-right {
-            right: 15%;
-            transform: rotate(5deg);
-            animation-delay: -2s;
-        }
-
-        .floating-orb {
-            position: absolute;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: radial-gradient(circle, #fffb9a 0%, rgba(255, 255, 255, 0) 70%);
-            box-shadow: 0 0 20px rgba(255, 255, 200, 0.7);
-            animation: orbFloat 7s ease-in-out infinite;
-        }
-
-        .floating-orb.orb-1 {
-            left: 25%;
-            bottom: 55%;
-            animation-delay: 0s;
-        }
-
-        .floating-orb.orb-2 {
-            left: 60%;
-            bottom: 50%;
-            animation-delay: -2s;
-        }
-
-        .floating-orb.orb-3 {
-            left: 80%;
-            bottom: 60%;
-            animation-delay: -4s;
-        }
-
-        .shopping-icons {
+        /* 角落面板布局 */
+        .corner-panels {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             pointer-events: none;
-            z-index: 2;
+            z-index: 20;
         }
 
-        .shopping-icon {
+        .panel {
             position: absolute;
-            width: 80px;
-            height: 80px;
-            opacity: 0.7;
-            animation: iconFloat 8s ease-in-out infinite;
-            filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.4));
+            width: 330px;
+            /* Reduced from 380px */
+            height: 250px;
+            /* Reduced from 280px */
+            background: rgba(16, 22, 58, 0.75);
+            border: 1px solid #00eaff;
+            box-shadow: 0 0 20px rgba(0, 234, 255, 0.15) inset;
+            border-radius: 4px;
+            padding: 15px;
+            backdrop-filter: blur(8px);
+            pointer-events: auto;
+            transition: all 0.3s ease;
+            clip-path: polygon(0 0,
+                    100% 0,
+                    100% calc(100% - 20px),
+                    calc(100% - 20px) 100%,
+                    0 100%);
         }
 
-        @keyframes backgroundPulse {
-
-            0%,
-            100% {
-                filter: hue-rotate(0deg);
-            }
-
-            50% {
-                filter: hue-rotate(20deg);
-            }
+        /* Tech corner decoration */
+        .panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 15px;
+            height: 15px;
+            border-top: 2px solid #00eaff;
+            border-left: 2px solid #00eaff;
         }
 
-        @keyframes haloGlow {
-
-            0%,
-            100% {
-                opacity: 0.6;
-                transform: translateX(-50%) scale(1);
-            }
-
-            50% {
-                opacity: 0.9;
-                transform: translateX(-50%) scale(1.05);
-            }
+        .panel::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 15px;
+            height: 15px;
+            border-bottom: 2px solid #00eaff;
+            border-right: 2px solid #00eaff;
         }
 
-        @keyframes floatSlow {
-
-            0%,
-            100% {
-                transform: translateY(0);
-            }
-
-            50% {
-                transform: translateY(-12px);
-            }
+        .panel:hover {
+            box-shadow: 0 0 30px rgba(0, 234, 255, 0.25) inset;
+            border-color: #fff;
+            z-index: 30;
         }
 
-        @keyframes shimmer {
-            0% {
-                opacity: 0.4;
-            }
-
-            50% {
-                opacity: 0.7;
-            }
-
-            100% {
-                opacity: 0.4;
-            }
+        .panel.top-left {
+            top: 50px;
+            left: 30px;
+            /* Moved closer to edge */
         }
 
-        @keyframes beamGlow {
-
-            0%,
-            100% {
-                opacity: 0.3;
-            }
-
-            50% {
-                opacity: 0.55;
-            }
+        .panel.top-right {
+            top: 50px;
+            right: 30px;
         }
 
-        @keyframes orbFloat {
-
-            0%,
-            100% {
-                transform: translateY(0);
-                opacity: 0.6;
-            }
-
-            50% {
-                transform: translateY(-20px);
-                opacity: 1;
-            }
+        .panel.bottom-left {
+            bottom: 40px;
+            left: 30px;
         }
 
-        @keyframes iconFloat {
-
-            0%,
-            100% {
-                transform: translateY(0) scale(1);
-                opacity: 0.6;
-            }
-
-            50% {
-                transform: translateY(-25px) scale(1.05);
-                opacity: 0.95;
-            }
+        .panel.bottom-right {
+            bottom: 40px;
+            right: 30px;
         }
 
-        /* 背景粒子效果 */
-        #particles {
+        .panel:hover {
+            border-color: rgba(0, 234, 255, 0.8);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 234, 255, 0.3);
+        }
+
+        .panel::before {
+            content: '';
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
-            height: 100%;
-            z-index: 1;
+            height: 3px;
+            background: linear-gradient(90deg, #ff3366, #00eaff);
+            opacity: 0.8;
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .panel-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #00eaff;
+            text-shadow: 0 0 10px rgba(0, 234, 255, 0.5);
+        }
+
+        .panel-icon {
+            font-size: 28px;
+            color: #ff3366;
+        }
+
+        .panel-content {
+            height: calc(100% - 40px);
+            overflow-y: auto;
+        }
+
+        /* 滚动条样式 */
+        .panel-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .panel-content::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .panel-content::-webkit-scrollbar-thumb {
+            background: rgba(0, 234, 255, 0.5);
+            border-radius: 3px;
+        }
+
+        /* 热卖榜列表 */
+        .product-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .product-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 6px 8px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+            border-left: 2px solid #ff3366;
+            transition: all 0.3s ease;
+        }
+
+        .product-item:hover {
+            background: rgba(0, 0, 0, 0.4);
+            transform: translateX(5px);
+        }
+
+        .product-rank {
+            font-size: 16px;
+            font-weight: bold;
+            color: #ffd700;
+            min-width: 20px;
+        }
+
+        .product-info {
+            flex: 1;
+        }
+
+        .product-name {
+            font-size: 11px;
+            color: #fff;
+            margin-bottom: 3px;
+        }
+
+        .product-sales {
+            font-size: 9px;
+            color: #00eaff;
+        }
+
+        /* 区域经济列表 */
+        .region-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .region-item {
+            padding: 6px 8px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .region-name {
+            color: #fff;
+            font-size: 11px;
+        }
+
+        .region-value {
+            color: #ffd700;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .region-bar {
+            height: 4px;
+            background: rgba(255, 51, 102, 0.3);
+            border-radius: 2px;
+            margin-top: 5px;
             overflow: hidden;
         }
 
-        .particle {
-            position: absolute;
-            width: 4px;
-            height: 4px;
-            background: #ff0033;
-            border-radius: 50%;
-            box-shadow: 0 0 10px #ff0033, 0 0 20px #ff0033;
-            opacity: 0.6;
+        .region-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff3366, #ff6699);
+            border-radius: 2px;
+            transition: width 1s ease;
         }
 
-        /* 主容器 */
-        .dashboard-container {
-            position: relative;
-            z-index: 10;
-            width: 100%;
+        /* 物流统计 */
+        .logistics-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .stat-card {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 6px;
+            padding: 10px;
+            text-align: center;
+            border: 1px solid rgba(0, 234, 255, 0.2);
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #00eaff;
+            margin-bottom: 3px;
+        }
+
+        .stat-label {
+            font-size: 10px;
+            color: #999;
+        }
+
+        /* 用户画像 */
+        .user-chart {
             height: 100%;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
         }
 
-        /* 标题区域 */
-        .title-section {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        .title-chinese {
-            font-size: 56px;
-            font-weight: 900;
-            background: linear-gradient(135deg,
-                    #FF1744 0%,
-                    #FF6B6B 15%,
-                    #FF8E53 30%,
-                    #FFD93D 45%,
-                    #FFB347 60%,
-                    #FF8E53 75%,
-                    #FF6B6B 90%,
-                    #FF1744 100%);
-            background-size: 300% 300%;
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow:
-                0 0 25px rgba(255, 23, 68, 1),
-                0 0 50px rgba(255, 107, 107, 0.8),
-                0 0 75px rgba(255, 142, 83, 0.6),
-                0 0 100px rgba(255, 217, 61, 0.5),
-                2px 2px 0px rgba(255, 23, 68, 0.5),
-                4px 4px 0px rgba(255, 23, 68, 0.4),
-                6px 6px 0px rgba(255, 23, 68, 0.3),
-                8px 8px 0px rgba(255, 23, 68, 0.2),
-                0 5px 15px rgba(0, 0, 0, 0.6);
-            letter-spacing: 12px;
-            margin-bottom: 10px;
-            font-family: 'Microsoft YaHei', 'SimHei', 'STHeiti', 'Arial Black', sans-serif;
-            -webkit-text-stroke: 2px rgba(255, 255, 255, 0.15);
-            animation: artisticGradientShift 5s ease-in-out infinite,
-                titlePulse 3s ease-in-out infinite;
-            position: relative;
-            display: inline-block;
-            transform: perspective(800px) rotateX(2deg);
-        }
-
-        @keyframes artisticGradientShift {
-
-            0%,
-            100% {
-                background-position: 0% 50%;
-            }
-
-            25% {
-                background-position: 50% 50%;
-            }
-
-            50% {
-                background-position: 100% 50%;
-            }
-
-            75% {
-                background-position: 50% 50%;
-            }
-        }
-
-        @keyframes titlePulse {
-
-            0%,
-            100% {
-                transform: perspective(800px) rotateX(2deg) scale(1);
-                filter: brightness(1);
-            }
-
-            50% {
-                transform: perspective(800px) rotateX(2deg) scale(1.015);
-                filter: brightness(1.1);
-            }
-        }
-
-        .title-english {
-            font-size: 24px;
-            color: #ffffff;
-            letter-spacing: 4px;
-            opacity: 0.9;
-        }
-
-        /* 交易额主显示区 */
-        #sales-display {
-            text-align: center;
-            min-height: 200px;
-            position: relative;
-        }
-
-        /* 底部数据行容器 */
-        .bottom-data-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-            margin-top: 10px;
-            position: relative;
-        }
-
-        /* 人民币金额显示 */
-        #cny-amount {
-            font-size: 80px;
-            font-weight: 900;
-            color: #ffcc00;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8), 0 0 30px rgba(255, 204, 0, 0.8), 0 0 60px rgba(255, 204, 0, 0.4);
-            letter-spacing: 2px;
-            margin: 10px 0 5px 0;
-            line-height: 1.2;
-            font-family: 'Arial Black', 'Microsoft YaHei', sans-serif;
-            text-rendering: optimizeLegibility;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        /* 底部数据显示样式 */
-        .bottom-data {
-            font-size: 32px;
-            font-weight: 700;
-            color: #ffffff;
-            text-shadow:
-                0 0 15px rgba(255, 255, 255, 0.8),
-                0 0 30px rgba(255, 255, 255, 0.5),
-                0 0 45px rgba(255, 255, 255, 0.3),
-                1px 1px 2px rgba(0, 0, 0, 0.8);
-            letter-spacing: 2px;
-            font-family: 'Arial', 'Microsoft YaHei', sans-serif;
-            text-rendering: optimizeLegibility;
-            -webkit-font-smoothing: antialiased;
-            opacity: 0.95;
-            white-space: nowrap;
-        }
-
-        /* 左侧 - 美元总金额 */
-        .bottom-data.data-left {
-            text-align: left;
-        }
-
-        /* 右侧 - 无线成交占比 */
-        .bottom-data.data-right {
-            text-align: right;
-        }
-
-        /* 无线成交占比统一白色 */
-        #growth-rate span {
-            color: #ffffff;
-            text-shadow:
-                0 0 10px rgba(255, 255, 255, 0.6),
-                0 0 20px rgba(255, 255, 255, 0.4),
-                1px 1px 2px rgba(0, 0, 0, 0.8);
-        }
-
-        /* 时间戳 */
-        .timestamp {
+        /* 时钟 */
+        .clock {
             position: absolute;
-            top: 30px;
-            right: 50px;
-            color: #ffffff;
-            font-size: 24px;
-            font-family: 'Courier New', monospace;
-        }
-
-        /* 加载提示 */
-        .loading {
-            text-align: center;
-            color: #ffffff;
+            top: 20px;
+            right: 30px;
             font-size: 20px;
-            margin-top: 30px;
-        }
-
-        /* 侧边四板块布局 */
-        .side-panels {
-            position: absolute;
-            top: 180px;
-            left: 20px;
-            right: 20px;
-            bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            gap: 20px;
-            z-index: 12;
-            pointer-events: none;
-        }
-
-        .side-column {
-            width: 360px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            pointer-events: auto;
-        }
-
-        .panel {
-            flex: 1;
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
-            border-radius: 12px;
-            padding: 14px;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
-            backdrop-filter: blur(6px);
-            overflow: hidden;
-            position: relative;
-            color: #fff;
-            font-size: 14px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .panel .panel-title {
-            font-weight: 700;
-            margin-bottom: 8px;
-            font-size: 16px;
-            letter-spacing: 1px;
-            border-left: 4px solid #ff0033;
-            padding-left: 10px;
-        }
-
-        /* 右上面板可点击跳转 */
-        .panel.clickable {
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        .panel.clickable:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(255, 0, 51, 0.3);
-            border-color: rgba(255, 0, 51, 0.5);
-        }
-
-        /* 占位 SVG 区域 */
-        .viz-area {
-            width: 100%;
-            height: calc(100% - 28px);
-            position: relative;
+            color: #00eaff;
+            font-family: 'Arial', monospace;
+            text-shadow: 0 0 10px rgba(0, 234, 255, 0.5);
         }
     </style>
 </head>
 
 <body>
-    <!-- 主题背景 -->
-    <div class="festival-background">
-        <div class="sun-halo"></div>
-        <div class="light-beam beam-left"></div>
-        <div class="light-beam beam-right"></div>
-        <div class="mountain-layer"></div>
-        <div class="mountain-layer layer-2"></div>
-        <div class="mountain-layer layer-3"></div>
-        <div class="city-grid"></div>
-        <div class="floating-orb orb-1"></div>
-        <div class="floating-orb orb-2"></div>
-        <div class="floating-orb orb-3"></div>
+    <div class="bg-decoration">
+        <div class="bg-grid"></div>
     </div>
 
-    <!-- 时间戳 -->
-    <div class="timestamp" id="timestamp"></div>
+    <div class="clock" id="clock"></div>
 
-    <!-- 主内容区 -->
-    <div class="dashboard-container">
-        <div class="title-section">
-            <div class="title-chinese">双11全球狂欢节</div>
-            <div class="title-english">2025 11.11 GLOBAL SHOPPING FESTIVAL</div>
-        </div>
+    <!-- 3D地球容器 -->
+    <div id="globe-container"></div>
 
-        <div id="sales-display">
-            <div id="cny-amount">¥0</div>
-            <div class="bottom-data-row">
-                <div id="usd-amount" class="bottom-data data-left">$0</div>
-                <div id="growth-rate" class="bottom-data data-right">无线成交占比 0%</div>
-            </div>
-        </div>
-
-        <!-- 侧边四个板块 -->
-        <div class="side-panels" id="side-panels">
-            <!-- 左列 -->
-            <div class="side-column">
-                <div class="panel" id="sales-structure">
-                    <div class="panel-title">销售结构</div>
-                    <div class="viz-area" id="wordcloud"></div>
-                </div>
-                <div class="panel" id="user-heatmap">
-                    <div class="panel-title">用户热力图</div>
-                    <div class="viz-area" id="heatmap"></div>
+    <div class="container">
+        <!-- 中心GMV区域 -->
+        <div class="center-area">
+            <h1 class="main-title">双11全球狂欢节</h1>
+            <!-- GMV Display -->
+            <div class="gmv-display">
+                <div class="currency-symbol">¥</div>
+                <div class="gmv-number-container" id="gmv-container">
+                    <!-- Javascript will populate digits here -->
+                    <div class="gmv-digit-box">1</div>
+                    <div class="gmv-digit-box">2</div>
+                    <div class="gmv-digit-box">3</div>
+                    <div class="gmv-digit-comma">,</div>
+                    <div class="gmv-digit-box">4</div>
+                    <div class="gmv-digit-box">5</div>
+                    <div class="gmv-digit-box">6</div>
+                    <div class="gmv-digit-comma">,</div>
+                    <div class="gmv-digit-box">7</div>
+                    <div class="gmv-digit-box">8</div>
+                    <div class="gmv-digit-box">9</div>
                 </div>
             </div>
 
-            <!-- 右列 -->
-            <div class="side-column">
-                <div class="panel clickable" id="package-total" title="点击进入大盘">
-                    <div class="panel-title">包裹总量</div>
-                    <div class="viz-area"
-                        style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap: 15px;">
-                        <svg viewBox="0 0 24 24" width="64" height="64" stroke="#00eaff" stroke-width="1.5" fill="none"
-                            stroke-linecap="round" stroke-linejoin="round"
-                            style="filter: drop-shadow(0 0 10px rgba(0,234,255,0.6));">
-                            <path
-                                d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z">
-                            </path>
-                            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-                            <line x1="12" y1="22.08" x2="12" y2="12"></line>
-                        </svg>
-                        <div id="package-total-value"
-                            style="font-size:40px; font-weight:800; color:#00eaff; text-shadow:0 0 10px rgba(0,234,255,0.5);">
-                            --</div>
-                    </div>
+            <div class="sub-stats">
+                <span>$181,266,281,130</span>
+                <span>无线成交占比: 86%</span>
+            </div>
+
+        </div>
+
+        <!-- 趋势图容器 - Moved outside center-area -->
+        <div class="trend-chart-container">
+            <svg id="trend-chart" width="100%" height="100%"></svg>
+        </div>
+
+        <!-- 角落面板 -->
+        <div class="corner-panels">
+            <!-- 左上:全球热卖榜 -->
+            <div class="panel top-left" id="hot-products">
+                <div class="panel-header">
+                    <div class="panel-title">🏆 全球热卖榜</div>
                 </div>
-                <div class="panel" id="channel-pie">
-                    <div class="panel-title">渠道销售占比</div>
-                    <div class="viz-area" id="channel-pie-chart"></div>
+                <div class="panel-content">
+                    <div class="product-list" id="product-list"></div>
+                </div>
+            </div>
+
+            <!-- 右上:全国区域经济 -->
+            <div class="panel top-right" id="regional-sales">
+                <div class="panel-header">
+                    <div class="panel-title">📊 全国区域经济</div>
+                </div>
+                <div class="panel-content">
+                    <div class="region-list" id="region-list"></div>
+                </div>
+            </div>
+
+            <!-- 左下:菜鸟网络 -->
+            <div class="panel bottom-left" id="logistics" onclick="navigateTo('dashboard/index_bundled.html')">
+                <div class="panel-header">
+                    <div class="panel-title">🚚 菜鸟网络-仓配协同</div>
+                </div>
+                <div class="panel-content">
+                    <div class="logistics-stats" id="logistics-stats"></div>
+                </div>
+            </div>
+
+            <!-- 右下:用户画像 -->
+            <div class="panel bottom-right" id="user-portrait">
+                <div class="panel-header">
+                    <div class="panel-title">👥 用户画像分析</div>
+                </div>
+                <div class="panel-content">
+                    <div class="user-chart" id="user-chart"></div>
                 </div>
             </div>
         </div>
-
-        <div class="loading" id="loading">正在加载实时数据...</div>
     </div>
 
     <script>
-        // ========== 背景粒子效果 ==========
-        function createParticles() {
-            const particlesContainer = d3.select("#particles");
-            const particleCount = 100;
-
-            for (let i = 0; i < particleCount; i++) {
-                particlesContainer.append("div")
-                    .attr("class", "particle")
-                    .style("left", Math.random() * 100 + "%")
-                    .style("top", Math.random() * 100 + "%")
-                    .style("animation-delay", Math.random() * 5 + "s")
-                    .transition()
-                    .duration(5000 + Math.random() * 5000)
-                    .ease(d3.easeLinear)
-                    .style("transform", `translate(${(Math.random() - 0.5) * 200}px, ${(Math.random() - 0.5) * 200}px)`)
-                    .on("end", function repeat() {
-                        d3.select(this)
-                            .style("transform", `translate(${(Math.random() - 0.5) * 200}px, ${(Math.random() - 0.5) * 200}px)`)
-                            .transition()
-                            .duration(5000 + Math.random() * 5000)
-                            .ease(d3.easeLinear)
-                            .on("end", repeat);
-                    });
-            }
+        // 导航函数
+        function navigateTo(url) {
+            window.location.href = url;
         }
 
-        // ========== 数字格式化工具 ==========
-        const formatCNY = d3.format(",");
-        const formatUSD = d3.format(",.0f");
-
-        // ========== 实时交易额滚动组件 ==========
-        class RealtimeSalesRoller {
-            constructor(containerSelector, options = {}) {
-                this.container = d3.select(containerSelector);
-                this.cnyElement = d3.select("#cny-amount");
-                this.usdElement = d3.select("#usd-amount");
-                this.growthElement = d3.select("#growth-rate");
-                this.loadingElement = d3.select("#loading");
-
-                // 配置参数
-                this.options = {
-                    startValue: options.startValue || 0,
-                    lastYearValue: options.lastYearValue || 0,
-                    animationDuration: options.animationDuration || 2000
-                };
-
-                this.currentValue = this.options.startValue;
-                this.isRunning = false;
-                this.dataCallback = null;
-                this.currentAnimation = null;
-                this.currentUsdAnimation = null;
-                this.currentGrowthAnimation = null;
-            }
-
-            // 启动组件（接收流数据）
-            start() {
-                if (this.isRunning) return;
-                this.isRunning = true;
-                this.loadingElement.style("display", "none");
-
-                // 初始化显示（直接显示数字，无翻页结构）
-                this.updateDisplay(this.currentValue);
-            }
-
-            // 停止更新
-            stop() {
-                this.isRunning = false;
-                if (this.currentAnimation) {
-                    this.currentAnimation.stop();
-                    this.currentAnimation = null;
-                }
-                if (this.currentUsdAnimation) {
-                    this.currentUsdAnimation.stop();
-                    this.currentUsdAnimation = null;
-                }
-                if (this.currentGrowthAnimation) {
-                    this.currentGrowthAnimation.stop();
-                    this.currentGrowthAnimation = null;
-                }
-            }
-
-            // 接收流数据推送（模拟WebSocket接收数据）
-            receiveData(newValue) {
-                if (!this.isRunning) return;
-
-                // 使用平滑滚动动画更新到新值
-                this.currentValue = newValue;
-                this.updateDisplay(newValue);
-            }
-
-            // 更新显示（直接更新数字，无翻页动画）
-            updateDisplay(targetValue) {
-                // 直接格式化并更新数字显示
-                const formattedValue = this.formatCNYValue(targetValue);
-                this.cnyElement.text(formattedValue);
-
-                // 计算美元总交易额（假设汇率为 1 CNY = 0.14 USD）
-                const usdAmount = targetValue * 0.14;
-                this.updateUsdAmount(usdAmount);
-
-                // 计算无线成交占比（基于交易金额计算，与交易金额同步变化）
-                const ratioBase = 60 + (targetValue / 1000000000000) * 10;
-                const unlimitedRatio = Math.min(70, Math.max(60, ratioBase + (Math.random() * 2 - 1)));
-                this.updateGrowthRate(unlimitedRatio);
-            }
-
-            // 格式化人民币金额（带逗号分隔）
-            formatCNYValue(value) {
-                const numValue = Math.floor(Math.abs(value));
-                const formatted = d3.format(",")(numValue);
-                return `¥${formatted}`;
-            }
-
-            // 获取当前显示的数字值（从文本中解析）
-            getCurrentDisplayValue(element) {
-                const currentText = element.text();
-                return this.parseValue(currentText);
-            }
-
-            // 缓动函数（三次缓出）- 用于同比增长动画
-            easeOutCubic(t) {
-                return 1 - Math.pow(1 - t, 3);
-            }
-
-            // 计算同比增长百分比
-            calculateGrowthRate(currentValue, lastYearValue) {
-                if (!lastYearValue || lastYearValue === 0) {
-                    return 0;
-                }
-                const growth = ((currentValue - lastYearValue) / lastYearValue) * 100;
-                return growth;
-            }
-
-            // 更新美元总交易额显示（直接更新，与交易金额同步）
-            updateUsdAmount(usdAmount) {
-                this.usdElement.text(this.formatUsdAmount(usdAmount));
-            }
-
-            // 美元金额动画
-            animateUsdAmount(startAmount, targetAmount) {
-                if (this.currentUsdAnimation) {
-                    this.currentUsdAnimation.stop();
-                    this.currentUsdAnimation = null;
-                }
-
-                const interpolator = d3.interpolateNumber(startAmount, targetAmount);
-                const self = this;
-                const duration = 1500;
-
-                this.currentUsdAnimation = d3.timer(function (elapsed) {
-                    const progress = Math.min(1, elapsed / duration);
-                    const currentAmount = Math.floor(interpolator(self.easeOutCubic(progress)));
-
-                    self.usdElement.text(self.formatUsdAmount(currentAmount));
-
-                    if (progress === 1) {
-                        self.currentUsdAnimation.stop();
-                        self.currentUsdAnimation = null;
-                        self.usdElement.text(self.formatUsdAmount(targetAmount));
-                    }
-                });
-            }
-
-            // 解析美元金额
-            parseUsdAmount(text) {
-                const numericStr = text.replace(/[^\d]/g, '');
-                return parseFloat(numericStr) || 0;
-            }
-
-            // 格式化美元金额
-            formatUsdAmount(value) {
-                const formatted = d3.format(",")(Math.floor(value));
-                return `$${formatted}`;
-            }
-
-            // 更新无线成交占比显示（直接更新，与交易金额同步）
-            updateGrowthRate(ratio) {
-                this.growthElement.html(this.formatGrowthRate(ratio));
-            }
-
-            // 无线成交占比动画
-            animateGrowthRate(startRatio, targetRatio) {
-                if (this.currentGrowthAnimation) {
-                    this.currentGrowthAnimation.stop();
-                    this.currentGrowthAnimation = null;
-                }
-
-                const interpolator = d3.interpolateNumber(startRatio, targetRatio);
-                const self = this;
-                const duration = 1500;
-
-                this.currentGrowthAnimation = d3.timer(function (elapsed) {
-                    const progress = Math.min(1, elapsed / duration);
-                    const currentRatio = interpolator(self.easeOutCubic(progress));
-
-                    self.growthElement.html(self.formatGrowthRate(currentRatio));
-
-                    if (progress === 1) {
-                        self.currentGrowthAnimation.stop();
-                        self.currentGrowthAnimation = null;
-                        self.growthElement.html(self.formatGrowthRate(targetRatio));
-                    }
-                });
-            }
-
-            // 解析无线成交占比（从HTML中提取纯文本后解析）
-            parseGrowthRate(text) {
-                const plainText = text.replace(/<[^>]*>/g, '');
-                const numericStr = plainText.replace(/[^\d.]/g, '');
-                return parseFloat(numericStr) || 0;
-            }
-
-            // 格式化无线成交占比（统一白色）
-            formatGrowthRate(value) {
-                const formatted = d3.format('.1f')(value);
-                return `<span style="color: #ffffff;">无线成交占比 ${formatted}%</span>`;
-            }
-
-            // 解析当前显示的值
-            parseValue(text) {
-                const numericStr = text.replace(/[^\d.]/g, '');
-                return parseFloat(numericStr) || 0;
-            }
+        // 时钟
+        function updateClock() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('zh-CN', { hour12: false });
+            document.getElementById('clock').textContent = timeStr;
         }
+        setInterval(updateClock, 1000);
+        updateClock();
 
-        // ========== 模拟数据流（模拟后端WebSocket推送） ==========
-        class MockDataStream {
-            constructor(salesRoller) {
-                this.salesRoller = salesRoller;
-                this.currentValue = 912000000000;
-                this.baseIncrementPerSecond = 20000000;
-                this.isRunning = false;
-                this.pushInterval = null;
-                this.lastPushTime = Date.now();
-            }
+        // GMV数字滚动
+        let currentGMV = 123456789012; // Initial Match Reference
 
-            start() {
-                if (this.isRunning) return;
-                this.isRunning = true;
-                this.lastPushTime = Date.now();
+        function updateGMVDisplay() {
+            const container = document.getElementById('gmv-container');
+            const str = currentGMV.toLocaleString('en-US');
+            container.innerHTML = '';
 
-                // 初始化显示
-                this.salesRoller.receiveData(this.currentValue);
-
-                // 模拟数据流推送
-                this.pushData();
-            }
-
-            stop() {
-                this.isRunning = false;
-                if (this.pushInterval) {
-                    clearTimeout(this.pushInterval);
-                }
-            }
-
-            // 模拟推送数据（类似WebSocket.onmessage）
-            pushData() {
-                if (!this.isRunning) return;
-
-                const now = Date.now();
-                const elapsed = 0.5;
-                this.lastPushTime = now;
-
-                const hour = new Date().getHours();
-                let multiplier = 1;
-
-                if (hour >= 20 && hour <= 23) {
-                    multiplier = 3.5;
-                } else if (hour >= 12 && hour <= 14) {
-                    multiplier = 2.2;
-                } else if (hour >= 19 && hour <= 20) {
-                    multiplier = 3.0;
-                } else if (hour >= 0 && hour <= 6) {
-                    multiplier = 0.8;
-                } else if (hour >= 6 && hour <= 10) {
-                    multiplier = 1.5;
+            for (let char of str) {
+                if (char === ',') {
+                    const el = document.createElement('div');
+                    el.className = 'gmv-digit-comma';
+                    el.innerText = ',';
+                    container.appendChild(el);
                 } else {
-                    multiplier = 1.8;
+                    const el = document.createElement('div');
+                    el.className = 'gmv-digit-box';
+                    el.innerText = char;
+                    container.appendChild(el);
                 }
-
-                const increment = this.baseIncrementPerSecond * elapsed * multiplier;
-                const randomFactor = 1 + (Math.random() - 0.5) * 0.3;
-                const actualIncrement = Math.floor(increment * randomFactor);
-
-                this.currentValue += actualIncrement;
-
-                const pushDelay = 500;
-
-                this.salesRoller.receiveData(this.currentValue);
-
-                this.pushInterval = setTimeout(() => {
-                    this.pushData();
-                }, pushDelay);
-            }
-
-            // 模拟WebSocket连接（可以扩展为真实WebSocket）
-            connect() {
-                console.log("模拟数据流连接已建立...");
-                this.start();
-            }
-
-            // 模拟WebSocket断开
-            disconnect() {
-                console.log("模拟数据流连接已断开");
-                this.stop();
             }
         }
 
-        // ========== 侧边面板初始化 ==========
-        function initSidePanels() {
-            // 1. 销售结构（词云模拟）
-            renderWordCloud();
+        function updateGMV() {
+            // 每次增加随机金额
+            const increment = Math.floor(Math.random() * 500000) + 100000;
+            currentGMV += increment;
+            updateGMVDisplay();
+        }
 
-            // 2. 用户热力图
-            renderHeatmap();
+        setInterval(updateGMV, 2000);
+        updateGMV();
 
-            // 3. 包裹总量（模拟数据更新）
-            startPackageTotalUpdate();
+        // 趋势图数据 - 模拟累积增长曲线
+        const trendData = [];
+        let total = 0;
+        for (let i = 0; i <= 24; i++) { // 0h to 24h
+            let growth = 0;
+            // 模拟双11特征: 开场爆发, 随后平缓, 晚间回升
+            if (i === 0) growth = 10;
+            else if (i <= 2) growth = 50 + Math.random() * 20;
+            else if (i <= 8) growth = 10 + Math.random() * 5;
+            else growth = 15 + Math.random() * 10;
 
-            // 4. 渠道销售占比（饼图）
-            renderChannelPie();
+            total += growth;
+            trendData.push({ hour: i, value: total });
+        }
 
-            // 5. 交互跳转
-            d3.select("#package-total").on("click", function () {
-                window.location.href = "dashboard/index_bundled.html";
+        // 里程碑数据
+        const milestones = [
+            { x: 1, y: trendData[1].value, label: '00:01:12', amount: '¥10亿' },
+            { x: 3, y: trendData[3].value, label: '00:12:28', amount: '¥100亿' },
+            { x: 8, y: trendData[8].value, label: '07:45:42', amount: '¥656亿' },
+            { x: 14, y: trendData[14].value, label: '11:49:09', amount: '¥571亿' }
+        ];
+
+        // 绘制趋势图
+        function renderTrendChart() {
+            const svg = d3.select('#trend-chart');
+            const container = document.querySelector('.trend-chart-container');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            svg.selectAll('*').remove();
+
+            const margin = { top: 50, right: 50, bottom: 50, left: 80 };
+            const chartWidth = width - margin.left - margin.right;
+            const chartHeight = height - margin.top - margin.bottom;
+
+            const g = svg.append('g')
+                .attr('transform', `translate(${margin.left},${margin.top})`);
+
+            const x = d3.scaleLinear().domain([0, 24]).range([0, chartWidth]);
+            const y = d3.scaleLinear().domain([0, d3.max(trendData, d => d.value) * 1.2]).range([chartHeight, 0]);
+
+            // 网格线 (虚线)
+            const yAxisGrid = d3.axisLeft(y)
+                .tickSize(-chartWidth)
+                .tickFormat('')
+                .ticks(5);
+
+            g.append('g')
+                .attr('class', 'grid')
+                .call(yAxisGrid)
+                .selectAll('line')
+                .style('stroke', 'rgba(0, 234, 255, 0.2)')
+                .style('stroke-dasharray', '4,4');
+            g.select('.domain').remove();
+
+            // Y轴标签
+            g.append('g')
+                .call(d3.axisLeft(y).ticks(5))
+                .selectAll('text')
+                .attr('fill', '#00eaff')
+                .attr('font-size', '14px')
+                .attr('x', -10);
+            g.select('.domain').remove();
+            g.selectAll('.tick line').remove();
+
+            // Y轴标题
+            svg.append('text')
+                .attr('x', margin.left)
+                .attr('y', margin.top - 20)
+                .attr('fill', '#00eaff')
+                .attr('font-size', '16px')
+                .attr('font-weight', 'bold')
+                .text('成交额(亿)');
+
+            // X轴
+            const xAxis = g.append('g')
+                .attr('transform', `translate(0,${chartHeight})`)
+                .call(d3.axisBottom(x).ticks(24).tickFormat(d => d < 10 ? '0' + d : d));
+
+            xAxis.selectAll('text')
+                .attr('fill', '#00eaff')
+                .attr('font-size', '12px')
+                .attr('dy', '15px');
+
+            xAxis.select('.domain')
+                .attr('stroke', '#00eaff')
+                .attr('stroke-width', 2)
+                .attr('stroke-opacity', 0.5);
+
+            // 移除X轴Tick线
+            xAxis.selectAll('.tick line').remove();
+
+            // 线条
+            const line = d3.line()
+                .x(d => x(d.hour))
+                .y(d => y(d.value))
+                .curve(d3.curveMonotoneX);
+
+            // 绘制线条
+            g.append('path')
+                .datum(trendData)
+                .attr('fill', 'none')
+                .attr('stroke', '#ff3366')
+                .attr('stroke-width', 3)
+                .attr('d', line)
+                .attr('filter', 'drop-shadow(0 0 5px rgba(255, 51, 102, 0.8))');
+
+            // 绘制终点圆点
+            const lastPoint = trendData[trendData.length - 1];
+            g.append('circle')
+                .attr('cx', x(lastPoint.hour))
+                .attr('cy', y(lastPoint.value))
+                .attr('r', 4)
+                .attr('fill', '#ffff00');
+
+            // 绘制里程碑标签
+            milestones.forEach(m => {
+                const mx = x(m.x);
+                const my = y(m.y);
+
+                // 垂直线
+                g.append('line')
+                    .attr('x1', mx)
+                    .attr('y1', my)
+                    .attr('x2', mx)
+                    .attr('y2', my + 40)
+                    .attr('stroke', '#ff0000')
+                    .attr('stroke-width', 2);
+
+                // 标签框
+                const labelGroup = g.append('g')
+                    .attr('transform', `translate(${mx - 30}, ${my + 40})`);
+
+                labelGroup.append('rect')
+                    .attr('width', 80)
+                    .attr('height', 40)
+                    .attr('fill', '#aa0000')
+                    .attr('stroke', '#ff0000');
+
+                labelGroup.append('text')
+                    .attr('x', 40).attr('y', 15)
+                    .attr('text-anchor', 'middle')
+                    .attr('fill', '#fff')
+                    .attr('font-size', '10px')
+                    .text(m.label);
+
+                labelGroup.append('text')
+                    .attr('x', 40).attr('y', 32)
+                    .attr('text-anchor', 'middle')
+                    .attr('fill', '#fff')
+                    .attr('font-size', '14px')
+                    .attr('font-weight', 'bold')
+                    .text(m.amount);
             });
         }
 
-        function renderWordCloud() {
-            const container = d3.select("#wordcloud");
-            // 确保容器有尺寸
-            if (container.empty()) return;
-            container.html(""); // 清空旧内容
+        renderTrendChart();
 
-            const width = container.node().getBoundingClientRect().width || 330;
-            const height = container.node().getBoundingClientRect().height || 200;
+        // --- 3D Globe Implementation ---
+        function initGlobe() {
+            const container = document.getElementById('globe-container');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
 
-            // 扩展词汇量并调整权重
-            const words = [
-                { text: "美妆", size: 40 }, { text: "手机", size: 36 }, { text: "运动", size: 32 },
-                { text: "食品", size: 28 }, { text: "母婴", size: 26 }, { text: "家电", size: 24 },
-                { text: "服饰", size: 22 }, { text: "个护", size: 20 }, { text: "鞋包", size: 18 },
-                { text: "家居", size: 16 }, { text: "电脑", size: 16 }, { text: "生鲜", size: 14 },
-                { text: "医药", size: 14 }, { text: "图书", size: 12 }, { text: "汽车", size: 12 },
-                { text: "珠宝", size: 12 }, { text: "数码", size: 10 }, { text: "内衣", size: 10 },
-                { text: "箱包", size: 10 }, { text: "洗护", size: 10 }, { text: "零食", size: 10 },
-                { text: "宠物", size: 10 }, { text: "乐器", size: 10 }, { text: "鲜花", size: 10 }
-            ];
+            // Scene
+            const scene = new THREE.Scene();
+            // Optional: Add fog for depth
+            scene.fog = new THREE.FogExp2(0x0b0f19, 0.002);
 
-            // 双11主题色系
-            const colors = ["#ff0033", "#ff6600", "#ffcc00", "#ffffff", "#00ccff"];
+            // Camera
+            const camera = new THREE.PerspectiveCamera(45, width / height, 1, 1000);
+            camera.position.z = 220; // Adjust zoom to fit container
 
-            // 使用 d3-cloud 布局
-            const layout = d3.layout.cloud()
-                .size([width, height])
-                .words(words.map(d => ({ text: d.text, size: d.size })))
-                .padding(5)
-                .rotate(function () { return ~~(Math.random() * 2) * 0; }) // 减少旋转，保持水平更易读，或者设为 0
-                .font("Microsoft YaHei")
-                .fontSize(function (d) { return d.size; })
-                .on("end", draw);
+            // Renderer
+            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setSize(width, height);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(renderer.domElement);
 
-            layout.start();
+            // Group to hold earth and atmosphere
+            const globeGroup = new THREE.Group();
+            scene.add(globeGroup);
 
-            function draw(words) {
-                const svg = container.append("svg")
-                    .attr("width", layout.size()[0])
-                    .attr("height", layout.size()[1])
-                    .append("g")
-                    .attr("transform", "translate(" + layout.size()[0] / 2 + "," + layout.size()[1] / 2 + ")");
+            // Earth Texture - Using Canvas to generate a "Tech World Map" placeholder 
+            // because external URLs are blocked in some regions.
+            function createWorldTexture() {
+                const canvas = document.createElement('canvas');
+                canvas.width = 2048;
+                canvas.height = 1024;
+                const ctx = canvas.getContext('2d');
 
-                svg.selectAll("text")
-                    .data(words)
-                    .enter().append("text")
-                    .style("font-size", function (d) { return d.size + "px"; })
-                    .style("font-family", "Microsoft YaHei")
-                    .style("font-weight", "bold")
-                    .style("fill", (d, i) => colors[i % colors.length])
-                    .attr("text-anchor", "middle")
-                    .attr("transform", function (d) {
-                        return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
-                    })
-                    .text(function (d) { return d.text; })
-                    .style("opacity", 0)
-                    .style("text-shadow", "0 0 5px rgba(0,0,0,0.5)") // 增加阴影提高可读性
-                    .transition().duration(800).style("opacity", 1);
-            }
-        }
+                // Background: Dark Ocean
+                ctx.fillStyle = '#0b1026';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        async function renderHeatmap() {
-            const container = d3.select("#heatmap");
-            if (container.empty()) return;
-            container.html("");
+                // Simulate Continents (Simplified approximations)
+                ctx.fillStyle = '#1a3b6e';
 
-            const width = container.node().getBoundingClientRect().width || 330;
-            const height = container.node().getBoundingClientRect().height || 200;
+                // Helper to draw rough shapes
+                function drawBlob(x, y, w, h) {
+                    ctx.beginPath();
+                    ctx.ellipse(x, y, w, h, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                }
 
-            const svg = container.append("svg")
-                .attr("width", width)
-                .attr("height", height)
-                .style("background", "transparent");
+                // Americas
+                drawBlob(300, 150, 80, 60); // North America
+                drawBlob(350, 350, 50, 80); // South America
 
-            const defs = svg.append("defs");
-            const filter = defs.append("filter").attr("id", "heat-glow");
-            filter.append("feGaussianBlur").attr("stdDeviation", "3").attr("result", "coloredBlur");
-            const feMerge = filter.append("feMerge");
-            feMerge.append("feMergeNode").attr("in", "coloredBlur");
-            feMerge.append("feMergeNode").attr("in", "SourceGraphic");
+                // Europe/Africa
+                drawBlob(550, 150, 50, 40); // Europe
+                drawBlob(550, 280, 60, 70); // Africa
 
-            const projection = d3.geoMercator()
-                .scale(width / 6.5)
-                .translate([width / 2, height / 1.6]);
+                // Asia
+                drawBlob(750, 150, 100, 80); // Asia
 
-            const path = d3.geoPath().projection(projection);
+                // Australia
+                drawBlob(850, 380, 40, 30);
 
-            const mapGroup = svg.append("g").attr("class", "map");
-            const heatGroup = svg.append("g").attr("class", "heat");
+                // Grid overlay for tech look
+                ctx.strokeStyle = '#2a5a8a';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                for (let i = 0; i < canvas.width; i += 40) {
+                    ctx.moveTo(i, 0);
+                    ctx.lineTo(i, canvas.height);
+                }
+                for (let i = 0; i < canvas.height; i += 40) {
+                    ctx.moveTo(0, i);
+                    ctx.lineTo(canvas.width, i);
+                }
+                ctx.stroke();
 
-            try {
-                const res = await fetch('https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson');
-                const geoData = await res.json();
-
-                mapGroup.selectAll("path")
-                    .data(geoData.features.filter(d => d.properties.name !== "Antarctica"))
-                    .enter().append("path")
-                    .attr("d", path)
-                    .attr("fill", "rgba(255,255,255,0.05)")
-                    .attr("stroke", "rgba(255,255,255,0.1)")
-                    .attr("stroke-width", 0.5);
-
-                const centers = [
-                    { lon: 105, lat: 35, v: 1.0, count: 15 },
-                    { lon: -100, lat: 40, v: 0.8, count: 8 },
-                    { lon: 10, lat: 50, v: 0.7, count: 8 },
-                    { lon: 135, lat: -25, v: 0.5, count: 3 },
-                    { lon: -60, lat: -15, v: 0.5, count: 3 }
-                ];
-
-                const points = [];
-                centers.forEach(c => {
-                    for (let i = 0; i < c.count; i++) {
-                        points.push({
-                            lon: c.lon + (Math.random() - 0.5) * 30,
-                            lat: c.lat + (Math.random() - 0.5) * 20,
-                            value: Math.random() * c.v
-                        });
+                // Cities (Random dots)
+                ctx.fillStyle = '#00ffff';
+                for (let i = 0; i < 100; i++) {
+                    const x = Math.random() * canvas.width;
+                    const y = Math.random() * canvas.height;
+                    // Simple check to keep dots roughly on "land" (very approximate)
+                    if ((x > 200 && x < 450) || (x > 500 && x < 900)) {
+                        if (y > 100 && y < 450) {
+                            ctx.beginPath();
+                            ctx.arc(x, y, 2, 0, Math.PI * 2);
+                            ctx.fill();
+                        }
                     }
-                });
+                }
 
-                heatGroup.selectAll("circle")
-                    .data(points)
-                    .enter().append("circle")
-                    .attr("cx", d => projection([d.lon, d.lat])[0])
-                    .attr("cy", d => projection([d.lon, d.lat])[1])
-                    .attr("r", 0)
-                    .attr("fill", d => d3.interpolateInferno(d.value))
-                    .style("opacity", 0.6)
-                    .style("filter", "url(#heat-glow)")
-                    .transition().duration(1000)
-                    .attr("r", d => 3 + d.value * 5);
-
-                setInterval(() => {
-                    heatGroup.selectAll("circle")
-                        .transition().duration(2000)
-                        .style("opacity", () => 0.3 + Math.random() * 0.5)
-                        .attr("r", d => (3 + d.value * 5) * (0.8 + Math.random() * 0.4));
-                }, 2000);
-
-            } catch (e) {
-                console.error("Map load error", e);
-                container.append("text").attr("x", width / 2).attr("y", height / 2).attr("fill", "#fff").text("Map Data Error");
+                return new THREE.CanvasTexture(canvas);
             }
+
+            const earthTexture = createWorldTexture();
+
+            // Earth Material - Tech Style
+            const earthMaterial = new THREE.MeshPhongMaterial({
+                map: earthTexture,
+                color: 0xffffff, // Use white to let texture colors show through
+                emissive: 0x112244,
+                emissiveMap: earthTexture,
+                emissiveIntensity: 0.5,
+                shininess: 25
+            });
+
+            // Earth Mesh
+            const geometry = new THREE.SphereGeometry(80, 64, 64);
+            const earth = new THREE.Mesh(geometry, earthMaterial);
+            globeGroup.add(earth);
+
+            // Atmosphere / Glow (Simplified)
+            const atmosMaterial = new THREE.MeshPhongMaterial({
+                color: 0x00aaff,
+                transparent: true,
+                opacity: 0.2,
+                side: THREE.BackSide,
+                blending: THREE.AdditiveBlending
+            });
+            const atmosphere = new THREE.Mesh(new THREE.SphereGeometry(84, 64, 64), atmosMaterial);
+            globeGroup.add(atmosphere);
+
+            // Lights
+            const ambientLight = new THREE.AmbientLight(0x333333);
+            scene.add(ambientLight);
+
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+            directionalLight.position.set(50, 30, 50);
+            scene.add(directionalLight);
+
+            // Add some point lights for tech effect
+            const pointLight1 = new THREE.PointLight(0x00aaff, 1.5, 300);
+            pointLight1.position.set(-100, 100, 100);
+            scene.add(pointLight1);
+
+            // Animation Loop
+            function animate() {
+                requestAnimationFrame(animate);
+
+                // Rotation
+                globeGroup.rotation.y += 0.002;
+
+                renderer.render(scene, camera);
+            }
+            animate();
+
+            // Handle Resize
+            window.addEventListener('resize', () => {
+                // Warning: This simple resize might not be perfect with fixed container size logic
+                // but good enough for now.
+                const w = container.clientWidth;
+                const h = container.clientHeight;
+                camera.aspect = w / h;
+                camera.updateProjectionMatrix();
+                renderer.setSize(w, h);
+            });
         }
 
-        function startPackageTotalUpdate() {
-            const el = d3.select("#package-total-value");
-            let count = 1254300000;
+        // Initialize Globe
+        initGlobe();
 
-            setInterval(() => {
-                count += Math.floor(Math.random() * 500);
-                el.text(d3.format(",")(count));
-            }, 100);
+        // 热卖商品
+        const products = [
+            { name: '美妆护肤套装', sales: 15234567 },
+            { name: 'iPhone 15 Pro', sales: 12876543 },
+            { name: '运动鞋', sales: 9876543 },
+            { name: '羽绒服', sales: 8765432 },
+            { name: '电脑配件', sales: 7654321 },
+            { name: '母婴用品', sales: 6543210 },
+            { name: '食品生鲜', sales: 5432109 },
+            { name: '家居用品', sales: 4321098 }
+        ];
+
+        function renderProducts() {
+            const list = document.getElementById('product-list');
+            list.innerHTML = products.map((p, i) => `
+                <div class="product-item">
+                    <span class="product-rank">${i + 1}</span>
+                    <div class="product-info">
+                        <div class="product-name">${p.name}</div>
+                        <div class="product-sales">销量: ${p.sales.toLocaleString()}</div>
+                    </div>
+                </div>
+            `).join('');
         }
+        renderProducts();
 
-        function renderChannelPie() {
-            const container = d3.select("#channel-pie-chart");
-            if (container.empty()) return;
+        // 区域经济
+        const regions = [
+            { name: '广东', value: 12345678901 },
+            { name: '江苏', value: 10234567890 },
+            { name: '浙江', value: 9123456789 },
+            { name: '北京', value: 8012345678 },
+            { name: '上海', value: 7901234567 },
+            { name: '山东', value: 6890123456 },
+            { name: '四川', value: 5789012345 },
+            { name: '河南', value: 4678901234 }
+        ];
 
-            const width = container.node().getBoundingClientRect().width || 330;
-            const height = container.node().getBoundingClientRect().height || 200;
-            const radius = Math.min(width, height) / 2 - 10;
+        function renderRegions() {
+            const maxValue = Math.max(...regions.map(r => r.value));
+            const list = document.getElementById('region-list');
+            list.innerHTML = regions.map(r => `
+                <div class="region-item">
+                    <span class="region-name">${r.name}</span>
+                    <span class="region-value">¥${(r.value / 100000000).toFixed(2)}亿</span>
+                    <div class="region-bar">
+                        <div class="region-bar-fill" style="width: ${(r.value / maxValue * 100)}%"></div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        renderRegions();
 
-            const svg = container.append("svg")
-                .attr("width", width)
-                .attr("height", height)
-                .append("g")
-                .attr("transform", `translate(${width / 2},${height / 2})`);
+        // 物流统计
+        const logisticsData = [
+            { label: '仓库总数', value: '617' },
+            { label: '包裹处理', value: '3.2亿' },
+            { label: '配送效率', value: '87.6%' },
+            { label: '智能调度', value: '99.2%' }
+        ];
 
+        function renderLogistics() {
+            const container = document.getElementById('logistics-stats');
+            container.innerHTML = logisticsData.map(d => `
+                <div class="stat-card">
+                    <div class="stat-value">${d.value}</div>
+                    <div class="stat-label">${d.label}</div>
+                </div>
+            `).join('');
+        }
+        renderLogistics();
+
+        // 用户画像饼图
+        function renderUserChart() {
             const data = [
-                { label: "APP", value: 65 },
-                { label: "小程序", value: 25 },
-                { label: "其他", value: 10 }
+                { label: '18-25岁', value: 35, color: '#ff3366' },
+                { label: '26-35岁', value: 40, color: '#00eaff' },
+                { label: '36-45岁', value: 20, color: '#ffcc00' },
+                { label: '46岁+', value: 5, color: '#888' }
             ];
 
-            const color = d3.scaleOrdinal()
-                .domain(data.map(d => d.label))
-                .range(["#ff0033", "#ff9900", "#00ccff"]);
+            const svg = d3.select('#user-chart').append('svg')
+                .attr('width', 250)
+                .attr('height', 250);
+
+            const radius = 100;
+            const g = svg.append('g')
+                .attr('transform', `translate(125, 125)`);
 
             const pie = d3.pie().value(d => d.value);
-            const arc = d3.arc().innerRadius(radius * 0.5).outerRadius(radius);
+            const arc = d3.arc().innerRadius(40).outerRadius(radius);
 
-            const arcs = svg.selectAll("arc")
+            g.selectAll('path')
                 .data(pie(data))
-                .enter().append("g");
+                .enter()
+                .append('path')
+                .attr('d', arc)
+                .attr('fill', d => d.data.color)
+                .attr('stroke', '#0a0e27')
+                .attr('stroke-width', 2)
+                .style('opacity', 0.9);
 
-            arcs.append("path")
-                .attr("d", arc)
-                .attr("fill", d => color(d.data.label))
-                .attr("stroke", "rgba(255,255,255,0.2)")
-                .style("stroke-width", "1px");
-
-            arcs.append("text")
-                .attr("transform", d => `translate(${arc.centroid(d)})`)
-                .attr("text-anchor", "middle")
-                .text(d => d.data.label)
-                .style("fill", "#fff")
-                .style("font-size", "12px")
-                .style("text-shadow", "0 1px 2px black");
+            // 标签
+            const labelArc = d3.arc().innerRadius(70).outerRadius(70);
+            g.selectAll('text')
+                .data(pie(data))
+                .enter()
+                .append('text')
+                .attr('transform', d => `translate(${labelArc.centroid(d)})`)
+                .attr('text-anchor', 'middle')
+                .attr('fill', '#fff')
+                .attr('font-size', '12px')
+                .text(d => `${d.data.value}%`);
         }
+        renderUserChart();
 
-        // ========== 更新时间戳 ==========
-        function updateTimestamp() {
-            const now = new Date();
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const seconds = String(now.getSeconds()).padStart(2, '0');
-            d3.select("#timestamp").text(`${hours}:${minutes}:${seconds}`);
-        }
+        // 更新趋势图数据
+        // 移除旧的趋势图更新逻辑，模拟静态增长曲线
+        // setInterval(() => { ... }, 10000);
 
-        // ========== 初始化 ==========
-        function init() {
-            // 初始化侧边面板
-            initSidePanels();
+        // ===== Three.js 3D地球可视化 =====
+        function initGlobe() {
+            const container = document.getElementById('globe-container');
+            const scene = new THREE.Scene();
 
-            const startValue = 912000000000;
-            const lastYearValue = Math.floor(startValue / 1.15);
+            // 相机设置
+            const camera = new THREE.PerspectiveCamera(
+                45,
+                container.clientWidth / container.clientHeight,
+                0.1,
+                1000
+            );
+            camera.position.z = 300;
 
-            const salesRoller = new RealtimeSalesRoller("#sales-display", {
-                startValue: startValue,
-                lastYearValue: lastYearValue,
-                animationDuration: 3000
+            // 渲染器
+            const renderer = new THREE.WebGLRenderer({
+                alpha: true,
+                antialias: true
             });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setClearColor(0x000000, 0);
+            container.appendChild(renderer.domElement);
 
-            // 启动组件
-            salesRoller.start();
+            // 地球主体
+            const earthGeometry = new THREE.SphereGeometry(80, 64, 64);
 
-            // 启动模拟数据流
-            const dataStream = new MockDataStream(salesRoller);
-            dataStream.connect();
+            // 地球材质 - 蓝色带光泽
+            const earthMaterial = new THREE.MeshPhongMaterial({
+                color: 0x2233aa,
+                emissive: 0x112266,
+                shininess: 25,
+                transparent: true,
+                opacity: 0.9
+            });
+            const earth = new THREE.Mesh(earthGeometry, earthMaterial);
+            scene.add(earth);
 
-            // 更新时间戳
-            updateTimestamp();
-            setInterval(updateTimestamp, 1000);
+            // 地球发光层
+            const glowGeometry = new THREE.SphereGeometry(85, 64, 64);
+            const glowMaterial = new THREE.MeshBasicMaterial({
+                color: 0x00aaff,
+                transparent: true,
+                opacity: 0.2,
+                side: THREE.BackSide
+            });
+            const glow = new THREE.Mesh(glowGeometry, glowMaterial);
+            scene.add(glow);
 
-            // 将实例保存到全局，方便调试
-            window.salesRoller = salesRoller;
-            window.dataStream = dataStream;
+            // 添加大陆高光点
+            const continentDots = new THREE.Group();
+            for (let i = 0; i < 500; i++) {
+                const dotGeometry = new THREE.SphereGeometry(0.5, 8, 8);
+                const dotMaterial = new THREE.MeshBasicMaterial({
+                    color: Math.random() > 0.7 ? 0xffaa00 : 0x44ddff,
+                    transparent: true,
+                    opacity: Math.random() * 0.8 + 0.2
+                });
+                const dot = new THREE.Mesh(dotGeometry, dotMaterial);
+
+                // 随机分布在球体表面
+                const phi = Math.acos(-1 + (2 * i) / 500);
+                const theta = Math.sqrt(500 * Math.PI) * phi;
+
+                dot.position.x = 82 * Math.cos(theta) * Math.sin(phi);
+                dot.position.y = 82 * Math.sin(theta) * Math.sin(phi);
+                dot.position.z = 82 * Math.cos(phi);
+
+                continentDots.add(dot);
+            }
+            scene.add(continentDots);
+
+            // 添加粒子云
+            const particlesGeometry = new THREE.BufferGeometry();
+            const particleCount = 1000;
+            const positions = new Float32Array(particleCount * 3);
+
+            for (let i = 0; i < particleCount * 3; i += 3) {
+                const radius = 100 + Math.random() * 50;
+                const theta = Math.random() * Math.PI * 2;
+                const phi = Math.acos(2 * Math.random() - 1);
+
+                positions[i] = radius * Math.sin(phi) * Math.cos(theta);
+                positions[i + 1] = radius * Math.sin(phi) * Math.sin(theta);
+                positions[i + 2] = radius * Math.cos(phi);
+            }
+
+            particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            const particlesMaterial = new THREE.PointsMaterial({
+                color: 0x00eaff,
+                size: 1,
+                transparent: true,
+                opacity: 0.6
+            });
+            const particles = new THREE.Points(particlesGeometry, particlesMaterial);
+            scene.add(particles);
+
+            // 光源
+            const ambientLight = new THREE.AmbientLight(0x404040, 2);
+            scene.add(ambientLight);
+
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+            directionalLight.position.set(5, 3, 5);
+            scene.add(directionalLight);
+
+            const pointLight = new THREE.PointLight(0xff3366, 1, 300);
+            pointLight.position.set(-100, 50, 100);
+            scene.add(pointLight);
+
+            // 动画循环
+            function animate() {
+                requestAnimationFrame(animate);
+
+                // 地球自转
+                earth.rotation.y += 0.002;
+                glow.rotation.y += 0.002;
+                continentDots.rotation.y += 0.002;
+
+                // 粒子云旋转
+                particles.rotation.y += 0.0005;
+                particles.rotation.x += 0.0002;
+
+                renderer.render(scene, camera);
+            }
+            animate();
+
+            // 响应窗口大小变化
+            window.addEventListener('resize', () => {
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+            });
         }
 
-        // 页面加载完成后初始化
-        d3.select(window).on("load", init);
+        // 初始化3D地球
+        initGlobe();
     </script>
 </body>
 
