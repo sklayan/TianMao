@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>双十一用户行为热力分析</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <!-- World Map Data -->
+    <script src="https://fastly.jsdelivr.net/npm/echarts@4.9.0/map/js/world.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <div class="filter-group">
+                    <select id="user-filter">
+                        <option value="all">全部用户</option>
+                        <option value="vip">VIP用户</option>
+                        <option value="new">新用户</option>
+                    </select>
+                    <button id="compare-btn" class="action-btn">同期对比</button>
+                </div>
+            </div>
+            <div class="header-center">
+                <div class="title-container">
+                    <div class="header-title">双十一用户行为热力分析</div>
+                    <div class="header-subtitle">USER BEHAVIOR HEATMAP ANALYSIS</div>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="refresh-time">数据更新于: <span id="timestamp">--:--:--</span></div>
+                <button id="export-btn" class="action-btn">导出数据</button>
+                <button id="back-btn" class="back-btn" onclick="window.location.href='../index.html'">返回大屏</button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Left Column: Visualization (70%) -->
+            <div class="column left-column">
+                <div class="row-split large-row">
+                    <div class="panel-box">
+                        <div class="panel-header">
+                            <span>时间维度热力图 (24h x 11天)</span>
+                            <div class="panel-controls">
+                                <span class="control-item active" data-type="uv">浏览UV</span>
+                                <span class="control-item" data-type="order">下单量</span>
+                                <span class="control-item" data-type="gmv">GMV</span>
+                            </div>
+                        </div>
+                        <div class="chart-container" id="time-heatmap"></div>
+                    </div>
+                    <div class="panel-box">
+                        <div class="panel-header">地理热力图 (活跃度分布)</div>
+                        <div class="chart-container" id="geo-heatmap"></div>
+                    </div>
+                </div>
+                <div class="row-split small-row">
+                    <div class="panel-box">
+                        <div class="panel-header">用户行为路径热力 (浏览 -> 支付)</div>
+                        <div class="chart-container" id="behavior-path"></div>
+                    </div>
+                    <div class="panel-box">
+                        <div class="panel-header">商品偏好热力矩阵 (品类 x 用户标签)</div>
+                        <div class="chart-container" id="preference-heatmap"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Details (30%) -->
+            <div class="column right-column">
+                <div class="panel-box">
+                    <div class="panel-header">用户分群统计</div>
+                    <div class="chart-container" id="user-segment-chart"></div>
+                </div>
+                <div class="panel-box">
+                    <div class="panel-header">关键行为指标</div>
+                    <div class="kpi-list" id="behavior-kpi">
+                        <!-- Injected by JS -->
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/main.js"></script>
+</body>
+</html>

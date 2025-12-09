@@ -18,22 +18,13 @@ function updateTimestamp() {
 setInterval(updateTimestamp, 1000);
 updateTimestamp();
 
-// Fetch China Map Data
+// Fetch World Map Data
 async function initMap() {
-    try {
-        const response = await fetch('https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json');
-        const geoJson = await response.json();
-        echarts.registerMap('china', geoJson);
-        initAllCharts();
-    } catch (error) {
-        console.error('Failed to load map data:', error);
-        // Fallback or init other charts anyway
-        initAllCharts();
-    }
+    // World map is loaded via script tag in index.html
+    initAllCharts();
 }
 
 function initAllCharts() {
-    initChannelRatioChart();
     initChannelSalesChart();
     initConversionCards();
     initTrafficSourceChart();
@@ -41,7 +32,6 @@ function initAllCharts() {
     initCategoryTrendChart();
     initWordCloudChart();
     initMarginGaugeChart();
-    initCustomerTierChart();
     initMapChart();
     initCityRankChart();
     initRepurchaseChart();
@@ -53,39 +43,6 @@ function initAllCharts() {
     window.addEventListener('resize', () => {
         Object.values(charts).forEach(chart => chart && chart.resize());
     });
-}
-
-// 1. Channel Sales Ratio (Pie)
-function initChannelRatioChart() {
-    const chart = echarts.init(document.getElementById('channel-ratio-chart'));
-    charts.channelRatio = chart;
-    
-    const option = {
-        tooltip: { trigger: 'item' },
-        legend: { bottom: '0%', textStyle: { color: '#fff' } },
-        series: [
-            {
-                name: '销售占比',
-                type: 'pie',
-                radius: ['40%', '70%'],
-                center: ['50%', '45%'],
-                itemStyle: {
-                    borderRadius: 5,
-                    borderColor: '#0a0a1e',
-                    borderWidth: 2
-                },
-                label: { show: false },
-                data: [
-                    { value: 1048, name: '天猫' },
-                    { value: 735, name: '京东' },
-                    { value: 580, name: '拼多多' },
-                    { value: 484, name: '抖音' },
-                    { value: 300, name: '自营官网' }
-                ]
-            }
-        ]
-    };
-    chart.setOption(option);
 }
 
 // 2. Channel Sales Comparison (Bar)
@@ -447,48 +404,7 @@ function initMarginGaugeChart() {
     chart.setOption(option);
 }
 
-// 9. Customer Tier (Funnel)
-function initCustomerTierChart() {
-    const chart = echarts.init(document.getElementById('customer-tier-chart'));
-    charts.customerTier = chart;
-
-    const option = {
-        tooltip: { trigger: 'item' },
-        series: [
-            {
-                name: '客户层级',
-                type: 'funnel',
-                left: '10%',
-                top: 10,
-                bottom: 10,
-                width: '80%',
-                min: 0,
-                max: 100,
-                minSize: '0%',
-                maxSize: '100%',
-                sort: 'descending',
-                gap: 2,
-                label: {
-                    show: true,
-                    position: 'inside'
-                },
-                itemStyle: {
-                    borderColor: '#fff',
-                    borderWidth: 1
-                },
-                data: [
-                    { value: 60, name: '新客户' },
-                    { value: 40, name: '普通会员' },
-                    { value: 20, name: 'VIP客户' },
-                    { value: 5, name: 'SVIP' }
-                ]
-            }
-        ]
-    };
-    chart.setOption(option);
-}
-
-// 10. Map Chart
+// 10. Map Chart (World)
 function initMapChart() {
     const chart = echarts.init(document.getElementById('map-chart'));
     charts.map = chart;
@@ -508,8 +424,10 @@ function initMapChart() {
             textStyle: { color: '#fff' }
         },
         geo: {
-            map: 'china',
+            map: 'world',
             roam: true,
+            zoom: 1.2,
+            label: { show: false },
             itemStyle: {
                 areaColor: '#323c48',
                 borderColor: '#111'
@@ -517,7 +435,8 @@ function initMapChart() {
             emphasis: {
                 itemStyle: {
                     areaColor: '#2a333d'
-                }
+                },
+                label: { show: false }
             }
         },
         series: [
@@ -526,13 +445,16 @@ function initMapChart() {
                 type: 'heatmap',
                 coordinateSystem: 'geo',
                 data: [
-                    { name: '北京', value: [116.46, 39.92, 800] },
-                    { name: '上海', value: [121.48, 31.22, 900] },
-                    { name: '广州', value: [113.23, 23.16, 700] },
-                    { name: '深圳', value: [114.07, 22.62, 750] },
-                    { name: '杭州', value: [120.19, 30.26, 850] },
-                    { name: '成都', value: [104.06, 30.67, 600] },
-                    { name: '武汉', value: [114.31, 30.52, 550] }
+                    { name: 'China', value: [104.19, 35.86, 950] },
+                    { name: 'United States', value: [-95.71, 37.09, 800] },
+                    { name: 'Japan', value: [138.25, 36.20, 750] },
+                    { name: 'Germany', value: [10.45, 51.16, 600] },
+                    { name: 'United Kingdom', value: [-3.43, 55.37, 550] },
+                    { name: 'Australia', value: [133.77, -25.27, 400] },
+                    { name: 'Canada', value: [-106.34, 56.13, 350] },
+                    { name: 'Brazil', value: [-51.92, -14.23, 300] },
+                    { name: 'Russia', value: [105.31, 61.52, 250] },
+                    { name: 'India', value: [78.96, 20.59, 450] }
                 ]
             }
         ]
