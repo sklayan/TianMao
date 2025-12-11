@@ -10,6 +10,7 @@
         href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400;700&display=swap"
         rel="stylesheet">
     <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="src/data/world-data.js"></script>
     <style>
         body {
             margin: 0;
@@ -398,8 +399,8 @@
                 .style("background", "#050a14");
 
             try {
-                const response = await fetch('/dashboard/src/data/world.geojson');
-                const geoData = await response.json();
+                // Use the inline WORLD_GEOJSON data instead of fetching
+                const geoData = WORLD_GEOJSON;
                 const features = geoData.features.filter(d => d.properties.name !== "Antarctica");
 
                 projection = d3.geoMercator()
