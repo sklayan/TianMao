@@ -298,8 +298,116 @@ function initUserMap() {
     chart.setOption(option);
 }
 
+// Data Simulation
+function startDataSimulation() {
+    // 1. Simulate Real-time Gender Ratio Fluctuation
+    setInterval(() => {
+        if (!charts.gender) return;
+        const maleVal = 60 + (Math.random() * 4 - 2); // 58-62
+        charts.gender.setOption({
+            series: [{
+                data: [
+                    { value: maleVal, name: '男性', itemStyle: { color: '#2979ff' } },
+                    { value: 100 - maleVal, name: '女性', itemStyle: { color: '#00eaff' } }
+                ]
+            }]
+        });
+    }, 3000);
+
+    // 2. Simulate Age Group Activity (PictorialBar)
+    setInterval(() => {
+        if (!charts.age) return;
+        const data = [120, 200, 450, 680, 350].map(v => v + Math.floor(Math.random() * 50 - 25));
+        charts.age.setOption({
+            series: [{ data: data }]
+        });
+    }, 5000);
+
+    // 3. Simulate Occupation Changes (Radar)
+    setInterval(() => {
+        if (!charts.occupation) return;
+        const newData = [60, 90, 40, 70, 85, 50].map(v => Math.min(100, Math.max(20, v + Math.floor(Math.random() * 20 - 10))));
+        charts.occupation.setOption({
+            series: [{
+                data: [{
+                    value: newData,
+                    name: '职业分布'
+                }]
+            }]
+        });
+    }, 4000);
+
+    // 4. Simulate Consumption Funnel
+    setInterval(() => {
+        if (!charts.consumption) return;
+        charts.consumption.setOption({
+            series: [{
+                data: [
+                    { value: 60 + Math.random() * 10, name: '高消费', itemStyle: { color: '#2979ff' } },
+                    { value: 40 + Math.random() * 10, name: '中高消费', itemStyle: { color: '#00eaff' } },
+                    { value: 20 + Math.random() * 10, name: '中等消费', itemStyle: { color: '#00b0ff' } },
+                    { value: 10 + Math.random() * 5, name: '低消费', itemStyle: { color: '#80d8ff' } }
+                ]
+            }]
+        });
+    }, 3500);
+
+    // 5. Simulate Interest Bubbles (Graph)
+    setInterval(() => {
+        if (!charts.interest) return;
+        const opt = charts.interest.getOption();
+        if (!opt.series || !opt.series[0].data) return;
+        
+        const data = opt.series[0].data.map(item => {
+            // Randomly change value
+            let newVal = item.value + (Math.random() * 10 - 5);
+            newVal = Math.max(20, Math.min(100, newVal));
+            return {
+                ...item,
+                value: newVal,
+                symbolSize: newVal
+            };
+        });
+        
+        charts.interest.setOption({
+            series: [{ data: data }]
+        });
+    }, 2000);
+
+    // 6. Simulate Map Activity (Flash random cities)
+    setInterval(() => {
+        if (!charts.map) return;
+        // We can add a temporary point or just fluctuate existing ones
+        const cities = [
+            {name: '北京', value: [116.4074, 39.9042, 100]},
+            {name: '上海', value: [121.4737, 31.2304, 95]},
+            {name: '广州', value: [113.2644, 23.1291, 90]},
+            {name: '深圳', value: [114.0859, 22.547, 85]},
+            {name: '杭州', value: [120.1551, 30.2741, 80]},
+            {name: '成都', value: [104.0665, 30.5723, 75]},
+            {name: '武汉', value: [114.3054, 30.5931, 70]}
+        ];
+        
+        // Randomly boost one city
+        const target = Math.floor(Math.random() * cities.length);
+        cities[target].value[2] = 150; // Spike
+        
+        charts.map.setOption({
+            series: [{ data: cities }]
+        });
+        
+        // Reset after short delay
+        setTimeout(() => {
+            cities[target].value[2] = 100 - target * 5; // Rough original value
+            charts.map.setOption({ series: [{ data: cities }] });
+        }, 500);
+        
+    }, 1500);
+}
+
 // Start
 initAllCharts();
+startDataSimulation();
 
 
 
