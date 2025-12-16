@@ -4,84 +4,114 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>双十一用户行为热力分析</title>
+    <title>双十一用户画像分析</title>
     <link rel="stylesheet" href="css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
-    <!-- World Map Data -->
-    <script src="https://fastly.jsdelivr.net/npm/echarts@4.9.0/map/js/world.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts-gl@2.0.9/dist/echarts-gl.min.js"></script>
+    <!-- Map Data -->
+    <script src="https://fastly.jsdelivr.net/npm/echarts@4.9.0/map/js/china.js"></script>
 </head>
 
 <body>
+    <!-- Background Particles -->
+    <canvas id="particle-canvas"></canvas>
+    
+    <!-- Holographic Scan Overlay -->
+    <div class="scan-overlay"></div>
+
     <div class="container">
         <!-- Header -->
         <header class="header">
             <div class="header-left">
-                <div class="filter-group">
-                    <select id="user-filter">
-                        <option value="all">全部用户</option>
-                        <option value="vip">VIP用户</option>
-                        <option value="new">新用户</option>
-                    </select>
-                    <button id="compare-btn" class="action-btn">同期对比</button>
-                </div>
             </div>
             <div class="header-center">
                 <div class="title-container">
-                    <div class="header-title">双十一用户行为热力分析</div>
-                    <div class="header-subtitle">USER BEHAVIOR HEATMAP ANALYSIS</div>
+                    <div class="main-title">双十一用户画像分析</div>
                 </div>
             </div>
             <div class="header-right">
                 <div class="refresh-time">数据更新于: <span id="timestamp">--:--:--</span></div>
-                <button id="export-btn" class="action-btn">导出数据</button>
                 <button id="back-btn" class="back-btn" onclick="window.location.href='../../index.html'">返回大屏</button>
             </div>
         </header>
 
         <!-- Main Content -->
         <main class="main-content">
-            <!-- Left Column: Visualization (70%) -->
+            <!-- Left Column -->
             <div class="column left-column">
-                <div class="row-split large-row">
-                    <div class="panel-box">
-                        <div class="panel-header">
-                            <span>时间维度热力图 (24h x 11天)</span>
-                            <div class="panel-controls">
-                                <span class="control-item active" data-type="uv">浏览UV</span>
-                                <span class="control-item" data-type="order">下单量</span>
-                                <span class="control-item" data-type="gmv">GMV</span>
-                            </div>
-                        </div>
-                        <div class="chart-container" id="time-heatmap"></div>
+                <div class="panel-box">
+                    <div class="panel-header">基础属性：性别分布</div>
+                    <div class="chart-container" id="gender-chart"></div>
+                </div>
+                <div class="panel-box">
+                    <div class="panel-header">社会属性：职业分布</div>
+                    <div class="chart-container" id="occupation-chart"></div>
+                </div>
+                <div class="panel-box">
+                    <div class="panel-header">基础属性：年龄分布</div>
+                    <div class="chart-container" id="age-chart"></div>
+                </div>
+            </div>
+
+            <!-- Center Column -->
+            <div class="column center-column">
+                <div class="kpi-banner" id="total-users-kpi">
+                    <div class="kpi-item">
+                        <div class="kpi-label">累计活跃用户数</div>
+                        <div class="kpi-num" id="total-user-num">8,942,105</div>
                     </div>
-                    <div class="panel-box">
-                        <div class="panel-header">地理热力图 (活跃度分布)</div>
-                        <div class="chart-container" id="geo-heatmap"></div>
+                    <div class="kpi-item">
+                        <div class="kpi-label">新增用户占比</div>
+                        <div class="kpi-num highlight" id="new-user-rate">12.5%</div>
                     </div>
                 </div>
-                <div class="row-split small-row">
-                    <div class="panel-box">
-                        <div class="panel-header">用户行为路径热力 (浏览 -> 支付)</div>
-                        <div class="chart-container" id="behavior-path"></div>
+                <div class="panel-box map-panel">
+                    <div class="panel-header">地域分布：用户来源</div>
+                    <div class="chart-container" id="user-map"></div>
+                    
+                    <!-- Super User Card (Hidden by default) -->
+                    <div id="super-user-card" class="user-card hidden">
+                        <div class="card-header">
+                            <div class="avatar"></div>
+                            <div class="user-info">
+                                <div class="user-id">ID: 8848_Titan</div>
+                                <div class="user-tag">超级会员</div>
+                            </div>
+                            <div class="close-btn" onclick="closeUserCard()">×</div>
+                        </div>
+                        <div class="card-body">
+                            <div class="stat-row">
+                                <span>年度消费:</span> <span class="highlight">¥ 128,400</span>
+                            </div>
+                            <div class="stat-row">
+                                <span>偏好关键词:</span> <span>数码 / 极客 / 摄影</span>
+                            </div>
+                            <div class="radar-mini" id="user-radar-mini"></div>
+                        </div>
                     </div>
-                    <div class="panel-box">
-                        <div class="panel-header">商品偏好热力矩阵 (品类 x 用户标签)</div>
-                        <div class="chart-container" id="preference-heatmap"></div>
+
+                    <!-- Time Slider -->
+                    <div class="time-control">
+                        <div class="time-label">11.01</div>
+                        <input type="range" min="1" max="11" value="11" class="time-slider" id="time-slider" oninput="updateTime(this.value)">
+                        <div class="time-label">11.11</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Right Column: Details (30%) -->
+            <!-- Right Column -->
             <div class="column right-column">
                 <div class="panel-box">
-                    <div class="panel-header">用户分群统计</div>
-                    <div class="chart-container" id="user-segment-chart"></div>
+                    <div class="panel-header">趣味属性：星座分布</div>
+                    <div class="chart-container" id="zodiac-chart"></div>
                 </div>
                 <div class="panel-box">
-                    <div class="panel-header">关键行为指标</div>
-                    <div class="kpi-list" id="behavior-kpi">
-                        <!-- Injected by JS -->
-                    </div>
+                    <div class="panel-header">消费属性：消费能力</div>
+                    <div class="chart-container" id="consumption-chart"></div>
+                </div>
+                <div class="panel-box">
+                    <div class="panel-header">行为属性：兴趣偏好</div>
+                    <div class="chart-container" id="interest-chart"></div>
                 </div>
             </div>
         </main>

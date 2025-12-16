@@ -41,10 +41,13 @@
             position: absolute;
             width: 100%;
             height: 100%;
-            background-image: linear-gradient(rgba(0, 234, 255, 0.1) 1px, transparent 1px),
+            /* background-image: linear-gradient(rgba(0, 234, 255, 0.1) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(0, 234, 255, 0.1) 1px, transparent 1px);
             background-size: 50px 50px;
-            animation: gridMove 20s linear infinite;
+            animation: gridMove 20s linear infinite; */
+            /* User requested removal for more natural look */
+            background: radial-gradient(circle at center, rgba(14, 19, 41, 0) 0%, rgba(0, 0, 0, 0.4) 100%);
+            /* Subtle vignette instead */
         }
 
         @keyframes gridMove {
@@ -54,6 +57,39 @@
 
             100% {
                 transform: translate(50px, 50px);
+            }
+        }
+
+        /* Stars */
+        #star-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .star {
+            position: absolute;
+            background: #fff;
+            border-radius: 50%;
+            opacity: 0.8;
+            animation: twinkle var(--duration) ease-in-out infinite;
+        }
+
+        @keyframes twinkle {
+
+            0%,
+            100% {
+                opacity: 0.3;
+                transform: scale(0.8);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1.2);
             }
         }
 
@@ -218,10 +254,10 @@
 
         .panel {
             position: absolute;
-            width: 330px;
-            /* Reduced from 380px */
-            height: 250px;
-            /* Reduced from 280px */
+            width: 400px;
+            /* Increased from 330px for more prominence */
+            height: 290px;
+            /* Increased from 250px for more prominence */
             background: rgba(16, 22, 58, 0.75);
             border: 1px solid #00eaff;
             box-shadow: 0 0 20px rgba(0, 234, 255, 0.15) inset;
@@ -278,12 +314,14 @@
         }
 
         .panel.bottom-left {
-            bottom: 40px;
+            bottom: 60px;
+            /* Moved up from 40px */
             left: 30px;
         }
 
         .panel.bottom-right {
-            bottom: 40px;
+            bottom: 60px;
+            /* Moved up from 40px */
             right: 30px;
         }
 
@@ -308,18 +346,21 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
+            /* Reduced from 20px to save space */
         }
 
         .panel-title {
-            font-size: 16px;
+            font-size: 18px;
+            /* Increased from 16px for larger panels */
             font-weight: bold;
             color: #00eaff;
             text-shadow: 0 0 10px rgba(0, 234, 255, 0.5);
         }
 
         .panel-icon {
-            font-size: 28px;
+            font-size: 32px;
+            /* Increased from 28px for larger panels */
             color: #ff3366;
         }
 
@@ -337,14 +378,17 @@
         .product-list {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 10px;
+            /* Increased from 8px for larger panels */
         }
 
         .product-item {
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 6px 8px;
+            gap: 12px;
+            /* Increased from 10px */
+            padding: 8px 10px;
+            /* Increased from 6px 8px */
             background: rgba(0, 0, 0, 0.2);
             border-radius: 4px;
             border-left: 2px solid #ff3366;
@@ -357,10 +401,12 @@
         }
 
         .product-rank {
-            font-size: 16px;
+            font-size: 18px;
+            /* Increased from 16px for larger panels */
             font-weight: bold;
             color: #ffd700;
-            min-width: 20px;
+            min-width: 24px;
+            /* Increased from 20px */
         }
 
         .product-info {
@@ -368,13 +414,15 @@
         }
 
         .product-name {
-            font-size: 11px;
+            font-size: 12px;
+            /* Increased from 11px for larger panels */
             color: #fff;
             margin-bottom: 3px;
         }
 
         .product-sales {
-            font-size: 9px;
+            font-size: 10px;
+            /* Increased from 9px for larger panels */
             color: #00eaff;
         }
 
@@ -386,7 +434,8 @@
         }
 
         .region-item {
-            padding: 6px 8px;
+            padding: 8px 10px;
+            /* Increased from 6px 8px for larger panels */
             background: rgba(0, 0, 0, 0.2);
             border-radius: 4px;
             display: flex;
@@ -396,12 +445,14 @@
 
         .region-name {
             color: #fff;
-            font-size: 11px;
+            font-size: 12px;
+            /* Increased from 11px for larger panels */
         }
 
         .region-value {
             color: #ffd700;
-            font-size: 11px;
+            font-size: 12px;
+            /* Increased from 11px for larger panels */
             font-weight: bold;
         }
 
@@ -421,6 +472,38 @@
         }
 
         /* 物流统计 */
+        .cainiao-stat-box {
+            background: rgba(0, 234, 255, 0.05);
+            border: 1px solid rgba(0, 234, 255, 0.2);
+            padding: 6px;
+            /* Increased from 5px for larger panels */
+            margin-bottom: 6px;
+            /* Increased from 5px */
+            position: relative;
+        }
+
+        .cainiao-stat-box::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: -1px;
+            width: 10px;
+            height: 10px;
+            border-top: 2px solid #00eaff;
+            border-left: 2px solid #00eaff;
+        }
+
+        .cainiao-stat-box::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            right: -1px;
+            width: 10px;
+            height: 10px;
+            border-bottom: 2px solid #00eaff;
+            border-right: 2px solid #00eaff;
+        }
+
         .logistics-stats {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -430,20 +513,23 @@
         .stat-card {
             background: rgba(0, 0, 0, 0.3);
             border-radius: 6px;
-            padding: 10px;
+            padding: 12px;
+            /* Increased from 10px for larger panels */
             text-align: center;
             border: 1px solid rgba(0, 234, 255, 0.2);
         }
 
         .stat-value {
-            font-size: 20px;
+            font-size: 22px;
+            /* Increased from 20px for larger panels */
             font-weight: bold;
             color: #00eaff;
             margin-bottom: 3px;
         }
 
         .stat-label {
-            font-size: 10px;
+            font-size: 11px;
+            /* Increased from 10px for larger panels */
             color: #999;
         }
 
@@ -465,12 +551,469 @@
             font-family: 'Arial', monospace;
             text-shadow: 0 0 10px rgba(0, 234, 255, 0.5);
         }
+
+        /* User Portrait Grid */
+        .chart-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 5px;
+            padding: 5px;
+            height: 100%;
+        }
+
+        .chart-item {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* border: 1px dashed rgba(255,255,255,0.1); Debugging */
+        }
+
+        /* New Panel Styles - Compacted */
+        .panel-content {
+            /* Global shrink to fit small containers */
+            transform: scale(0.98);
+            transform-origin: center top;
+            height: 98% !important;
+        }
+
+        .panel-subtitle {
+            font-size: 8px;
+            /* Reduced */
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 0px;
+            margin-bottom: 2px;
+        }
+
+        /* Top Left: Hot Selling */
+        .hot-tabs {
+            display: flex;
+            gap: 15px;
+            /* Increased from 5px to fill space */
+            margin-bottom: 5px;
+            /* Reduced further */
+            border-bottom: 1px solid rgba(0, 234, 255, 0.2);
+            padding-bottom: 5px;
+        }
+
+        .hot-tab {
+            font-size: 14px;
+            /* Increased from 10px */
+            color: #00eaff;
+            cursor: pointer;
+            padding: 2px 8px;
+            /* Reduced vertical padding */
+            border: 1px solid transparent;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .hot-tab.active,
+        .hot-tab:hover {
+            background: rgba(0, 234, 255, 0.1);
+            border: 1px solid #00eaff;
+            box-shadow: 0 0 5px rgba(0, 234, 255, 0.2) inset;
+        }
+
+        .ranking-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+            /* Increased from 5px */
+            height: calc(100% - 60px) !important;
+            /* Adjusted */
+            overflow: hidden;
+        }
+
+        .rank-column {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .rank-header {
+            font-size: 11px;
+            /* Increased from 9px */
+            color: #fff;
+            margin-bottom: 4px;
+            /* Reduced from 8px */
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 4px;
+            line-height: 1.2;
+        }
+
+        .rank-header span {
+            display: block;
+            font-size: 9px;
+            /* Increased from 7px */
+            color: #666;
+            transform: scale(1);
+            /* Removed scale reduction */
+            white-space: nowrap;
+        }
+
+        .rank-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            /* Increased from 2px */
+            overflow-y: hidden;
+            /* Prevent scrollbar */
+        }
+
+        .rank-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
+            /* Increased from 9px */
+            font-size: 11px;
+            /* Increased from 9px */
+            padding: 2px 6px;
+            /* Reduced padding */
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 2px;
+            height: 20px;
+            /* Reduced height */
+        }
+
+        .rank-item:nth-child(1) {
+            color: #ffd700;
+            background: rgba(255, 215, 0, 0.1);
+        }
+
+        .rank-item:nth-child(2) {
+            color: #c0c0c0;
+            background: rgba(192, 192, 192, 0.1);
+        }
+
+        .rank-item:nth-child(3) {
+            color: #cd7f32;
+            background: rgba(205, 127, 50, 0.1);
+        }
+
+        .ticker-footer {
+            position: absolute;
+            bottom: 2px;
+            left: 5px;
+            right: 5px;
+            height: 20px;
+            /* Reduced */
+            background: rgba(0, 50, 100, 0.5);
+            border: 1px solid rgba(0, 234, 255, 0.3);
+            display: flex;
+            align-items: center;
+            padding: 0 5px;
+            font-size: 9px;
+        }
+
+        .ticker-label {
+            color: #00eaff;
+            margin-right: 5px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .ticker-content {
+            display: flex;
+            gap: 10px;
+            color: #fff;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .badge {
+            background: #ff9900;
+            color: #000;
+            border-radius: 50%;
+            width: 12px;
+            /* Reduced */
+            height: 12px;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 9px;
+            margin-right: 3px;
+        }
+
+        /* Bottom Left: Logistics */
+        .logistics-layout {
+            display: flex;
+            position: relative;
+            height: 100%;
+        }
+
+        .logistics-sidebar {
+            width: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            z-index: 2;
+        }
+
+        .logistics-right {
+            position: absolute;
+            top: 0;
+            right: 0;
+            z-index: 2;
+            text-align: right;
+        }
+
+        .stat-group {
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            color: #ffd700;
+            /* Yellow title */
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .stat-sublabel {
+            color: #666;
+            font-size: 8px;
+            margin-bottom: 3px;
+        }
+
+        .stat-big-num {
+            font-family: 'Orbitron', monospace;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .stat-big-num.highlight {
+            color: #ffff00;
+            text-shadow: 0 0 10px rgba(255, 255, 0, 0.5);
+        }
+
+        .stat-big-num.blue {
+            color: #00eaff;
+            text-shadow: 0 0 10px rgba(0, 234, 255, 0.5);
+        }
+
+        .stat-item {
+            font-size: 10px;
+            color: #00eaff;
+            margin-bottom: 5px;
+        }
+
+        .stat-item .dim {
+            color: #fff;
+            margin-left: 5px;
+        }
+
+        .legend-box {
+            font-size: 9px;
+            color: #fff;
+        }
+
+        .legend-box div {
+            margin-bottom: 2px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .dot.normal {
+            background: #00eaff;
+            box-shadow: 0 0 5px #00eaff;
+        }
+
+        .dot.busy {
+            background: #ffd700;
+            box-shadow: 0 0 5px #ffd700;
+        }
+
+        .dot.overload {
+            background: #ff3366;
+            box-shadow: 0 0 5px #ff3366;
+        }
+
+        .logistics-map {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 250px;
+            height: 180px;
+            z-index: 1;
+            /* Border/Box styling similar to image */
+            border: 1px solid rgba(0, 100, 255, 0.3);
+            background: rgba(0, 20, 60, 0.4);
+            box-shadow: 0 0 15px rgba(0, 100, 255, 0.2) inset;
+        }
+
+        /* Top Right: Regional */
+        .regional-layout {
+            display: flex;
+            height: 100%;
+            gap: 10px;
+        }
+
+        .regional-map-container {
+            flex: 1.5;
+            position: relative;
+            background: rgba(0, 20, 60, 0.2);
+            /* Minimal styling, mainly map holder */
+        }
+
+        .map-overlay-info {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 30, 80, 0.8);
+            border: 1px solid #00eaff;
+            padding: 5px;
+            border-radius: 4px;
+            width: 100px;
+        }
+
+        .info-title {
+            font-size: 12px;
+            color: #00eaff;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .bar-row {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 9px;
+            color: #fff;
+            margin-bottom: 2px;
+        }
+
+        .bar-bg {
+            flex: 1;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+        }
+
+        .bar-val {
+            height: 100%;
+            background: #00eaff;
+            border-radius: 2px;
+        }
+
+        .regional-list-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            /* Heavily reduced */
+            overflow: visible;
+        }
+
+        .list-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: visible;
+        }
+
+        .list-title {
+            font-size: 9px;
+            /* Reduced */
+            color: #fff;
+            margin-bottom: 0;
+            line-height: 1.2;
+        }
+
+        .list-sub {
+            font-size: 7px;
+            /* Reduced */
+            color: #666;
+            margin-bottom: 2px;
+            white-space: nowrap;
+            transform: scale(0.9);
+            transform-origin: left top;
+        }
+
+        .ranking-simple {
+            list-style: none;
+            padding: 0;
+            font-size: 9px;
+            /* Reduced */
+            color: #fff;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-evenly;
+            /* Distribute items */
+        }
+
+        .ranking-simple li {
+            display: flex;
+            align-items: center;
+            padding: 0 5px;
+            /* Removed background/border */
+            border-bottom: none;
+            background: transparent;
+            margin-bottom: 0px;
+            /* Spacing */
+            border-radius: 0;
+        }
+
+        .ranking-simple li:nth-child(1) {
+            background: transparent;
+            border-left: none;
+        }
+
+        .ranking-simple li:nth-child(2) {
+            background: transparent;
+            border-left: none;
+        }
+
+        .ranking-simple li:nth-child(3) {
+            background: transparent;
+            border-left: none;
+        }
+
+        .ranking-simple .r-num {
+            display: inline-block;
+            width: 15px;
+            font-weight: bold;
+            color: #fff;
+            text-align: left !important;
+            margin-right: 5px;
+            font-style: normal !important;
+        }
+
+
+
+
+
+        .ranking-simple li .r-bar {
+            height: 3px;
+            background: #00eaff;
+            margin-top: 3px;
+            width: 50%;
+            opacity: 0.5;
+        }
     </style>
 </head>
 
 <body>
     <div class="bg-decoration">
         <div class="bg-grid"></div>
+        <!-- Star container moved after bg-grid to be on top -->
+        <div id="star-container"></div>
     </div>
 
     <div class="clock" id="clock"></div>
@@ -519,20 +1062,316 @@
             <div class="panel top-left" id="hot-products" onclick="navigateTo('dashboard/sales_structure/index.html')"
                 style="cursor: pointer;">
                 <div class="panel-header">
-                    <div class="panel-title">🏆 全球热卖榜</div>
+                    <div class="panel-title">全球热卖榜</div>
+                    <div class="panel-subtitle">Global Top Selling</div>
                 </div>
-                <div class="panel-content">
-                    <div class="product-list" id="product-list"></div>
+                <div class="hot-tabs">
+                    <div class="hot-tab active">
+                        <i class="icon-mobile"></i> 手机
+                    </div>
+                    <div class="hot-tab">
+                        <i class="icon-dress"></i> 女装
+                    </div>
+                    <div class="hot-tab">
+                        <i class="icon-shirt"></i> 男装
+                    </div>
+                    <div class="hot-tab">
+                        <i class="icon-shoe"></i> 鞋子
+                    </div>
+                    <div class="hot-tab">
+                        <i class="icon-sport"></i> 运动户外
+                    </div>
+                </div>
+
+                <div class="panel-content ranking-container">
+                    <!-- Column 1: Brand GMV -->
+                    <div class="rank-column">
+                        <div class="rank-header">
+                            品牌销售额排行
+                            <span>Top brands by GMV</span>
+                        </div>
+                        <div class="rank-list" id="rank-gmv">
+                            <!-- populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Column 2: Sales Volume -->
+                    <div class="rank-column">
+                        <div class="rank-header">
+                            品牌销售量排行
+                            <span>Top Brands by Transaction Volume</span>
+                        </div>
+                        <div class="rank-list" id="rank-vol">
+                            <!-- populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Column 3: Merchant GMV -->
+                    <div class="rank-column">
+                        <div class="rank-header">
+                            商家销售额排行
+                            <span>Top Merchants by GMV</span>
+                        </div>
+                        <div class="rank-list" id="rank-merchant">
+                            <!-- populated by JS -->
+                        </div>
+                    </div>
+
+
+                </div>
+
+                <div class="ticker-footer">
+                    <div class="ticker-label">单品销售排行</div>
+                    <div class="ticker-content">
+                        <span><span class="badge">1</span> IPHONE6S</span>
+                        <span><span class="badge">2</span> IPHONE6S</span>
+                        <span><span class="badge">3</span> IPHONE6S</span>
+                    </div>
                 </div>
             </div>
 
             <!-- 右上:全国区域经济 -->
-            <div class="panel top-right" id="regional-sales">
+            <!-- 右上:全国区域经济 -->
+            <div class="panel top-right" id="regional-sales"
+                onclick="navigateTo('dashboard/regional_economy/index.html')" style="cursor: pointer;">
                 <div class="panel-header">
-                    <div class="panel-title">📊 全国区域经济</div>
+                    <div class="panel-title">全国区域经济</div>
+                    <div class="panel-subtitle">Nationwide Consumption Patterns</div>
                 </div>
-                <div class="panel-content">
-                    <div class="region-list" id="region-list"></div>
+                <div class="panel-content" style="display:flex; flex-direction:row; gap:10px; padding:0 10px 5px 10px;">
+                    <!-- Left: Map & Info -->
+                    <div
+                        style="flex:1.4; position:relative; display:flex; flex-direction:column; justify-content:flex-end; align-items:center;">
+                        <!-- Static Map Image -->
+                        <img src="img/map.png"
+                            style="width:100%; height:auto; display:block; opacity:1.0; margin-bottom: 45px; transform: scale(1.15);"
+                            alt="Map">
+
+                        <!-- Hubei Info Overlay (Card Style) - positioned top-center -->
+                        <div
+                            style="position:absolute; top:5px; left:50%; background:rgba(10,20,40,0.85); border:1px solid rgba(0,234,255,0.3); padding:4px 8px; border-radius:4px; box-shadow: 0 0 15px rgba(0,234,255,0.2); transform:translateX(-50%) scale(1.0); transform-origin:top center;">
+                            <div
+                                style="font-size:12px; color:#00eaff; font-weight:bold; margin-bottom:2px; letter-spacing:0.5px; white-space:nowrap;">
+                                湖北省 <span
+                                    style="font-size:8px; color:#666; font-weight:normal; margin-left:2px;">Hubei</span>
+                            </div>
+
+                            <!-- 2015 Bar -->
+                            <div style="margin-bottom:2px;">
+                                <div
+                                    style="display:flex; justify-content:space-between; font-size:8px; color:#fff; margin-bottom:1px;">
+                                    <span style="color:#00eaff;">2015</span>
+                                </div>
+                                <div style="height:3px; background:rgba(255,255,255,0.1); border-radius:1px;">
+                                    <div
+                                        style="width:80%; height:100%; background:#00eaff; box-shadow: 0 0 5px #00eaff; border-radius:1px;">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 2014 Bar -->
+                            <div style="margin-bottom:2px;">
+                                <div
+                                    style="display:flex; justify-content:space-between; font-size:8px; color:#fff; margin-bottom:1px;">
+                                    <span style="color:#0077aa;">2014</span>
+                                </div>
+                                <div style="height:3px; background:rgba(255,255,255,0.1); border-radius:1px;">
+                                    <div style="width:60%; height:100%; background:#0077aa; border-radius:1px;"></div>
+                                </div>
+                            </div>
+
+                            <!-- Arrow Indicator -->
+                            <div style="text-align:center; margin-top:2px;">
+                                <span style="font-size:9px; color:#ffd700; font-weight:bold;">▲ 10:05</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Two Lists (Stacked, No Scroll) -->
+                    <!-- ADJUSTED: Relaxed negative margin (-2px) to ensure title is fully visible. -->
+                    <div
+                        style="flex:1; display:flex; flex-direction:column; gap:0px; margin-top:-2px; margin-right:-5px; overflow:visible; padding-top: 5px;">
+
+                        <!-- Top List: Provinces -->
+                        <div style="display:flex; flex-direction:column; overflow:visible;">
+                            <!-- Removed manual padding-top on title as container handles it -->
+                            <div class="list-title" style="margin-bottom:0px; line-height:1;">
+                                <div style="font-size:9px; color:#fff; font-weight:bold; letter-spacing:-0.5px;">
+                                    消费省/地区排行</div>
+                                <div
+                                    style="font-size:6px; color:#666; text-transform:uppercase; transform:scale(0.85); transform-origin:left; margin-bottom:2px;">
+                                    Top Spending
+                                    Provinces/Regions</div>
+                            </div>
+                            <!-- Added pl-0 to remove default padding for strict alignment -->
+                            <ul class="ranking-simple" id="province-rank"
+                                style="display:flex; flex-direction:column; gap:3px; padding:0; margin:0; list-style:none;">
+                                <!-- Hardcoded Data with Bars -->
+                                <li style="display:flex; flex-direction:column; width:100%; padding:0;">
+                                    <div style="display:flex; align-items:baseline; width:100%; margin-bottom:1px;">
+                                        <div style="width:20px; min-width:20px; text-align:left;">
+                                            <span class="r-num"
+                                                style="display:inline-block; color:#00eaff; font-size:10px; font-weight:bold; font-family:sans-serif;">1</span>
+                                        </div>
+                                        <div style="flex:1; display:flex; align-items:baseline;">
+                                            <span
+                                                style="font-size:9px; color:#fff; font-weight:bold; margin-right:4px;">北京</span>
+                                            <span style="font-size:6px; color:#666;">Beijing</span>
+                                        </div>
+                                    </div>
+                                    <div style="width:100%; padding-left:20px; box-sizing:border-box;">
+                                        <div style="height:3px; background:rgba(255,255,255,0.1); width:100%;">
+                                            <div style="height:100%; width:95%; background:#00eaff;"></div>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li style="display:flex; flex-direction:column; width:100%; padding:0;">
+                                    <div style="display:flex; align-items:baseline; width:100%; margin-bottom:1px;">
+                                        <div style="width:20px; min-width:20px; text-align:left;">
+                                            <span class="r-num"
+                                                style="display:inline-block; color:#00eaff; font-size:10px; font-weight:bold; font-family:sans-serif;">2</span>
+                                        </div>
+                                        <div style="flex:1; display:flex; align-items:baseline;">
+                                            <span
+                                                style="font-size:9px; color:#fff; font-weight:bold; margin-right:4px;">上海</span>
+                                            <span style="font-size:6px; color:#666;">Shanghai</span>
+                                        </div>
+                                    </div>
+                                    <div style="width:100%; padding-left:20px; box-sizing:border-box;">
+                                        <div style="height:3px; background:rgba(255,255,255,0.1); width:100%;">
+                                            <div style="height:100%; width:85%; background:#0077aa;"></div>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li style="display:flex; flex-direction:column; width:100%; padding:0;">
+                                    <div style="display:flex; align-items:baseline; width:100%; margin-bottom:1px;">
+                                        <div style="width:20px; min-width:20px; text-align:left;">
+                                            <span class="r-num"
+                                                style="display:inline-block; color:#00eaff; font-size:10px; font-weight:bold; font-family:sans-serif;">3</span>
+                                        </div>
+                                        <div style="flex:1; display:flex; align-items:baseline;">
+                                            <span
+                                                style="font-size:9px; color:#fff; font-weight:bold; margin-right:4px;">广东</span>
+                                            <span style="font-size:6px; color:#666;">Guangdong</span>
+                                        </div>
+                                    </div>
+                                    <div style="width:100%; padding-left:20px; box-sizing:border-box;">
+                                        <div style="height:3px; background:rgba(255,255,255,0.1); width:100%;">
+                                            <div style="height:100%; width:70%; background:#0077aa;"></div>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li style="display:flex; flex-direction:column; width:100%; padding:0;">
+                                    <div style="display:flex; align-items:baseline; width:100%; margin-bottom:1px;">
+                                        <div style="width:20px; min-width:20px; text-align:left;">
+                                            <span class="r-num"
+                                                style="display:inline-block; color:#00eaff; font-size:10px; font-weight:bold; font-family:sans-serif;">4</span>
+                                        </div>
+                                        <div style="flex:1; display:flex; align-items:baseline;">
+                                            <span
+                                                style="font-size:9px; color:#fff; font-weight:bold; margin-right:4px;">浙江</span>
+                                            <span style="font-size:6px; color:#666;">Zhejiang</span>
+                                        </div>
+                                    </div>
+                                    <div style="width:100%; padding-left:20px; box-sizing:border-box;">
+                                        <div style="height:3px; background:rgba(255,255,255,0.1); width:100%;">
+                                            <div style="height:100%; width:60%; background:#0077aa;"></div>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- Bottom List: Counties -->
+                        <!-- Kept top margin (2px) as user didn't ask to change this internal gap, only to move "the block" up -->
+                        <div
+                            style="display:flex; flex-direction:column; overflow:visible; border-top:1px dashed rgba(255,255,255,0.1); padding-top:4px; margin-top:2px;">
+                            <div class="list-title" style="margin-bottom:2px; line-height:1;">
+                                <div style="font-size:9px; color:#fff; font-weight:bold; letter-spacing:-0.5px;">消费县排行
+                                </div>
+                                <div
+                                    style="font-size:6px; color:#666; text-transform:uppercase; transform:scale(0.85); transform-origin:left;">
+                                    Top Spending Counties
+                                </div>
+                            </div>
+                            <ul class="ranking-simple" id="county-rank"
+                                style="display:flex; flex-direction:column; gap:3px; padding:0; margin:0 0 5px 0; list-style:none;">
+                                <!-- Hardcoded Data with Bars -->
+                                <li style="display:flex; flex-direction:column; width:100%; padding:0;">
+                                    <div style="display:flex; align-items:baseline; width:100%; margin-bottom:1px;">
+                                        <div style="width:20px; min-width:20px; text-align:left;">
+                                            <span class="r-num"
+                                                style="display:inline-block; color:#00eaff; font-size:10px; font-weight:bold; font-family:sans-serif;">1</span>
+                                        </div>
+                                        <div style="flex:1; display:flex; align-items:baseline;">
+                                            <span
+                                                style="font-size:9px; color:#fff; font-weight:bold; margin-right:4px;">江苏常州</span>
+                                            <span style="font-size:6px; color:#666;">Changzhou</span>
+                                        </div>
+                                    </div>
+                                    <div style="width:100%; padding-left:20px; box-sizing:border-box;">
+                                        <div style="height:3px; background:rgba(255,255,255,0.1); width:100%;">
+                                            <div style="height:100%; width:92%; background:#00eaff;"></div>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li style="display:flex; flex-direction:column; width:100%; padding:0;">
+                                    <div style="display:flex; align-items:baseline; width:100%; margin-bottom:1px;">
+                                        <div style="width:20px; min-width:20px; text-align:left;">
+                                            <span class="r-num"
+                                                style="display:inline-block; color:#00eaff; font-size:10px; font-weight:bold; font-family:sans-serif;">2</span>
+                                        </div>
+                                        <div style="flex:1; display:flex; align-items:baseline;">
+                                            <span
+                                                style="font-size:9px; color:#fff; font-weight:bold; margin-right:4px;">江苏苏州</span>
+                                            <span style="font-size:6px; color:#666;">Suzhou</span>
+                                        </div>
+                                    </div>
+                                    <div style="width:100%; padding-left:20px; box-sizing:border-box;">
+                                        <div style="height:3px; background:rgba(255,255,255,0.1); width:100%;">
+                                            <div style="height:100%; width:82%; background:#0077aa;"></div>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li style="display:flex; flex-direction:column; width:100%; padding:0;">
+                                    <div style="display:flex; align-items:baseline; width:100%; margin-bottom:1px;">
+                                        <div style="width:20px; min-width:20px; text-align:left;">
+                                            <span class="r-num"
+                                                style="display:inline-block; color:#00eaff; font-size:10px; font-weight:bold; font-family:sans-serif;">3</span>
+                                        </div>
+                                        <div style="flex:1; display:flex; align-items:baseline;">
+                                            <span
+                                                style="font-size:9px; color:#fff; font-weight:bold; margin-right:4px;">浙江义乌</span>
+                                            <span style="font-size:6px; color:#666;">Yiwu</span>
+                                        </div>
+                                    </div>
+                                    <div style="width:100%; padding-left:20px; box-sizing:border-box;">
+                                        <div style="height:3px; background:rgba(255,255,255,0.1); width:100%;">
+                                            <div style="height:100%; width:72%; background:#0077aa;"></div>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li style="display:flex; flex-direction:column; width:100%; padding:0;">
+                                    <div style="display:flex; align-items:baseline; width:100%; margin-bottom:1px;">
+                                        <div style="width:20px; min-width:20px; text-align:left;">
+                                            <span class="r-num"
+                                                style="display:inline-block; color:#00eaff; font-size:10px; font-weight:bold; font-family:sans-serif;">4</span>
+                                        </div>
+                                        <div style="flex:1; display:flex; align-items:baseline;">
+                                            <span
+                                                style="font-size:9px; color:#fff; font-weight:bold; margin-right:4px;">广东东莞</span>
+                                            <span style="font-size:6px; color:#666;">Dongguan</span>
+                                        </div>
+                                    </div>
+                                    <div style="width:100%; padding-left:20px; box-sizing:border-box;">
+                                        <div style="height:3px; background:rgba(255,255,255,0.1); width:100%;">
+                                            <div style="height:100%; width:62%; background:#0077aa;"></div>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -540,10 +1379,125 @@
             <div class="panel bottom-left" id="logistics" onclick="navigateTo('dashboard/index_bundled.html')"
                 style="cursor: pointer;">
                 <div class="panel-header">
-                    <div class="panel-title">🚚 菜鸟网络-仓配协同</div>
+                    <div class="panel-title">菜鸟网络 - 仓配协同</div>
+                    <div class="panel-subtitle">Global Trading Trends</div>
                 </div>
-                <div class="panel-content">
-                    <div class="logistics-stats" id="logistics-stats"></div>
+                <div class="panel-content logistics-layout"
+                    style="display: flex; flex-direction: column; gap: 3px; padding: 4px 10px 35px 10px;">
+                    <!-- Top Stats Row -->
+                    <div style="display: flex; gap: 8px; width: 100%; flex: 0.8;">
+                        <div class="cainiao-stat-box"
+                            style="flex:1; display:flex; flex-direction:column; justify-content:center;">
+                            <div class="stat-label">累计物流订单量</div>
+                            <div class="stat-sublabel">Orders</div>
+                            <div class="stat-big-num highlight">323,595,522</div>
+                        </div>
+                        <div class="cainiao-stat-box"
+                            style="flex:1; display:flex; flex-direction:column; justify-content:center;">
+                            <div class="stat-label">电子面单量</div>
+                            <div class="stat-sublabel">e-Waybills</div>
+                            <div class="stat-big-num blue">198,432,110</div>
+                        </div>
+                    </div>
+
+                    <!-- Middle: Data Visualization Components -->
+                    <div style="flex: 1.2; display: flex; gap: 8px;">
+                        <!-- Left: Delivery Speed Gauge -->
+                        <div
+                            style="flex: 1; position: relative; border: 1px solid rgba(0,234,255,0.1); background: rgba(0,0,0,0.2); display: flex; flex-direction: column; padding: 6px;">
+                            <div
+                                style="font-size: 9px; color: #00eaff; text-align: center; margin-bottom: 2px; display: flex; align-items: flex-start; justify-content: center; flex-direction: column;">
+                                <div>平均配送时长</div>
+                                <div style="font-size: 7px; color: #999;">Avg Delivery Time</div>
+                            </div>
+                            <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
+                                <div class="stat-big-num highlight"
+                                    style="font-size: 20px; text-shadow: 0 0 10px rgba(255,255,0,0.3);">2.4
+                                    <span style="font-size: 10px; color:#fff;">Days</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Middle: Order Status Pie Chart -->
+                        <div
+                            style="flex: 1; position: relative; border: 1px solid rgba(0,234,255,0.1); background: rgba(0,0,0,0.2); display: flex; flex-direction: column; padding: 6px;">
+                            <div
+                                style="font-size: 9px; color: #00eaff; text-align: center; margin-bottom: 2px; display: flex; align-items: flex-start; justify-content: center; flex-direction: column;">
+                                <div>订单状态分布</div>
+                                <div style="font-size: 7px; color: #999;">Order Status</div>
+                            </div>
+                            <div
+                                style="flex: 1; width:100%; font-size: 7px; color:#fff; padding: 2px; display: flex; flex-direction: column; justify-content: center;">
+                                <div
+                                    style="display:flex; justify-content:space-between; margin-bottom:2px; align-items: center;">
+                                    <span style="color:#00eaff; display:flex; align-items:center; gap:2px;"><span
+                                            style="display:inline-block; width:4px; height:4px; background:#00eaff; border-radius:50%;"></span>
+                                        Signed</span>
+                                    <span>85%</span>
+                                </div>
+                                <div
+                                    style="display:flex; justify-content:space-between; margin-bottom:2px; align-items: center;">
+                                    <span style="color:#ffd700; display:flex; align-items:center; gap:2px;"><span
+                                            style="display:inline-block; width:4px; height:4px; background:#ffd700; border-radius:50%;"></span>
+                                        Transit</span>
+                                    <span>12%</span>
+                                </div>
+                                <div style="display:flex; justify-content:space-between; align-items: center;">
+                                    <span style="color:#ff3366; display:flex; align-items:center; gap:2px;"><span
+                                            style="display:inline-block; width:4px; height:4px; background:#ff3366; border-radius:50%;"></span>
+                                        Issue</span>
+                                    <span>3%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right: Top Couriers Bar Chart -->
+                        <div
+                            style="flex: 1; position: relative; border: 1px solid rgba(0,234,255,0.1); background: rgba(0,0,0,0.2); display: flex; flex-direction: column; padding: 6px;">
+                            <div
+                                style="font-size: 9px; color: #00eaff; text-align: center; margin-bottom: 5px; display: flex; align-items: flex-start; justify-content: center; flex-direction: column;">
+                                <div>TOP 5 快递公司</div>
+                                <div style="font-size: 7px; color: #999;">Top Couriers</div>
+                            </div>
+                            <div
+                                style="flex: 1; width:100%; font-size: 7px; color:#fff; padding: 0 5px; display: flex; flex-direction: column; justify-content: center;">
+                                <div style="margin-bottom:3px; display:flex; align-items:center; gap:3px;">
+                                    <div style="width:20px; text-align:right;">SF</div>
+                                    <div
+                                        style="flex:1; height:3px; background:rgba(255,255,255,0.1); border-radius: 1px;">
+                                        <div style="width:95%; height:100%; background:#00eaff; border-radius: 1px;">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="margin-bottom:3px; display:flex; align-items:center; gap:3px;">
+                                    <div style="width:20px; text-align:right;">YTO</div>
+                                    <div
+                                        style="flex:1; height:3px; background:rgba(255,255,255,0.1); border-radius: 1px;">
+                                        <div style="width:80%; height:100%; background:#00eaff; border-radius: 1px;">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="margin-bottom:3px; display:flex; align-items:center; gap:3px;">
+                                    <div style="width:20px; text-align:right;">ZTO</div>
+                                    <div
+                                        style="flex:1; height:3px; background:rgba(255,255,255,0.1); border-radius: 1px;">
+                                        <div style="width:75%; height:100%; background:#00eaff; border-radius: 1px;">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="margin-bottom:0px; display:flex; align-items:center; gap:3px;">
+                                    <div style="width:20px; text-align:right;">STO</div>
+                                    <div
+                                        style="flex:1; height:3px; background:rgba(255,255,255,0.1); border-radius: 1px;">
+                                        <div style="width:60%; height:100%; background:#00eaff; border-radius: 1px;">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
                 </div>
             </div>
 
@@ -551,16 +1505,37 @@
             <div class="panel bottom-right" id="user-portrait" onclick="navigateTo('dashboard/user_heatmap/index.html')"
                 style="cursor: pointer;">
                 <div class="panel-header">
-                    <div class="panel-title">👥 用户画像分析</div>
+                    <div class="panel-title">用户画像分析</div>
+                    <div class="panel-subtitle">USER PORTRAIT ANALYSIS</div>
                 </div>
-                <div class="panel-content">
-                    <div class="user-chart" id="user-chart"></div>
+                <div class="panel-content"
+                    style="display:flex; flex-direction:column; gap:8px; padding:8px; position:relative; height: calc(100% - 45px);">
+
+                    <!-- Top Row: Gender and Radars -->
+                    <div style="flex:1.2; display:flex; width:100%; gap: 8px;">
+                        <!-- Left: Gender Ratio -->
+                        <div id="user-gender-ratio" style="flex: 1; position:relative;"></div>
+
+                        <!-- Right: Occupation Radar -->
+                        <div id="user-occupation-radar" style="flex: 1.2; position:relative;"></div>
+                    </div>
+
+                    <!-- Bottom Row: Mountain and Bars -->
+                    <div
+                        style="flex:0.8; display:flex; border-top:1px dashed rgba(255,255,255,0.1); padding-top:8px; gap: 8px; margin-bottom: 5px;">
+                        <!-- Left: Zodiac Bars -->
+                        <div id="user-zodiac-bars" style="flex: 1.5; position:relative;"></div>
+
+                        <!-- Right: Generation Mountain -->
+                        <div id="user-generation-mountain" style="flex: 1; position:relative;"></div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
+        console.log('=== SCRIPT TAG STARTED ===');
         // 导航函数
         function navigateTo(url) {
             window.location.href = url;
@@ -1016,20 +1991,62 @@
             { name: '家居用品', sales: 4321098 }
         ];
 
-        function renderProducts() {
-            const list = document.getElementById('product-list');
-            // Limit to Top 5 for summary view
-            list.innerHTML = products.slice(0, 5).map((p, i) => `
-                <div class="product-item">
-                    <span class="product-rank">${i + 1}</span>
-                    <div class="product-info">
-                        <div class="product-name">${p.name}</div>
-                        <div class="product-sales">销量: ${p.sales.toLocaleString()}</div>
+        // Global Hot Selling - 3 Column Rankings
+        function renderRankings() {
+            // Data matching reference image
+            const rankingData = {
+                gmv: [
+                    { name: '小米', val: '' },
+                    { name: '华为', val: '' },
+                    { name: '苹果', val: '' },
+                    { name: '锤子科技', val: '' },
+                    { name: '魅族', val: '' }
+                ],
+                vol: [
+                    { name: '小米', val: '' },
+                    { name: '华为', val: '' },
+                    { name: '苹果', val: '' },
+                    { name: '锤子科技', val: '' },
+                    { name: '魅族', val: '' }
+                ],
+                merch: [
+                    { name: '小米', val: '' },
+                    { name: '华为', val: '' },
+                    { name: '苹果', val: '' },
+                    { name: '锤子科技', val: '' },
+                    { name: '魅族', val: '' }
+                ]
+            };
+
+            const renderList = (id, data) => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.innerHTML = data.map((item, i) => `
+                    <div class="rank-item">
+                        <span style="width:10px;text-align:center;font-weight:bold;margin-right:5px;">${i + 1}</span>
+                        <span style="flex:1;text-align:right;">${item.name}</span>
                     </div>
-                </div>
-            `).join('');
+                `).join('');
+            };
+
+            renderList('brand-gmv', rankingData.gmv);
+            renderList('brand-vol', rankingData.vol);
+            renderList('merch-gmv', rankingData.merch);
+
+            // Ticker (Bottom)
+            const ticker = document.getElementById('hot-ticker');
+            if (ticker) {
+                ticker.innerHTML = `
+                    <div class="ticker-content" style="display:flex;gap:15px;align-items:center;">
+                        <span class="ticker-label" style="color:#00eaff;">单品销售排行</span>
+                        <span class="badge" style="background:#ff9900;color:#000;padding:0 4px;border-radius:2px;font-weight:bold;">1</span> IPHONE6S
+                        <span class="badge" style="background:#ffcc00;color:#000;padding:0 4px;border-radius:2px;font-weight:bold;">2</span> IPHONE6S PLUS
+                        <span class="badge" style="background:#ffd700;color:#000;padding:0 4px;border-radius:2px;font-weight:bold;">3</span> IPAD PRO
+                    </div>
+                `;
+            }
         }
-        renderProducts();
+        renderRankings();
 
         // 区域经济
         const regions = [
@@ -1044,10 +2061,11 @@
         ];
 
         function renderRegions() {
-            const maxValue = Math.max(...regions.map(r => r.value));
             const list = document.getElementById('region-list');
-            // Limit to Top 5
-            list.innerHTML = regions.slice(0, 5).map(r => `
+            if (!list) return; // Exit if element doesn't exist
+            const maxValue = Math.max(...regions.map(r => r.value));
+            // Limit to Top 4 to prevent overflow on small screens
+            list.innerHTML = regions.slice(0, 4).map(r => `
                 <div class="region-item">
                     <span class="region-name">${r.name}</span>
                     <span class="region-value">¥${(r.value / 100000000).toFixed(2)}亿</span>
@@ -1070,6 +2088,7 @@
 
         function renderLogistics() {
             const container = document.getElementById('logistics-stats');
+            if (!container) return; // Exit if element doesn't exist
             container.innerHTML = logisticsData.map(d => `
                 <div class="stat-card">
                     <div class="stat-value">${d.value}</div>
@@ -1078,52 +2097,717 @@
             `).join('');
         }
         renderLogistics();
+        console.log('=== After renderLogistics ===');
 
-        // 用户画像饼图
+        console.log('=== About to define renderUserChart ===');
+        // User Portrait - Complete Design
         function renderUserChart() {
-            const data = [
-                { label: '18-25岁', value: 35, color: '#ff3366' },
-                { label: '26-35岁', value: 40, color: '#00eaff' },
-                { label: '36-45岁', value: 20, color: '#ffcc00' },
-                { label: '46岁+', value: 5, color: '#888' }
+            const panelContent = document.querySelector('#user-portrait .panel-content');
+            const panelRect = panelContent ? panelContent.getBoundingClientRect() : { width: 200, height: 200 };
+            const defaultW = Math.max(panelRect.width / 2, 100);
+            const defaultH = Math.max(panelRect.height / 2, 80);
+
+            // 1. Gender Ratio (Donut)
+            {
+                const container = document.getElementById('user-gender-ratio');
+                if (container) {
+                    const rect = container.getBoundingClientRect();
+                    const w = rect.width > 0 ? rect.width : defaultW;
+                    const h = rect.height > 0 ? rect.height : defaultH;
+                    const r = Math.min(w, h) / 2 - 5;
+                    d3.select(container).selectAll('*').remove();
+                    const svg = d3.select(container).append('svg').attr('width', w).attr('height', h);
+                    const g = svg.append('g').attr('transform', `translate(${w / 2},${h / 2})`);
+
+                    const data = [{ l: 'Male', v: 64, c: '#00eaff' }, { l: 'Female', v: 36, c: '#ff3366' }];
+                    const pie = d3.pie().value(d => d.v).sort(null);
+                    const arc = d3.arc().innerRadius(r - 8).outerRadius(r);
+
+                    g.selectAll('path').data(pie(data)).enter().append('path').attr('d', arc)
+                        .attr('fill', d => d.data.c).attr('stroke', '#000').attr('stroke-width', 1);
+
+                    g.append('text').attr('y', -5).attr('text-anchor', 'middle').attr('fill', '#fff').attr('font-size', '9px').text('男女占比');
+                    g.append('text').attr('y', 10).attr('text-anchor', 'middle').attr('fill', '#00eaff').attr('font-size', '8px').text('♂ 64%');
+                    g.append('text').attr('y', 20).attr('text-anchor', 'middle').attr('fill', '#ff3366').attr('font-size', '8px').text('♀ 36%');
+                }
+            }
+
+            // 2. Occupation Radar
+            {
+                const container = document.getElementById('user-occupation-radar');
+                if (container) {
+                    const rect = container.getBoundingClientRect();
+                    const w = rect.width > 0 ? rect.width : defaultW;
+                    const h = rect.height > 0 ? rect.height : defaultH;
+                    const r = Math.min(w, h) / 2 - 10;
+                    d3.select(container).selectAll('*').remove();
+                    const svg = d3.select(container).append('svg').attr('width', w).attr('height', h);
+                    const g = svg.append('g').attr('transform', `translate(${w / 2},${h / 2})`);
+
+                    const data = [
+                        { axis: '学生', v: 80 }, { axis: '白领', v: 90 }, { axis: '公务员', v: 60 },
+                        { axis: '教职工', v: 40 }, { axis: '服务员', v: 50 }
+                    ];
+                    const angleSlice = Math.PI * 2 / data.length;
+                    const rScale = d3.scaleLinear().range([0, r]).domain([0, 100]);
+
+                    // Grid
+                    [1, 2, 3].forEach(level => {
+                        const factor = r * (level / 3);
+                        g.selectAll('.levels-' + level).data(data).enter().append('line')
+                            .attr('x1', (d, i) => factor * Math.cos(angleSlice * i - Math.PI / 2))
+                            .attr('y1', (d, i) => factor * Math.sin(angleSlice * i - Math.PI / 2))
+                            .attr('x2', (d, i) => factor * Math.cos(angleSlice * (i + 1) - Math.PI / 2))
+                            .attr('y2', (d, i) => factor * Math.sin(angleSlice * (i + 1) - Math.PI / 2))
+                            .attr('stroke', 'rgba(0, 234, 255, 0.2)').attr('stroke-width', 0.5);
+                    });
+
+                    // Area
+                    const line = d3.lineRadial().curve(d3.curveLinearClosed).radius(d => rScale(d.v)).angle((d, i) => i * angleSlice);
+                    g.append('path').datum(data).attr('d', line).attr('fill', 'rgba(0, 234, 255, 0.4)').attr('stroke', '#00eaff').attr('stroke-width', 1.5);
+
+                    // Labels
+                    g.selectAll('.label').data(data).enter().append('text')
+                        .attr('x', (d, i) => (rScale(100) + 8) * Math.cos(angleSlice * i - Math.PI / 2))
+                        .attr('y', (d, i) => (rScale(100) + 8) * Math.sin(angleSlice * i - Math.PI / 2))
+                        .attr('text-anchor', 'middle').attr('dy', '0.35em').attr('fill', '#00eaff').attr('font-size', '8px').text(d => d.axis);
+                }
+            }
+
+            // 3. Zodiac Bars
+            {
+                const container = document.getElementById('user-zodiac-bars');
+                if (container) {
+                    const rect = container.getBoundingClientRect();
+                    const w = rect.width > 0 ? rect.width : defaultW;
+                    const h = rect.height > 0 ? rect.height : defaultH;
+                    d3.select(container).selectAll('*').remove();
+                    const svg = d3.select(container).append('svg').attr('width', w).attr('height', h);
+                    const margin = { top: 5, right: 5, bottom: 15, left: 5 };
+                    const iw = w - margin.left - margin.right;
+                    const ih = h - margin.top - margin.bottom;
+                    const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+                    const data = [
+                        { l: '♈', v: 40 }, { l: '♉', v: 60 }, { l: '♊', v: 50 }, { l: '♋', v: 30 },
+                        { l: '♌', v: 80 }, { l: '♍', v: 45 }, { l: '♎', v: 70 }, { l: '♏', v: 90 },
+                        { l: '♐', v: 55 }, { l: '♑', v: 35 }, { l: '♒', v: 65 }, { l: '♓', v: 25 }
+                    ];
+                    const x = d3.scaleBand().rangeRound([0, iw]).padding(0.2).domain(data.map(d => d.l));
+                    const y = d3.scaleLinear().rangeRound([ih, 0]).domain([0, 100]);
+
+                    g.selectAll('.bar').data(data).enter().append('rect').attr('class', 'bar')
+                        .attr('x', d => x(d.l)).attr('y', d => y(d.v)).attr('width', x.bandwidth()).attr('height', d => ih - y(d.v))
+                        .attr('fill', (d, i) => i % 2 === 0 ? '#00eaff' : '#0077aa').attr('opacity', 0.8);
+
+                    g.selectAll('.lbl').data(data).enter().append('text')
+                        .attr('x', d => x(d.l) + x.bandwidth() / 2).attr('y', ih + 10).attr('text-anchor', 'middle')
+                        .attr('fill', '#999').attr('font-size', '7px').text(d => d.l);
+                }
+            }
+
+            // 4. Generation Mountain
+            {
+                const container = document.getElementById('user-generation-mountain');
+                if (container) {
+                    const rect = container.getBoundingClientRect();
+                    const w = rect.width > 0 ? rect.width : defaultW;
+                    const h = rect.height > 0 ? rect.height : defaultH;
+                    d3.select(container).selectAll('*').remove();
+                    const svg = d3.select(container).append('svg').attr('width', w).attr('height', h);
+                    const margin = { top: 10, right: 5, bottom: 15, left: 5 };
+                    const iw = w - margin.left - margin.right;
+                    const ih = h - margin.top - margin.bottom;
+                    const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+                    const data = [{ l: '00后', v: 30 }, { l: '90后', v: 80 }, { l: '80后', v: 60 }, { l: '70后', v: 40 }, { l: '60后', v: 20 }];
+                    const x = d3.scalePoint().range([0, iw]).domain(data.map(d => d.l)).padding(0.5);
+                    const y = d3.scaleLinear().range([ih, 0]).domain([0, 100]);
+                    const area = d3.area().x(d => x(d.l)).y0(ih).y1(d => y(d.v)).curve(d3.curveMonotoneX);
+
+                    // Gradient
+                    const defs = svg.append('defs');
+                    const grad = defs.append('linearGradient').attr('id', 'mtn-grad').attr('x1', '0%').attr('x2', '0%').attr('y1', '0%').attr('y2', '100%');
+                    grad.append('stop').attr('offset', '0%').attr('stop-color', '#00eaff').attr('stop-opacity', 0.8);
+                    grad.append('stop').attr('offset', '100%').attr('stop-color', '#00eaff').attr('stop-opacity', 0.1);
+
+                    g.append('path').datum(data).attr('d', area).attr('fill', 'url(#mtn-grad)').attr('stroke', '#00eaff').attr('stroke-width', 2);
+                    g.selectAll('.lbl').data(data).enter().append('text').attr('x', d => x(d.l)).attr('y', ih + 10).attr('text-anchor', 'middle')
+                        .attr('fill', '#aaa').attr('font-size', '8px').text(d => d.l);
+                }
+            }
+        }
+        // Call renderUserChart after a delay to ensure layout is computed
+        // Use setTimeout directly since DOMContentLoaded already passed by the time this inline script runs
+        setTimeout(function () {
+            try {
+                console.log('renderUserChart starting...');
+                renderUserChart();
+                console.log('renderUserChart completed');
+            } catch (e) {
+                console.error('renderUserChart error:', e);
+            }
+        }, 300);
+
+
+        // --- Small Screen Panel Implementations ---
+
+        // 1. Hot Selling Panel Logic
+        const hotTabs = document.querySelectorAll('.hot-tab');
+        hotTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                hotTabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                // Simulate data refresh (randomize ranks)
+                renderRankings();
+            });
+        });
+
+        function renderRankings() {
+            const brands = ['小米', '华为', '苹果', '魅族', '耐克', '阿迪', '优衣库'];
+            const merchants = ['小米官方旗舰店', '华为商城', 'Apple Store', '苏宁易购', '京东旗舰'];
+
+            function generateList(targetId, names) {
+                const list = document.getElementById(targetId);
+                if (!list) return;
+                list.innerHTML = '';
+                // Shuffle names for demo effect
+                const shuffled = [...names].sort(() => 0.5 - Math.random()).slice(0, 5);
+                shuffled.forEach((name, i) => {
+                    const div = document.createElement('div');
+                    div.className = 'rank-item';
+                    div.innerHTML = `<span class="r-num">${i + 1}</span> ${name}`;
+                    list.appendChild(div);
+                });
+            }
+
+            generateList('rank-gmv', brands);
+            generateList('rank-vol', brands);
+            generateList('rank-merchant', merchants);
+        }
+
+        // Initial Render
+        renderRankings();
+
+        // 2 & 3. Map Implementations (Logistics & Regional)
+        // Load China GeoJSON
+        d3.json('assets/china.geojson').then(function (geoData) {
+            if (!geoData) {
+                console.error("Failed to load map data");
+                return;
+            }
+
+            // Function to draw simple China map
+            function drawMap(containerId, colorFunc) {
+                const container = document.getElementById(containerId);
+                if (!container) return;
+                const width = container.clientWidth;
+                const height = container.clientHeight;
+
+                d3.select('#' + containerId).select('svg').remove(); // Clear prev
+
+                const svg = d3.select('#' + containerId)
+                    .append('svg')
+                    .attr('width', width)
+                    .attr('height', height);
+
+                // Better projection fitting
+                const projection = d3.geoMercator()
+                    .center([104, 36])
+                    .scale(width * 0.85) // Increased scale
+                    .translate([width / 2, height / 2]);
+
+                const path = d3.geoPath().projection(projection);
+
+                // Draw Map
+                svg.selectAll('path')
+                    .data(geoData.features)
+                    .enter()
+                    .append('path')
+                    .attr('d', path)
+                    .attr('stroke', '#004488')
+                    .attr('stroke-width', 0.5)
+                    .attr('fill', (d, i) => colorFunc ? colorFunc(d, i) : 'rgba(0, 100, 255, 0.2)')
+                    .on('mouseover', function () {
+                        d3.select(this).attr('fill', '#00eaff');
+                    })
+                    .on('mouseout', function (d, i) {
+                        d3.select(this).attr('fill', colorFunc ? colorFunc(d, i) : 'rgba(0, 100, 255, 0.2)');
+                    });
+
+                // CAINIAO ONLY: Add Logistics Routes & Points
+                if (containerId === 'cainiao-map') {
+                    // Random Routes
+                    const routes = [];
+                    for (let i = 0; i < 15; i++) {
+                        const start = [80 + Math.random() * 40, 20 + Math.random() * 30];
+                        const end = [80 + Math.random() * 40, 20 + Math.random() * 30];
+                        routes.push({ type: "LineString", coordinates: [start, end] });
+                    }
+
+                    svg.selectAll('.route')
+                        .data(routes)
+                        .enter().append('path')
+                        .attr('d', path)
+                        .attr('fill', 'none')
+                        .attr('stroke', 'rgba(0, 234, 255, 0.15)')
+                        .attr('stroke-width', 1)
+                        .attr('stroke-dasharray', '2,2');
+
+                    // Random Active Points (Blinking)
+                    const points = [];
+                    for (let i = 0; i < 40; i++) {
+                        points.push({
+                            long: 80 + Math.random() * 50,
+                            lat: 20 + Math.random() * 30,
+                            color: Math.random() > 0.7 ? '#ff3366' : '#ffff00'
+                        });
+                    }
+
+                    svg.selectAll('circle')
+                        .data(points)
+                        .enter()
+                        .append('circle')
+                        .attr('cx', d => projection([d.long, d.lat])[0])
+                        .attr('cy', d => projection([d.long, d.lat])[1])
+                        .attr('r', 1.5)
+                        .attr('fill', d => d.color)
+                        .attr('opacity', 0.8)
+                        .append('animate')
+                        .attr('attributeName', 'opacity')
+                        .attr('values', '0.8;0.3;0.8')
+                        .attr('dur', () => Math.random() * 2 + 1 + 's')
+                        .attr('repeatCount', 'indefinite');
+                }
+            }
+
+            // Draw Logistics Map (Brighter for visibility)
+            drawMap('cainiao-map', () => 'rgba(0, 100, 255, 0.4)');
+
+            // Draw Regional Map (Varied blues) -> Fixed ID mismatch
+            const colorScale = d3.scaleLinear()
+                .domain([0, 30]) // Approx number of provinces
+                .range(['rgba(0, 100, 255, 0.1)', 'rgba(0, 100, 255, 0.6)']);
+
+            drawMap('regional-map', (d, i) => colorScale(i));
+
+        }).catch(err => console.error("Error loading map:", err));
+
+        // Regional Rankings Data (Improved "Table" Look)
+        function populateRegionalLists() {
+            const provinces = [
+                { name: '北京 Beijing', val: '¥450亿' },
+                { name: '上海 Shanghai', val: '¥420亿' },
+                { name: '广东 Guangdong', val: '¥380亿' },
+                { name: '浙江 Zhejiang', val: '¥350亿' }
             ];
 
-            const svg = d3.select('#user-chart').append('svg')
-                .attr('width', 220) // Reduced size
-                .attr('height', 220);
+            const pList = document.getElementById('province-rank');
+            if (pList) {
+                pList.innerHTML = '';
+                provinces.forEach((p, i) => {
+                    // Table-row style layout
+                    pList.innerHTML += `
+                    <li style="display:flex; justify-content:space-between; width:100%;">
+                        <div style="display:flex; align-items:center; gap:5px;">
+                            <span class="r-num">${i + 1}</span> 
+                            <span>${p.name}</span>
+                        </div>
+                        <span style="color:#00eaff; font-family:monospace;">${p.val}</span>
+                    </li>`;
+                });
+            }
+        }
+        // populateRegionalLists();
 
-            const radius = 90;
+        // === Cainiao Network New Components ===
+
+        // 1. Render Delivery Speed Gauge
+        function renderDeliveryGauge() {
+            const container = document.getElementById('delivery-gauge');
+            if (!container) return;
+            const width = container.clientWidth || 100;
+            const height = container.clientHeight || 80;
+
+            d3.select('#delivery-gauge').selectAll('*').remove();
+
+            const svg = d3.select('#delivery-gauge').append('svg')
+                .attr('width', width).attr('height', height);
+
+            const centerX = width / 2;
+            const centerY = height * 0.65;
+            const radius = Math.min(width, height) * 0.4;
+
+            // Gauge background arc
+            const arc = d3.arc()
+                .innerRadius(radius * 0.7)
+                .outerRadius(radius)
+                .startAngle(-Math.PI * 0.75)
+                .endAngle(Math.PI * 0.75);
+
+            svg.append('path')
+                .attr('d', arc)
+                .attr('transform', `translate(${centerX},${centerY})`)
+                .attr('fill', 'rgba(0,234,255,0.1)')
+                .attr('stroke', 'rgba(0,234,255,0.3)')
+                .attr('stroke-width', 1);
+
+            // Value arc (24 hours average)
+            const avgHours = 24 + Math.random() * 8; // 24-32 hours
+            const percentage = avgHours / 48; // Max 48 hours
+            const valueArc = d3.arc()
+                .innerRadius(radius * 0.7)
+                .outerRadius(radius)
+                .startAngle(-Math.PI * 0.75)
+                .endAngle(-Math.PI * 0.75 + Math.PI * 1.5 * percentage);
+
+            svg.append('path')
+                .attr('d', valueArc)
+                .attr('transform', `translate(${centerX},${centerY})`)
+                .attr('fill', 'rgba(255,215,0,0.6)')
+                .attr('stroke', '#ffd700')
+                .attr('stroke-width', 2);
+
+            // Center text
+            svg.append('text')
+                .attr('x', centerX)
+                .attr('y', centerY - 5)
+                .attr('text-anchor', 'middle')
+                .attr('fill', '#ffd700')
+                .attr('font-size', '20px')
+                .attr('font-weight', 'bold')
+                .text(avgHours.toFixed(1));
+
+            svg.append('text')
+                .attr('x', centerX)
+                .attr('y', centerY + 10)
+                .attr('text-anchor', 'middle')
+                .attr('fill', '#999')
+                .attr('font-size', '8px')
+                .text('小时 Hours');
+        }
+
+        // 2. Render Order Status Pie Chart
+        function renderOrderStatusPie() {
+            const container = document.getElementById('order-status-pie');
+            if (!container) return;
+            const width = container.clientWidth || 100;
+            const height = container.clientHeight || 80;
+
+            d3.select('#order-status-pie').selectAll('*').remove();
+
+            const svg = d3.select('#order-status-pie').append('svg')
+                .attr('width', width).attr('height', height);
+
+            const centerX = width / 2;
+            const centerY = height * 0.55;
+            const radius = Math.min(width, height) * 0.35;
+
+            const data = [
+                { label: '已发货', value: 35, color: '#00eaff' },
+                { label: '运输中', value: 45, color: '#ffd700' },
+                { label: '已签收', value: 20, color: '#00ff88' }
+            ];
+
+            const pie = d3.pie().value(d => d.value).sort(null);
+            const arc = d3.arc().innerRadius(0).outerRadius(radius);
+
             const g = svg.append('g')
-                .attr('transform', `translate(110, 110)`);
-
-            const pie = d3.pie().value(d => d.value);
-            const arc = d3.arc().innerRadius(35).outerRadius(radius);
+                .attr('transform', `translate(${centerX},${centerY})`);
 
             g.selectAll('path')
                 .data(pie(data))
-                .enter()
-                .append('path')
+                .enter().append('path')
                 .attr('d', arc)
                 .attr('fill', d => d.data.color)
                 .attr('stroke', '#0a0e27')
-                .attr('stroke-width', 2)
-                .style('opacity', 0.9);
+                .attr('stroke-width', 1)
+                .attr('opacity', 0.8);
 
-            // 标签
-            const labelArc = d3.arc().innerRadius(70).outerRadius(70);
-            g.selectAll('text')
-                .data(pie(data))
-                .enter()
-                .append('text')
-                .attr('transform', d => `translate(${labelArc.centroid(d)})`)
-                .attr('text-anchor', 'middle')
-                .attr('fill', '#fff')
-                .attr('font-size', '12px')
-                .text(d => `${d.data.value}%`);
+            // Legend at bottom
+            const legendY = height - 15;
+            data.forEach((item, i) => {
+                const legendX = width / 4 * i + 10;
+
+                svg.append('circle')
+                    .attr('cx', legendX)
+                    .attr('cy', legendY)
+                    .attr('r', 3)
+                    .attr('fill', item.color);
+
+                svg.append('text')
+                    .attr('x', legendX + 6)
+                    .attr('y', legendY + 1)
+                    .attr('fill', '#fff')
+                    .attr('font-size', '7px')
+                    .text(`${item.label} ${item.value}%`);
+            });
         }
-        renderUserChart();
 
+        // 3. Render Top Couriers Bar Chart
+        function renderTopCouriers() {
+            const container = document.getElementById('top-couriers-bar');
+            if (!container) return;
+            const width = container.clientWidth || 100;
+            const height = container.clientHeight || 80;
 
+            d3.select('#top-couriers-bar').selectAll('*').remove();
+
+            const svg = d3.select('#top-couriers-bar').append('svg')
+                .attr('width', width).attr('height', height);
+
+            const data = [
+                { name: '顺丰', value: 85 },
+                { name: '圆通', value: 72 },
+                { name: '中通', value: 68 },
+                { name: '韵达', value: 55 },
+                { name: '申通', value: 48 }
+            ];
+
+            const margin = { top: 5, right: 5, bottom: 20, left: 25 };
+            const chartW = width - margin.left - margin.right;
+            const chartH = height - margin.top - margin.bottom;
+
+            const x = d3.scaleLinear().range([0, chartW]).domain([0, 100]);
+            const y = d3.scaleBand().range([0, chartH]).domain(data.map(d => d.name)).padding(0.3);
+
+            const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+            // Bars
+            g.selectAll('.bar')
+                .data(data)
+                .enter().append('rect')
+                .attr('y', d => y(d.name))
+                .attr('height', y.bandwidth())
+                .attr('x', 0)
+                .attr('width', d => x(d.value))
+                .attr('fill', (d, i) => i === 0 ? '#ffd700' : '#00eaff')
+                .attr('opacity', 0.8);
+
+            // Value labels
+            g.selectAll('.value-label')
+                .data(data)
+                .enter().append('text')
+                .attr('x', d => x(d.value) + 3)
+                .attr('y', d => y(d.name) + y.bandwidth() / 2)
+                .attr('dy', '0.35em')
+                .attr('fill', '#fff')
+                .attr('font-size', '7px')
+                .text(d => d.value);
+
+            // Y-axis labels
+            g.append('g')
+                .call(d3.axisLeft(y).tickSize(0))
+                .selectAll('text')
+                .attr('fill', '#fff')
+                .attr('font-size', '8px');
+
+            g.select('.domain').remove();
+        }
+
+        // Render new Cainiao Network components
+        renderDeliveryGauge();
+        renderOrderStatusPie();
+        renderTopCouriers();
+
+        // 1. Render County Spending Bar Chart (Vertical) - Force Render
+        function renderCountyBarChart() {
+            const container = document.getElementById('county-bar-chart');
+            if (!container) return;
+            // Force min-height if calculated height is 0
+            const width = container.clientWidth || 100;
+            const height = container.clientHeight || 80;
+
+            console.log("Rendering County Chart:", width, height);
+
+            d3.select('#county-bar-chart').selectAll('*').remove();
+
+            const svg = d3.select('#county-bar-chart').append('svg')
+                .attr('width', width).attr('height', height);
+
+            const data = [
+                { name: '昆山', val: 95 }, { name: '义乌', val: 88 },
+                { name: '慈溪', val: 75 }, { name: '江阴', val: 60 }, { name: '晋江', val: 45 }
+            ];
+
+            const margin = { top: 10, right: 0, bottom: 20, left: 0 };
+            const chartW = width - margin.left - margin.right;
+            const chartH = height - margin.top - margin.bottom;
+
+            const x = d3.scaleBand().range([0, chartW]).domain(data.map(d => d.name)).padding(0.4);
+            const y = d3.scaleLinear().range([chartH, 0]).domain([0, 100]);
+
+            const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+            g.selectAll('.bar')
+                .data(data)
+                .enter().append('rect')
+                .attr('x', d => x(d.name))
+                .attr('y', d => y(d.val))
+                .attr('width', x.bandwidth())
+                .attr('height', d => chartH - y(d.val))
+                .attr('fill', '#00eaff')
+                .attr('opacity', 0.8);
+
+            // Labels
+            g.append('g')
+                .attr('transform', `translate(0,${chartH})`)
+                .call(d3.axisBottom(x).tickSize(0))
+                .selectAll('text')
+                .attr('fill', '#fff')
+                .attr('font-size', '8px')
+                .attr('dy', '0.8em');
+
+            g.select('.domain').remove();
+        }
+
+        // 2. Render Logistics Trend Chart (Area) - Force Render
+        function renderLogisticsTrendChart() {
+            const container = document.getElementById('logistics-trend-chart');
+            if (!container) return;
+            // Force min-height if calculated height is 0
+            const width = container.clientWidth || 100;
+            const height = container.clientHeight || 60;
+
+            console.log("Rendering Logistics Chart:", width, height);
+
+            d3.select('#logistics-trend-chart').selectAll('*').remove();
+
+            const svg = d3.select('#logistics-trend-chart').append('svg')
+                .attr('width', width).attr('height', height);
+
+            // Realistic daily logistics throughput data (packages per hour)
+            // Shows typical pattern: low in early morning, peaks in afternoon, drops at night
+            const data = [
+                { x: 0, y: 15 },  // 00:00 - 低谷
+                { x: 1, y: 12 },  // 01:00
+                { x: 2, y: 10 },  // 02:00 - 最低
+                { x: 3, y: 13 },  // 03:00
+                { x: 4, y: 18 },  // 04:00 - 开始上升
+                { x: 5, y: 28 },  // 05:00
+                { x: 6, y: 45 },  // 06:00 - 早高峰开始
+                { x: 7, y: 62 },  // 07:00
+                { x: 8, y: 75 },  // 08:00
+                { x: 9, y: 82 },  // 09:00 - 上午高峰
+                { x: 10, y: 88 }, // 10:00 - 峰值
+                { x: 11, y: 85 }, // 11:00
+                { x: 12, y: 78 }, // 12:00 - 午餐时段
+                { x: 13, y: 72 }, // 13:00
+                { x: 14, y: 80 }, // 14:00 - 下午回升
+                { x: 15, y: 92 }, // 15:00 - 下午高峰
+                { x: 16, y: 95 }, // 16:00 - 全天峰值
+                { x: 17, y: 88 }, // 17:00
+                { x: 18, y: 75 }, // 18:00 - 晚高峰开始下降
+                { x: 19, y: 65 }, // 19:00
+                { x: 20, y: 52 }, // 20:00
+                { x: 21, y: 42 }, // 21:00
+                { x: 22, y: 32 }, // 22:00
+                { x: 23, y: 22 }  // 23:00 - 夜间
+            ];
+
+            const outputRangeX = width;
+            const outputRangeY = height - 5;
+
+            const x = d3.scaleLinear().domain([0, 23]).range([0, outputRangeX]);
+            const y = d3.scaleLinear().domain([0, 100]).range([outputRangeY, 5]);
+
+            const area = d3.area()
+                .x(d => x(d.x))
+                .y0(outputRangeY)
+                .y1(d => y(d.y))
+                .curve(d3.curveCardinal);
+
+            // Gradient
+            const defs = svg.append("defs");
+            const gradient = defs.append("linearGradient")
+                .attr("id", "logistics-grad")
+                .attr("x1", "0%").attr("y1", "0%").attr("x2", "0%").attr("y2", "100%");
+            gradient.append("stop").attr("offset", "0%").attr("stop-color", "#00eaff").attr("stop-opacity", 0.6);
+            gradient.append("stop").attr("offset", "100%").attr("stop-color", "#00eaff").attr("stop-opacity", 0.0);
+
+            svg.append('path')
+                .datum(data)
+                .attr('fill', 'url(#logistics-grad)')
+                .attr('stroke', '#00eaff')
+                .attr('stroke-width', 2)
+                .attr('d', area);
+        }
+
+        // 3. Compact Logistics Metrics
+        function renderLogisticsMetrics() {
+            const container = document.getElementById('logistics-metrics');
+            if (!container) return;
+
+            function updateMetrics() {
+                // Generate summary metrics
+                const totalIn = 5930 + Math.floor(Math.random() * 200 - 100);
+                const totalOut = 5690 + Math.floor(Math.random() * 200 - 100);
+                const avgLoad = 80 + Math.floor(Math.random() * 10 - 5);
+                const activeHubs = 617;
+
+                container.innerHTML = `
+                    <div style="display:flex; gap:3px; align-items:center;">
+                        <span style="color:#00eaff;">●</span>
+                        <span style="color:#aaa;">活跃节点</span>
+                        <span style="color:#fff; font-family:monospace; font-weight:bold;">${activeHubs}</span>
+                    </div>
+                    <div style="width:1px; height:12px; background:rgba(0,234,255,0.3);"></div>
+                    <div style="display:flex; gap:3px; align-items:center;">
+                        <span style="color:#00ff88;">↓</span>
+                        <span style="color:#aaa;">入库</span>
+                        <span style="color:#00ff88; font-family:monospace; font-weight:bold;">${totalIn.toLocaleString()}</span>
+                    </div>
+                    <div style="width:1px; height:12px; background:rgba(0,234,255,0.3);"></div>
+                    <div style="display:flex; gap:3px; align-items:center;">
+                        <span style="color:#ff9900;">↑</span>
+                        <span style="color:#aaa;">出库</span>
+                        <span style="color:#ff9900; font-family:monospace; font-weight:bold;">${totalOut.toLocaleString()}</span>
+                    </div>
+                    <div style="width:1px; height:12px; background:rgba(0,234,255,0.3);"></div>
+                    <div style="display:flex; gap:3px; align-items:center;">
+                        <span style="color:#aaa;">平均负载</span>
+                        <span style="color:${avgLoad > 85 ? '#ff3366' : '#00eaff'}; font-family:monospace; font-weight:bold;">${avgLoad}%</span>
+                    </div>
+                `;
+            }
+
+            updateMetrics();
+            setInterval(updateMetrics, 2000);
+        }
+
+        renderCountyBarChart();
+        renderLogisticsTrendChart();
+        renderLogisticsMetrics();
+
+        // Re-trigger map resize
+        window.dispatchEvent(new Event('resize'));
+
+        // Init Stars
+        function initStars() {
+            const starContainer = document.getElementById('star-container');
+            if (!starContainer) return;
+            const starCount = 200;
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                const x = Math.random() * 100;
+                const y = Math.random() * 100;
+                const size = 1 + Math.random() * 2; // Increased size: 1-3px
+                const duration = 2 + Math.random() * 3;
+                const delay = Math.random() * 5;
+
+                star.style.left = `${x}%`;
+                star.style.top = `${y}%`;
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                star.style.setProperty('--duration', `${duration}s`);
+                star.style.animationDelay = `${delay}s`;
+                star.style.opacity = 0.6 + Math.random() * 0.4; // Brighter: 0.6-1.0
+
+                starContainer.appendChild(star);
+            }
+        }
+        initStars();
     </script>
 </body>
 

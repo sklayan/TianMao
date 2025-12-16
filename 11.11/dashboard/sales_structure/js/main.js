@@ -1,6 +1,21 @@
 // Initialize ECharts instances
 const charts = {};
 
+// Centralized Category Data
+let currentCategory = '全品类'; // Default
+const categoryStats = {
+    '美妆': { volume: 900, margin: 65, trendBase: 200 },
+    '数码': { volume: 850, margin: 25, trendBase: 180 },
+    '家电': { volume: 800, margin: 30, trendBase: 160 },
+    '服饰': { volume: 750, margin: 55, trendBase: 140 },
+    '食品': { volume: 700, margin: 40, trendBase: 120 },
+    '母婴': { volume: 650, margin: 45, trendBase: 100 },
+    '家居': { volume: 600, margin: 50, trendBase: 90 },
+    '运动': { volume: 550, margin: 48, trendBase: 80 },
+    '个护': { volume: 500, margin: 60, trendBase: 70 },
+    '生鲜': { volume: 450, margin: 35, trendBase: 60 }
+};
+
 // Mock Data Generators
 function generateRandomData(length, min, max) {
     return Array.from({ length }, () => Math.floor(Math.random() * (max - min + 1)) + min);
@@ -8,7 +23,6 @@ function generateRandomData(length, min, max) {
 
 // DOM Elements
 const timestampEl = document.getElementById('timestamp');
-const timeSelector = document.getElementById('time-selector');
 
 // Update Timestamp
 function updateTimestamp() {
@@ -25,16 +39,18 @@ async function initMap() {
 }
 
 function initAllCharts() {
-    initChannelSalesChart();
+    initParticles(); // New: Particle Background
     initConversionCards();
     initTrafficSourceChart();
     initCategoryRankChart();
     initCategoryTrendChart();
     initWordCloudChart();
     initMarginGaugeChart();
-    initMapChart();
-    initCityRankChart();
+    initPriceRangeChart();
     initRepurchaseChart();
+
+    // Initialize with Total Data
+    updateCategoryCharts('全品类');
 
     // Start Data Stream
     startDataStream();
@@ -43,38 +59,6 @@ function initAllCharts() {
     window.addEventListener('resize', () => {
         Object.values(charts).forEach(chart => chart && chart.resize());
     });
-}
-
-// 2. Channel Sales Comparison (Bar)
-function initChannelSalesChart() {
-    const chart = echarts.init(document.getElementById('channel-sales-chart'));
-    charts.channelSales = chart;
-
-    const option = {
-        tooltip: { trigger: 'axis' },
-        grid: { top: '10%', bottom: '20%', left: '10%', right: '5%' },
-        xAxis: {
-            type: 'category',
-            data: ['天猫', '京东', '拼多多', '抖音', '官网'],
-            axisLabel: { color: '#fff' }
-        },
-        yAxis: {
-            type: 'value',
-            axisLabel: { color: '#fff' },
-            splitLine: { lineStyle: { color: 'rgba(255,255,255,0.1)' } }
-        },
-        series: [{
-            data: [120, 200, 150, 80, 70],
-            type: 'bar',
-            itemStyle: {
-                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                    { offset: 0, color: '#00eaff' },
-                    { offset: 1, color: '#0055ff' }
-                ])
-            }
-        }]
-    };
-    chart.setOption(option);
 }
 
 // 3. Conversion Cards
@@ -127,15 +111,23 @@ function startDataStream() {
         if (charts.categoryTrend) {
             const option = charts.categoryTrend.getOption();
             const data = option.series[0].data;
-            // Shift and push new random value
-            data.shift();
-            data.push(Math.floor(Math.random() * 150) + 80);
+            // Slowly increase the last value to simulate real-time sales
+            const lastIdx = data.length - 1;
+            data[lastIdx] = data[lastIdx] + Math.floor(Math.random() * 5);
             charts.categoryTrend.setOption({ series: [{ data: data }] });
         }
 
         // 4. Update Margin Gauge
         if (charts.marginGauge) {
-            const newVal = +(Math.random() * 60 + 20).toFixed(2);
+            let baseMargin = 35; // Default for Total
+            if (currentCategory !== '全品类' && categoryStats[currentCategory]) {
+                baseMargin = categoryStats[currentCategory].margin;
+            }
+
+            // Fluctuate slightly around base margin (+/- 2%)
+            const fluctuation = (Math.random() - 0.5) * 4;
+            const newVal = +(baseMargin + fluctuation).toFixed(2);
+            
             charts.marginGauge.setOption({
                 series: [{ data: [{ value: newVal, name: '毛利率' }] }]
             });
@@ -150,7 +142,9 @@ function initTrafficSourceChart() {
     charts.trafficSource = chart;
 
     const option = {
-        tooltip: { trigger: 'item' },
+        // Unified Blue/Cyan Theme with Gold Accent
+        color: ['#2979ff', '#00eaff', '#00b0ff', '#40c4ff', '#82b1ff', '#ffcc00'],
+        tooltip: { trigger: 'item', formatter: '{a} <br/>{b} : {c} ({d}%)' },
         series: [
             {
                 name: '流量来源',
@@ -158,7 +152,7 @@ function initTrafficSourceChart() {
                 radius: [10, 80],
                 center: ['50%', '50%'],
                 roseType: 'area',
-                itemStyle: { borderRadius: 5 },
+                itemStyle: { borderRadius: 5, borderColor: '#0b0f2a', borderWidth: 2 },
                 data: [
                     { value: 40, name: '直接访问' },
                     { value: 38, name: '搜索引擎' },
@@ -183,25 +177,39 @@ function initCategoryRankChart() {
         xAxis: { type: 'value', show: false },
         yAxis: {
             type: 'category',
-            data: ['美妆', '数码', '家电', '服饰', '食品', '母婴', '家居', '运动', '个护', '生鲜'].reverse(),
+            data: Object.keys(categoryStats).reverse(),
             axisLabel: { color: '#fff' },
             axisLine: { show: false },
             axisTick: { show: false }
         },
         series: [{
             type: 'bar',
-            data: [900, 850, 800, 750, 700, 650, 600, 550, 500, 450].reverse(),
+            data: Object.keys(categoryStats).map(k => categoryStats[k].volume).reverse(),
             label: { show: true, position: 'right', color: '#fff' },
             itemStyle: {
                 color: new echarts.graphic.LinearGradient(1, 0, 0, 0, [
-                    { offset: 0, color: '#ff0033' },
-                    { offset: 1, color: '#ff9966' }
+                    { offset: 0, color: '#00eaff' },
+                    { offset: 1, color: '#0091ea' }
                 ]),
-                borderRadius: [0, 10, 10, 0]
+                borderRadius: [0, 2, 2, 0]
             }
         }]
     };
     chart.setOption(option);
+
+    // Add click event for interactivity
+    chart.on('click', function (params) {
+        if (params.componentType === 'series') {
+            updateCategoryCharts(params.name);
+        }
+    });
+
+    // Add blank area click to reset
+    chart.getZr().on('click', function (params) {
+        if (!params.target) {
+            resetCategoryCharts();
+        }
+    });
 }
 
 // 6. Category Trend (Line)
@@ -209,14 +217,38 @@ function initCategoryTrendChart() {
     const chart = echarts.init(document.getElementById('category-trend-chart'));
     charts.categoryTrend = chart;
 
+    // Generate 24h data with finer granularity (every 30 mins)
+    const hours = [];
+    const dataCurrent = [];
+    const dataLast = [];
+    let valC = 100;
+    let valL = 80;
+    
+    for (let i = 0; i <= 48; i++) {
+        const h = Math.floor(i / 2);
+        const m = (i % 2) * 30;
+        hours.push(`${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`);
+        
+        // Upward trend with slight noise
+        valC += Math.random() * 150 - 10; 
+        valL += Math.random() * 100 - 10;
+        
+        dataCurrent.push(Math.floor(valC));
+        dataLast.push(Math.floor(valL));
+    }
+
     const option = {
         tooltip: { trigger: 'axis' },
         legend: { data: ['今年', '去年'], textStyle: { color: '#fff' } },
-        grid: { top: '15%', bottom: '10%', left: '5%', right: '5%', containLabel: true },
+        grid: { top: '15%', bottom: '15%', left: '5%', right: '5%', containLabel: true },
+        dataZoom: [
+            { type: 'inside', start: 0, end: 100 },
+            { type: 'slider', show: true, bottom: 0, height: 15, borderColor: 'transparent', backgroundColor: 'rgba(255,255,255,0.1)', textStyle: { color: '#fff' } }
+        ],
         xAxis: {
             type: 'category',
             boundaryGap: false,
-            data: ['0h', '4h', '8h', '12h', '16h', '20h', '24h'],
+            data: hours,
             axisLabel: { color: '#fff' }
         },
         yAxis: {
@@ -229,16 +261,18 @@ function initCategoryTrendChart() {
                 name: '今年',
                 type: 'line',
                 smooth: true,
-                data: [120, 132, 101, 134, 90, 230, 210],
-                itemStyle: { color: '#00eaff' },
-                areaStyle: { opacity: 0.2, color: '#00eaff' }
+                data: dataCurrent,
+                itemStyle: { color: '#2979ff' }, // Changed to Blue
+                areaStyle: { opacity: 0.2, color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{offset: 0, color: 'rgba(41, 121, 255, 0.5)'}, {offset: 1, color: 'rgba(41, 121, 255, 0.0)'}]) },
+                animationDuration: 8000,
+                animationEasing: 'linear'
             },
             {
                 name: '去年',
                 type: 'line',
                 smooth: true,
-                data: [220, 182, 191, 234, 290, 330, 310],
-                itemStyle: { color: '#ff0033' },
+                data: dataLast,
+                itemStyle: { color: '#00eaff' }, // Changed to Cyan
                 lineStyle: { type: 'dashed' }
             }
         ]
@@ -270,11 +304,8 @@ function initWordCloudChart() {
                 fontFamily: 'sans-serif',
                 fontWeight: 'bold',
                 color: function () {
-                    return 'rgb(' + [
-                        Math.round(Math.random() * 160 + 95),
-                        Math.round(Math.random() * 160 + 95),
-                        Math.round(Math.random() * 160 + 95)
-                    ].join(',') + ')';
+                    const colors = ['#00eaff', '#ffffff', '#ffcc00', '#ff0033', '#0091ea'];
+                    return colors[Math.floor(Math.random() * colors.length)];
                 }
             },
             emphasis: {
@@ -322,7 +353,7 @@ function initMarginGaugeChart() {
                 splitNumber: 5,
                 itemStyle: {
                     color: '#00eaff',
-                    shadowColor: 'rgba(0,138,255,0.45)',
+                    shadowColor: 'rgba(0, 234, 255, 0.45)',
                     shadowBlur: 10,
                     shadowOffsetX: 2,
                     shadowOffsetY: 2
@@ -404,88 +435,66 @@ function initMarginGaugeChart() {
     chart.setOption(option);
 }
 
-// 10. Map Chart (World)
-function initMapChart() {
-    const chart = echarts.init(document.getElementById('map-chart'));
-    charts.map = chart;
+// 10. Price Range Structure (Funnel)
+function initPriceRangeChart() {
+    const chart = echarts.init(document.getElementById('price-range-chart'));
+    charts.priceRange = chart;
 
     const option = {
-        tooltip: { trigger: 'item' },
-        visualMap: {
-            min: 0,
-            max: 1000,
+        color: ['#00eaff', '#00b0ff', '#2979ff', '#304ffe', '#536dfe'],
+        tooltip: { trigger: 'item', formatter: '{a} <br/>{b} : {c} ({d}%)' },
+        legend: {
+            orient: 'vertical',
             left: 'left',
-            top: 'bottom',
-            text: ['高', '低'],
-            calculable: true,
-            inRange: {
-                color: ['#e0ffff', '#006edd']
-            },
-            textStyle: { color: '#fff' }
-        },
-        geo: {
-            map: 'world',
-            roam: true,
-            zoom: 1.2,
-            label: { show: false },
-            itemStyle: {
-                areaColor: '#323c48',
-                borderColor: '#111'
-            },
-            emphasis: {
-                itemStyle: {
-                    areaColor: '#2a333d'
-                },
-                label: { show: false }
-            }
+            top: 'center',
+            textStyle: { color: '#fff' },
+            data: ['0-100元', '100-300元', '300-500元', '500-1000元', '1000-3000元', '3000元+']
         },
         series: [
             {
-                name: '销售额',
-                type: 'heatmap',
-                coordinateSystem: 'geo',
+                name: '价格带分布',
+                type: 'funnel',
+                left: '20%',
+                top: 20,
+                bottom: 20,
+                width: '70%',
+                min: 0,
+                max: 2500,
+                minSize: '0%',
+                maxSize: '100%',
+                sort: 'descending',
+                gap: 2,
+                label: {
+                    show: true,
+                    position: 'inside',
+                    color: '#fff'
+                },
+                labelLine: {
+                    length: 10,
+                    lineStyle: {
+                        width: 1,
+                        type: 'solid'
+                    }
+                },
+                itemStyle: {
+                    borderColor: '#fff',
+                    borderWidth: 1
+                },
+                emphasis: {
+                    label: {
+                        fontSize: 20
+                    }
+                },
                 data: [
-                    { name: 'China', value: [104.19, 35.86, 950] },
-                    { name: 'United States', value: [-95.71, 37.09, 800] },
-                    { name: 'Japan', value: [138.25, 36.20, 750] },
-                    { name: 'Germany', value: [10.45, 51.16, 600] },
-                    { name: 'United Kingdom', value: [-3.43, 55.37, 550] },
-                    { name: 'Australia', value: [133.77, -25.27, 400] },
-                    { name: 'Canada', value: [-106.34, 56.13, 350] },
-                    { name: 'Brazil', value: [-51.92, -14.23, 300] },
-                    { name: 'Russia', value: [105.31, 61.52, 250] },
-                    { name: 'India', value: [78.96, 20.59, 450] }
+                    { value: 1500, name: '0-100元' },
+                    { value: 2000, name: '100-300元' },
+                    { value: 1800, name: '300-500元' },
+                    { value: 1200, name: '500-1000元' },
+                    { value: 800, name: '1000-3000元' },
+                    { value: 400, name: '3000元+' }
                 ]
             }
         ]
-    };
-    chart.setOption(option);
-}
-
-// 11. City Rank (Bar)
-function initCityRankChart() {
-    const chart = echarts.init(document.getElementById('city-rank-chart'));
-    charts.cityRank = chart;
-
-    const option = {
-        tooltip: { trigger: 'axis' },
-        grid: { top: '5%', bottom: '5%', left: '20%', right: '10%', containLabel: true },
-        xAxis: { type: 'value', show: false },
-        yAxis: {
-            type: 'category',
-            data: ['上海', '北京', '杭州', '深圳', '广州', '成都', '重庆', '苏州', '南京', '武汉'].reverse(),
-            axisLabel: { color: '#fff' },
-            axisLine: { show: false },
-            axisTick: { show: false }
-        },
-        series: [{
-            type: 'bar',
-            data: [950, 920, 880, 850, 800, 750, 700, 650, 600, 550].reverse(),
-            itemStyle: {
-                color: '#00eaff',
-                borderRadius: [0, 5, 5, 0]
-            }
-        }]
     };
     chart.setOption(option);
 }
@@ -529,18 +538,216 @@ function initRepurchaseChart() {
     chart.setOption(option);
 }
 
-// Time Selector Interaction
-timeSelector.addEventListener('change', (e) => {
-    const value = e.target.value;
-    // Simulate data update
-    console.log('Switching to:', value);
-    // In a real app, fetch new data here.
-    // For demo, we just randomize some charts
-    const newData = generateRandomData(5, 50, 300);
-    charts.channelSales.setOption({
-        series: [{ data: newData }]
+// Helper: Get Data for Category Interaction
+function getCategoryData(category) {
+    if (category === '全品类') {
+        const words = [
+            { name: '智能手机', value: 10000 }, { name: '羽绒服', value: 6181 },
+            { name: '洗地机', value: 4386 }, { name: '面霜', value: 4055 },
+            { name: '运动鞋', value: 2467 }, { name: '猫粮', value: 2244 },
+            { name: '投影仪', value: 1898 }, { name: '咖啡液', value: 1484 },
+            { name: '洗碗机', value: 1112 }, { name: '冲锋衣', value: 965 },
+            { name: '扫地机器人', value: 847 }, { name: '空气炸锅', value: 582 },
+            { name: '面膜', value: 555 }, { name: '纸巾', value: 550 },
+            { name: '牛奶', value: 462 }
+        ];
+        const margin = 35; 
+        const dataCurrent = [];
+        const dataLast = [];
+        let valC = 1000; 
+        let valL = 800;
+        for (let i = 0; i <= 48; i++) {
+            valC += Math.random() * 150 - 10; 
+            valL += Math.random() * 100 - 10;
+            dataCurrent.push(Math.floor(valC));
+            dataLast.push(Math.floor(valL));
+        }
+        const priceRange = [
+            { value: 1500, name: '0-100元' },
+            { value: 2000, name: '100-300元' },
+            { value: 1800, name: '300-500元' },
+            { value: 1200, name: '500-1000元' },
+            { value: 800, name: '1000-3000元' },
+            { value: 400, name: '3000元+' }
+        ];
+        return { words, margin, trend: { current: dataCurrent, last: dataLast }, priceRange };
+    }
+
+    const stats = categoryStats[category] || categoryStats['美妆'];
+
+    const baseWords = {
+        '美妆': ['面霜', '面膜', '口红', '精华', '粉底液', '防晒', '眼霜', '香水', '卸妆水', '眉笔'],
+        '数码': ['手机', '平板', '耳机', '相机', '智能手表', '充电宝', '路由器', '键盘', '鼠标', '显示器'],
+        '家电': ['冰箱', '洗衣机', '空调', '电视', '微波炉', '烤箱', '吸尘器', '吹风机', '电饭煲', '加湿器'],
+        '服饰': ['羽绒服', '毛衣', '牛仔裤', '连衣裙', '卫衣', '外套', '衬衫', 'T恤', '短裙', '风衣'],
+        '食品': ['零食', '牛奶', '坚果', '巧克力', '饼干', '方便面', '饮料', '茶叶', '咖啡', '麦片'],
+        '母婴': ['奶粉', '纸尿裤', '婴儿车', '玩具', '童装', '奶瓶', '湿巾', '孕妇装', '辅食', '安全座椅'],
+        '家居': ['沙发', '床垫', '衣柜', '餐桌', '椅子', '窗帘', '地毯', '灯具', '收纳盒', '抱枕'],
+        '运动': ['跑鞋', '运动服', '瑜伽垫', '哑铃', '篮球', '足球', '泳衣', '帐篷', '登山鞋', '护膝'],
+        '个护': ['洗发水', '沐浴露', '牙膏', '牙刷', '护发素', '洗手液', '卫生巾', '剃须刀', '发膜', '身体乳'],
+        '生鲜': ['苹果', '香蕉', '牛肉', '猪肉', '鸡蛋', '海鲜', '蔬菜', '三文鱼', '车厘子', '草莓']
+    };
+
+    const words = (baseWords[category] || baseWords['美妆']).map(name => ({
+        name,
+        value: Math.floor(Math.random() * 5000) + 1000
+    }));
+
+    const margin = stats.margin;
+
+    // Generate trend data based on stats.trendBase
+    const dataCurrent = [];
+    const dataLast = [];
+    let valC = stats.trendBase;
+    let valL = stats.trendBase * 0.8;
+    
+    for (let i = 0; i <= 48; i++) {
+        valC += Math.random() * 40 - 2; 
+        valL += Math.random() * 30 - 2;
+        if (valC < 0) valC = 0;
+        if (valL < 0) valL = 0;
+        dataCurrent.push(Math.floor(valC));
+        dataLast.push(Math.floor(valL));
+    }
+
+    // Generate Price Range Data
+    // Ranges: 0-100, 100-300, 300-500, 500-1000, 1000-3000, 3000+
+    let priceDist = [20, 30, 20, 15, 10, 5]; // Default distribution
+    if (category === '数码' || category === '家电') {
+        priceDist = [5, 10, 15, 20, 30, 20]; // Higher prices
+    } else if (category === '食品' || category === '生鲜' || category === '个护') {
+        priceDist = [40, 30, 15, 10, 5, 0]; // Lower prices
+    } else if (category === '美妆' || category === '服饰') {
+        priceDist = [10, 25, 30, 20, 10, 5]; // Mid prices
+    }
+    
+    // Add some randomness
+    const ranges = ['0-100元', '100-300元', '300-500元', '500-1000元', '1000-3000元', '3000元+'];
+    const priceData = priceDist.map((base, index) => ({
+        value: Math.floor((base + Math.random() * 10) * 50),
+        name: ranges[index]
+    }));
+
+    return { words, margin, trend: { current: dataCurrent, last: dataLast }, priceRange: priceData };
+}
+
+function resetCategoryCharts() {
+    updateCategoryCharts('全品类');
+}
+
+function updateCategoryCharts(category) {
+    currentCategory = category;
+    
+    // Update Titles
+    document.getElementById('trend-chart-title').textContent = category + '销售趋势';
+    document.getElementById('wordcloud-title').textContent = category + '热销词云';
+    document.getElementById('margin-title').textContent = category + '毛利贡献';
+
+    const data = getCategoryData(category);
+
+    // Update Trend Chart
+    if (charts.categoryTrend) {
+        charts.categoryTrend.setOption({
+            // title: { text: category + '销售趋势', textStyle: { color: '#fff', fontSize: 14 }, top: '5%', left: 'center' },
+            series: [
+                { name: '今年', data: data.trend.current },
+                { name: '去年', data: data.trend.last }
+            ]
+        });
+    }
+
+    // Update Price Range Chart
+    if (charts.priceRange) {
+        charts.priceRange.setOption({
+            series: [{ data: data.priceRange }]
+        });
+    }
+
+    // Update Word Cloud
+    if (charts.wordCloud) {
+        charts.wordCloud.setOption({
+            series: [{ data: data.words }]
+        });
+    }
+
+    // Update Margin Gauge
+    if (charts.marginGauge) {
+        charts.marginGauge.setOption({
+            series: [{ data: [{ value: data.margin, name: '毛利率' }] }]
+        });
+    }
+}
+
+// --- Visual Effects ---
+
+// Particle System
+let particleCtx;
+function initParticles() {
+    const canvas = document.getElementById('particle-canvas');
+    if (!canvas) return;
+    particleCtx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    
+    const particles = [];
+    const particleCount = 100;
+    
+    class Particle {
+        constructor() {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
+            this.vx = (Math.random() - 0.5) * 0.5;
+            this.vy = (Math.random() - 0.5) * 0.5;
+            this.size = Math.random() * 2;
+        }
+        update() {
+            this.x += this.vx;
+            this.y += this.vy;
+            if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+            if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+        }
+        draw() {
+            particleCtx.fillStyle = 'rgba(0, 234, 255, 0.5)';
+            particleCtx.beginPath();
+            particleCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            particleCtx.fill();
+        }
+    }
+    
+    for (let i = 0; i < particleCount; i++) particles.push(new Particle());
+    
+    function animate() {
+        particleCtx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => {
+            p.update();
+            p.draw();
+        });
+        
+        // Draw connections
+        particleCtx.strokeStyle = 'rgba(0, 234, 255, 0.1)';
+        for (let i = 0; i < particles.length; i++) {
+            for (let j = i; j < particles.length; j++) {
+                const dx = particles[i].x - particles[j].x;
+                const dy = particles[i].y - particles[j].y;
+                const dist = Math.sqrt(dx*dx + dy*dy);
+                if (dist < 100) {
+                    particleCtx.beginPath();
+                    particleCtx.moveTo(particles[i].x, particles[i].y);
+                    particleCtx.lineTo(particles[j].x, particles[j].y);
+                    particleCtx.stroke();
+                }
+            }
+        }
+        requestAnimationFrame(animate);
+    }
+    animate();
+    
+    // Handle Resize
+    window.addEventListener('resize', () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
     });
-});
+}
 
 // Start
 initMap();
