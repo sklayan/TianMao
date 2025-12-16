@@ -39,6 +39,7 @@ async function initMap() {
 }
 
 function initAllCharts() {
+    initParticles(); // New: Particle Background
     initConversionCards();
     initTrafficSourceChart();
     initCategoryRankChart();
@@ -141,7 +142,8 @@ function initTrafficSourceChart() {
     charts.trafficSource = chart;
 
     const option = {
-        color: ['#ff0033', '#ff5252', '#ffcc00', '#00eaff', '#0091ea', '#304ffe'],
+        // Unified Blue/Cyan Theme with Gold Accent
+        color: ['#2979ff', '#00eaff', '#00b0ff', '#40c4ff', '#82b1ff', '#ffcc00'],
         tooltip: { trigger: 'item', formatter: '{a} <br/>{b} : {c} ({d}%)' },
         series: [
             {
@@ -150,7 +152,7 @@ function initTrafficSourceChart() {
                 radius: [10, 80],
                 center: ['50%', '50%'],
                 roseType: 'area',
-                itemStyle: { borderRadius: 5 },
+                itemStyle: { borderRadius: 5, borderColor: '#0b0f2a', borderWidth: 2 },
                 data: [
                     { value: 40, name: '直接访问' },
                     { value: 38, name: '搜索引擎' },
@@ -260,8 +262,8 @@ function initCategoryTrendChart() {
                 type: 'line',
                 smooth: true,
                 data: dataCurrent,
-                itemStyle: { color: '#ff0033' },
-                areaStyle: { opacity: 0.2, color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{offset: 0, color: 'rgba(255, 0, 51, 0.5)'}, {offset: 1, color: 'rgba(255, 0, 51, 0.0)'}]) },
+                itemStyle: { color: '#2979ff' }, // Changed to Blue
+                areaStyle: { opacity: 0.2, color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{offset: 0, color: 'rgba(41, 121, 255, 0.5)'}, {offset: 1, color: 'rgba(41, 121, 255, 0.0)'}]) },
                 animationDuration: 8000,
                 animationEasing: 'linear'
             },
@@ -270,7 +272,7 @@ function initCategoryTrendChart() {
                 type: 'line',
                 smooth: true,
                 data: dataLast,
-                itemStyle: { color: '#ffcc00' },
+                itemStyle: { color: '#00eaff' }, // Changed to Cyan
                 lineStyle: { type: 'dashed' }
             }
         ]
@@ -674,6 +676,77 @@ function updateCategoryCharts(category) {
             series: [{ data: [{ value: data.margin, name: '毛利率' }] }]
         });
     }
+}
+
+// --- Visual Effects ---
+
+// Particle System
+let particleCtx;
+function initParticles() {
+    const canvas = document.getElementById('particle-canvas');
+    if (!canvas) return;
+    particleCtx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    
+    const particles = [];
+    const particleCount = 100;
+    
+    class Particle {
+        constructor() {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
+            this.vx = (Math.random() - 0.5) * 0.5;
+            this.vy = (Math.random() - 0.5) * 0.5;
+            this.size = Math.random() * 2;
+        }
+        update() {
+            this.x += this.vx;
+            this.y += this.vy;
+            if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+            if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+        }
+        draw() {
+            particleCtx.fillStyle = 'rgba(0, 234, 255, 0.5)';
+            particleCtx.beginPath();
+            particleCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            particleCtx.fill();
+        }
+    }
+    
+    for (let i = 0; i < particleCount; i++) particles.push(new Particle());
+    
+    function animate() {
+        particleCtx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => {
+            p.update();
+            p.draw();
+        });
+        
+        // Draw connections
+        particleCtx.strokeStyle = 'rgba(0, 234, 255, 0.1)';
+        for (let i = 0; i < particles.length; i++) {
+            for (let j = i; j < particles.length; j++) {
+                const dx = particles[i].x - particles[j].x;
+                const dy = particles[i].y - particles[j].y;
+                const dist = Math.sqrt(dx*dx + dy*dy);
+                if (dist < 100) {
+                    particleCtx.beginPath();
+                    particleCtx.moveTo(particles[i].x, particles[i].y);
+                    particleCtx.lineTo(particles[j].x, particles[j].y);
+                    particleCtx.stroke();
+                }
+            }
+        }
+        requestAnimationFrame(animate);
+    }
+    animate();
+    
+    // Handle Resize
+    window.addEventListener('resize', () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    });
 }
 
 // Start

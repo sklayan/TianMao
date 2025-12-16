@@ -5,13 +5,15 @@
 }
 
 :root {
-    --bg-color: #0b0f2a;
-    --panel-bg: rgba(11, 15, 42, 0.7);
+    --bg-color: #0b0f2a; /* Deep Navy Blue */
+    --panel-bg: rgba(16, 24, 56, 0.6);
     --text-color: #ffffff;
-    --accent-color: #00eaff; /* Cyan for tech elements */
-    --secondary-color: #ff0033; /* Tmall Red */
-    --gold-color: #ffcc00; /* Number Yellow */
-    --border-color: rgba(0, 234, 255, 0.3);
+    --accent-color: #00eaff; /* Cyan */
+    --secondary-color: #2979ff; /* Blue (Unified with User Page) */
+    --highlight-color: #ffcc00; /* Gold */
+    --border-color: rgba(0, 234, 255, 0.2);
+    
+    /* Specific to Sales Page */
     --trend-up: #ff0033;
     --trend-down: #00eaff;
 }
@@ -52,6 +54,17 @@ body {
     position: relative;
 }
 
+/* Particle Canvas */
+#particle-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    pointer-events: none;
+}
+
 .header-left, .header-right {
     flex: 1;
     display: flex;
@@ -77,26 +90,31 @@ body {
     justify-content: center;
 }
 
-.header-title {
-    font-size: 42px;
+.main-title {
+    font-size: 36px;
     font-weight: 900;
-    color: #ffffff;
+    color: #fff;
+    text-shadow: 0 0 20px #ff0055, 0 0 40px #ff0055;
+    margin-bottom: 5px;
     letter-spacing: 4px;
-    font-family: 'Microsoft YaHei', sans-serif;
-    text-shadow: 
-        0 0 10px rgba(255, 0, 51, 0.8),
-        0 0 20px rgba(255, 0, 51, 0.4);
-    margin-bottom: 2px;
-    background: none;
-    -webkit-background-clip: border-box;
-    -webkit-text-fill-color: #ffffff;
+    font-style: italic;
+    background: linear-gradient(to bottom, #fff, #ffcccc);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    position: relative;
 }
 
-.header-subtitle {
-    font-size: 16px;
-    color: #ffffff;
-    letter-spacing: 6px;
-    font-family: 'Arial', sans-serif;
+.main-title::after {
+    content: 'SALES STRUCTURE ANALYSIS';
+    display: block;
+    font-size: 12px;
+    letter-spacing: 3px;
+    text-align: center;
+    -webkit-text-fill-color: #ff99aa;
+    margin-top: 5px;
+    font-style: normal;
+    font-weight: normal;
     font-weight: 700;
     text-transform: uppercase;
     opacity: 0.9;

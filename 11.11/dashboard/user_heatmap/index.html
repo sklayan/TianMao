@@ -7,11 +7,18 @@
     <title>双十一用户画像分析</title>
     <link rel="stylesheet" href="css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts-gl@2.0.9/dist/echarts-gl.min.js"></script>
     <!-- Map Data -->
     <script src="https://fastly.jsdelivr.net/npm/echarts@4.9.0/map/js/china.js"></script>
 </head>
 
 <body>
+    <!-- Background Particles -->
+    <canvas id="particle-canvas"></canvas>
+    
+    <!-- Holographic Scan Overlay -->
+    <div class="scan-overlay"></div>
+
     <div class="container">
         <!-- Header -->
         <header class="header">
@@ -19,8 +26,7 @@
             </div>
             <div class="header-center">
                 <div class="title-container">
-                    <div class="header-title">双十一用户画像分析</div>
-                    <div class="header-subtitle">USER PORTRAIT ANALYSIS</div>
+                    <div class="main-title">双十一用户画像分析</div>
                 </div>
             </div>
             <div class="header-right">
@@ -62,6 +68,34 @@
                 <div class="panel-box map-panel">
                     <div class="panel-header">地域分布：用户来源</div>
                     <div class="chart-container" id="user-map"></div>
+                    
+                    <!-- Super User Card (Hidden by default) -->
+                    <div id="super-user-card" class="user-card hidden">
+                        <div class="card-header">
+                            <div class="avatar"></div>
+                            <div class="user-info">
+                                <div class="user-id">ID: 8848_Titan</div>
+                                <div class="user-tag">超级会员</div>
+                            </div>
+                            <div class="close-btn" onclick="closeUserCard()">×</div>
+                        </div>
+                        <div class="card-body">
+                            <div class="stat-row">
+                                <span>年度消费:</span> <span class="highlight">¥ 128,400</span>
+                            </div>
+                            <div class="stat-row">
+                                <span>偏好关键词:</span> <span>数码 / 极客 / 摄影</span>
+                            </div>
+                            <div class="radar-mini" id="user-radar-mini"></div>
+                        </div>
+                    </div>
+
+                    <!-- Time Slider -->
+                    <div class="time-control">
+                        <div class="time-label">11.01</div>
+                        <input type="range" min="1" max="11" value="11" class="time-slider" id="time-slider" oninput="updateTime(this.value)">
+                        <div class="time-label">11.11</div>
+                    </div>
                 </div>
             </div>
 
