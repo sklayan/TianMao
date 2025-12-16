@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>双十一用户画像分析</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <!-- Map Data -->
+    <script src="https://fastly.jsdelivr.net/npm/echarts@4.9.0/map/js/china.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <div class="filter-group">
+                    <select id="user-filter">
+                        <option value="all">全部用户</option>
+                        <option value="vip">VIP用户</option>
+                        <option value="new">新用户</option>
+                    </select>
+                </div>
+            </div>
+            <div class="header-center">
+                <div class="title-container">
+                    <div class="header-title">双十一用户画像分析</div>
+                    <div class="header-subtitle">USER PORTRAIT ANALYSIS</div>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="refresh-time">数据更新于: <span id="timestamp">--:--:--</span></div>
+                <button id="back-btn" class="back-btn" onclick="window.location.href='../../index.html'">返回大屏</button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Left Column -->
+            <div class="column left-column">
+                <div class="panel-box">
+                    <div class="panel-header">基础属性：性别分布</div>
+                    <div class="chart-container" id="gender-chart"></div>
+                </div>
+                <div class="panel-box">
+                    <div class="panel-header">社会属性：职业分布</div>
+                    <div class="chart-container" id="occupation-chart"></div>
+                </div>
+                <div class="panel-box">
+                    <div class="panel-header">基础属性：年龄分布</div>
+                    <div class="chart-container" id="age-chart"></div>
+                </div>
+            </div>
+
+            <!-- Center Column -->
+            <div class="column center-column">
+                <div class="kpi-banner" id="total-users-kpi">
+                    <div class="kpi-item">
+                        <div class="kpi-label">累计活跃用户数</div>
+                        <div class="kpi-num" id="total-user-num">8,942,105</div>
+                    </div>
+                    <div class="kpi-item">
+                        <div class="kpi-label">新增用户占比</div>
+                        <div class="kpi-num highlight" id="new-user-rate">12.5%</div>
+                    </div>
+                </div>
+                <div class="panel-box map-panel">
+                    <div class="panel-header">地域分布：用户来源</div>
+                    <div class="chart-container" id="user-map"></div>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="column right-column">
+                <div class="panel-box">
+                    <div class="panel-header">趣味属性：星座分布</div>
+                    <div class="chart-container" id="zodiac-chart"></div>
+                </div>
+                <div class="panel-box">
+                    <div class="panel-header">消费属性：消费能力</div>
+                    <div class="chart-container" id="consumption-chart"></div>
+                </div>
+                <div class="panel-box">
+                    <div class="panel-header">行为属性：兴趣偏好</div>
+                    <div class="chart-container" id="interest-chart"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/main.js"></script>
+</body>
+
+</html>

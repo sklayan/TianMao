@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Scheduling Management - Double 11</title>
+    <link rel="stylesheet" href="./src/styles/main.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400;700&display=swap"
+        rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="src/data/world-data.js"></script>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #050a14;
+            color: #fff;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        #map-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .top-bar {
+            position: absolute;
+            top: 20px;
+            left: 30px;
+            right: 30px;
+            z-index: 10;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            pointer-events: none;
+        }
+
+        .back-button {
+            pointer-events: auto;
+            padding: 8px 20px;
+            background: rgba(10, 20, 40, 0.7);
+            border: 1px solid #00eaff;
+            color: #00eaff;
+            text-decoration: none;
+            font-weight: bold;
+            border-radius: 4px;
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: rgba(0, 234, 255, 0.15);
+            box-shadow: 0 0 15px rgba(0, 234, 255, 0.4);
+        }
+
+        .page-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 28px;
+            text-shadow: 0 0 10px rgba(0, 234, 255, 0.5);
+            background: linear-gradient(180deg, #fff, #00eaff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-right: auto;
+            margin-left: 20px;
+        }
+
+        .right-panel-container {
+            position: absolute;
+            top: 80px;
+            right: 30px;
+            width: 400px;
+            bottom: 60px;
+            z-index: 10;
+            pointer-events: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .floating-panel {
+            background: rgba(10, 20, 35, 0.9);
+            border: 1px solid rgba(0, 234, 255, 0.3);
+            backdrop-filter: blur(12px);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(0, 234, 255, 0.05);
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-header {
+            border-bottom: 2px solid rgba(0, 234, 255, 0.15);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .panel-header::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 60px;
+            height: 2px;
+            background: #00eaff;
+            box-shadow: 0 0 10px #00eaff;
+        }
+
+        .panel-title {
+            font-family: 'Orbitron', sans-serif;
+            color: #fff;
+            font-size: 22px;
+            margin: 0;
+            letter-spacing: 1px;
+            text-shadow: 0 0 10px rgba(0, 234, 255, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .panel-title::before {
+            content: '';
+            display: block;
+            width: 4px;
+            height: 20px;
+            background: #00eaff;
+            border-radius: 2px;
+            box-shadow: 0 0 8px #00eaff;
+        }
+
+        .panel-subtitle {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: 6px;
+            letter-spacing: 2px;
+            margin-left: 14px;
+        }
+
+        .task-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-shrink: 0;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-2px);
+            border-color: rgba(0, 234, 255, 0.3);
+            background: rgba(0, 234, 255, 0.05);
+        }
+
+        .stat-val {
+            font-size: 28px;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 5px;
+            font-weight: 500;
+        }
+
+        .task-table-container {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            margin: 0 -10px;
+            padding: 0 10px;
+        }
+
+        .task-table-container::-webkit-scrollbar {
+            width: 6px;
+            display: block;
+        }
+
+        .task-table-container::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+        }
+
+        .task-table-container::-webkit-scrollbar-thumb {
+            background: rgba(0, 234, 255, 0.3);
+            border-radius: 3px;
+        }
+
+        .task-table-container::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 234, 255, 0.5);
+        }
+
+        .task-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .task-table th {
+            text-align: left;
+            padding: 12px 10px;
+            color: #00eaff;
+            font-weight: bold;
+            border-bottom: 1px solid rgba(0, 234, 255, 0.3);
+            position: sticky;
+            top: 0;
+            background: rgba(10, 20, 35, 0.95);
+            z-index: 2;
+        }
+
+        .task-table td {
+            padding: 12px 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: #e0e0e0;
+            transition: background 0.2s;
+        }
+
+        .task-table tr:hover td {
+            background: rgba(0, 234, 255, 0.05);
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            display: inline-block;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+            white-space: nowrap;
+        }
+
+        .status-pending {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ccc;
+            border: 1px solid #666;
+        }
+
+        .status-loading {
+            background: rgba(0, 234, 255, 0.15);
+            color: #00eaff;
+            border: 1px solid rgba(0, 234, 255, 0.5);
+            box-shadow: 0 0 8px rgba(0, 234, 255, 0.2);
+        }
+
+        .status-transit {
+            background: rgba(255, 204, 0, 0.15);
+            color: #ffcc00;
+            border: 1px solid rgba(255, 204, 0, 0.5);
+            box-shadow: 0 0 8px rgba(255, 204, 0, 0.2);
+        }
+
+        .status-done {
+            background: rgba(51, 255, 51, 0.15);
+            color: #33ff33;
+            border: 1px solid rgba(51, 255, 51, 0.5);
+            box-shadow: 0 0 8px rgba(51, 255, 51, 0.2);
+        }
+
+        .effect-section {
+            flex-shrink: 0;
+            background: linear-gradient(90deg, rgba(0, 234, 255, 0.08), transparent);
+            border-left: 3px solid #00eaff;
+            padding: 15px 20px;
+            margin-top: 20px;
+            border-radius: 0 8px 8px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .effect-section::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            0% {
+                left: -100%;
+            }
+
+            50%,
+            100% {
+                left: 200%;
+            }
+        }
+
+        .effect-text {
+            font-size: 13px;
+            line-height: 1.6;
+            position: relative;
+            z-index: 1;
+        }
+
+        .highlight {
+            color: #00eaff;
+            font-weight: bold;
+            font-size: 1.1em;
+            text-shadow: 0 0 5px rgba(0, 234, 255, 0.5);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map-container"></div>
+
+    <div class="top-bar">
+        <div style="display: flex; align-items: center;">
+            <div class="page-title">全局调度管理</div>
+        </div>
+        <a href="index_bundled.html" class="back-button">
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+            返回大屏
+        </a>
+    </div>
+
+    <div class="right-panel-container">
+        <div class="floating-panel">
+            <div class="panel-header">
+                <h3 class="panel-title">调度执行监控</h3>
+                <div class="panel-subtitle">SCHEDULING EXECUTION MONITOR</div>
+            </div>
+
+            <div class="task-stats">
+                <div class="stat-item">
+                    <div class="stat-val" style="color: #00eaff;">12</div>
+                    <div class="stat-label">进行中任务</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-val" style="color: #ffcc00;">4</div>
+                    <div class="stat-label">待处理异常</div>
+                </div>
+            </div>
+
+            <div class="task-table-container">
+                <table class="task-table">
+                    <thead>
+                        <tr>
+                            <th>任务</th>
+                            <th>备注</th>
+                            <th>状态</th>
+                        </tr>
+                    </thead>
+                    <tbody id="taskTableBody"></tbody>
+                </table>
+            </div>
+
+            <div class="effect-section" id="effectSection">
+                <div style="font-size: 12px; color: #88a; margin-bottom: 5px;">效果追踪</div>
+                <div class="effect-text" id="effectText">
+                    <span style="color: #888;">点击任务查看该路线的效果追踪详情</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let mapSvg, projection, pathGroup, resourceGroup, routeGroup;
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+
+        async function initMap() {
+            const container = d3.select("#map-container");
+            mapSvg = container.append("svg")
+                .attr("width", "100%")
+                .attr("height", "100%")
+                .attr("viewBox", `0 0 ${width} ${height}`)
+                .style("background", "#050a14");
+
+            try {
+                // Use the inline WORLD_GEOJSON data instead of fetching
+                const geoData = WORLD_GEOJSON;
+                const features = geoData.features.filter(d => d.properties.name !== "Antarctica");
+
+                projection = d3.geoMercator()
+                    .fitExtent([[-50, 50], [width - 450, height - 50]], { type: "FeatureCollection", features: features });
+
+                const path = d3.geoPath().projection(projection);
+                pathGroup = mapSvg.append("g").attr("class", "map-layer");
+
+                pathGroup.selectAll("path")
+                    .data(features)
+                    .enter().append("path")
+                    .attr("d", path)
+                    .attr("fill", "#0f1c30")
+                    .attr("stroke", "#1e3a5a")
+                    .attr("stroke-width", 0.5);
+
+                renderResources();
+                renderRoutes();
+                renderTaskTable();
+
+            } catch (error) {
+                console.error("Map load failed", error);
+                container.append("div").style("color", "red").text("Failed to load map data");
+            }
+        }
+
+        // Task data with tracking effects
+        const tasks = [
+            {
+                id: "A001",
+                name: "调拨指令 #A001",
+                note: "上海 -> 北京 (急件)",
+                status: "transit",
+                route: { from: [121.4737, 31.2304], to: [116.4074, 39.9042] },
+                effect: {
+                    savings: "2.8%",
+                    warning: "因天气原因,预计延误约 30分钟"
+                }
+            },
+            {
+                id: "B023",
+                name: "补货任务 #B023",
+                note: "广州仓库存预警",
+                status: "loading",
+                route: { from: [121.4737, 31.2304], to: [113.2644, 23.1291] },
+                effect: {
+                    savings: "4.1%",
+                    warning: "注意：夜间装货,预计明早6点完成"
+                }
+            },
+            {
+                id: "R110",
+                name: "退货处理 #R110",
+                note: "批量退货归集",
+                status: "pending",
+                route: { from: [114.1095, 22.3964], to: [113.2644, 23.1291] },
+                effect: {
+                    savings: "1.5%",
+                    warning: "等待仓库确认收货时间"
+                }
+            },
+            {
+                id: "T889",
+                name: "干线运输 #T889",
+                note: "武汉 -> 西安",
+                status: "done",
+                route: { from: [114.3054, 30.5931], to: [108.9398, 34.3416] },
+                effect: {
+                    savings: "5.2%",
+                    warning: "已提前45分钟送达,客户满意度高"
+                }
+            },
+            {
+                id: "S992",
+                name: "临时调度 #S992",
+                note: "应对应急需求",
+                status: "transit",
+                route: { from: [113.2644, 23.1291], to: [121.4737, 31.2304] },
+                effect: {
+                    savings: "3.2%",
+                    warning: "因交通拥堵，部分线路时效延误约 45分钟"
+                }
+            },
+            {
+                id: "K221",
+                name: "库存平衡 #K221",
+                note: "区域间调配",
+                status: "pending",
+                route: { from: [114.1095, 22.3964], to: [121.4737, 31.2304] },
+                effect: {
+                    savings: "2.1%",
+                    warning: "库存平衡中,预计12小时内完成调配"
+                }
+            },
+            {
+                id: "F774",
+                name: "航运专线 #F774",
+                note: "北美航线加急",
+                status: "transit",
+                route: { from: [121.4737, 31.2304], to: [-118.2437, 34.0522] },
+                effect: {
+                    savings: "6.8%",
+                    warning: "海运航线顺利,预计提前2天抵达"
+                }
+            },
+            {
+                id: "D332",
+                name: "资源释放 #D332",
+                note: "大促结束释放",
+                status: "done",
+                route: { from: [139.6503, 35.6762], to: [121.4737, 31.2304] },
+                effect: {
+                    savings: "3.9%",
+                    warning: "资源已全部释放,成本优化显著"
+                }
+            }
+        ];
+
+        function getStatusLabel(status) {
+            switch (status) {
+                case 'transit': return '运输中';
+                case 'loading': return '装货中';
+                case 'pending': return '待处理';
+                case 'done': return '已送达';
+                default: return status;
+            }
+        }
+
+        function getStatusColor(status) {
+            switch (status) {
+                case 'transit': return '#ffcc00';
+                case 'loading': return '#00eaff';
+                case 'pending': return '#888888';
+                case 'done': return '#33ff33';
+                default: return '#888888';
+            }
+        }
+
+        let selectedTaskId = null;
+
+        function highlightRoute(taskId) {
+            tasks.forEach(task => {
+                if (task.route) {
+                    const route = routeGroup.select(`#route-${task.id}`);
+                    route.attr("stroke-width", 1.5)
+                        .attr("opacity", 0.6)
+                        .style("filter", "none");
+                }
+            });
+
+            // Update effect tracking section
+            const effectText = document.getElementById('effectText');
+
+            if (taskId) {
+                const selectedRoute = routeGroup.select(`#route-${taskId}`);
+                const task = tasks.find(t => t.id === taskId);
+                const color = getStatusColor(task.status);
+
+                selectedRoute
+                    .attr("stroke-width", 4)
+                    .attr("opacity", 1)
+                    .style("filter", `drop-shadow(0 0 8px ${color})`);
+
+                // Update effect text with task-specific info
+                if (task.effect) {
+                    effectText.innerHTML = `
+                        本次调度实际成本比预期节省了 <span class="highlight">${task.effect.savings}</span><br>
+                        <span style="color: #ffcc00;">注意：${task.effect.warning}</span>
+                    `;
+                }
+            } else {
+                effectText.innerHTML = '<span style="color: #888;">点击任务查看该路线的效果追踪详情</span>';
+            }
+            selectedTaskId = taskId;
+        }
+
+        function renderResources() {
+            if (!resourceGroup) resourceGroup = mapSvg.append("g").attr("class", "layer-resource");
+
+            const warehouses = [
+                // China
+                { lon: 121.4737, lat: 31.2304 }, // Shanghai
+                { lon: 113.2644, lat: 23.1291 }, // Guangzhou
+                { lon: 116.4074, lat: 39.9042 }, // Beijing
+                { lon: 114.1095, lat: 22.3964 }, // Shenzhen
+                { lon: 114.3054, lat: 30.5931 }, // Wuhan
+                { lon: 108.9398, lat: 34.3416 }, // Xi'an
+                { lon: 121.5654, lat: 25.0330 }, // Taipei
+
+                // Asia-Pacific
+                { lon: 139.6503, lat: 35.6762 }, // Tokyo
+                { lon: 103.8198, lat: 1.3521 }, // Singapore
+                { lon: 100.5018, lat: 13.7563 }, // Bangkok
+                { lon: 72.8777, lat: 19.0760 }, // Mumbai
+                { lon: 106.8456, lat: -6.2088 }, // Jakarta
+                { lon: 151.2093, lat: -33.8688 }, // Sydney
+
+                // Americas
+                { lon: -74.0060, lat: 40.7128 }, // New York
+                { lon: -118.2437, lat: 34.0522 }, // Los Angeles
+                { lon: -99.1332, lat: 19.4326 }, // Mexico City
+                { lon: -79.3832, lat: 43.6532 }, // Toronto
+                { lon: -46.6333, lat: -23.5505 }, // Sao Paulo
+                { lon: -58.3816, lat: -34.6037 }, // Buenos Aires
+                { lon: -43.1729, lat: -22.9068 }, // Rio
+
+                // Europe
+                { lon: -0.1278, lat: 51.5074 }, // London
+                { lon: 2.3522, lat: 48.8566 }, // Paris
+                { lon: 37.6173, lat: 55.7558 }, // Moscow
+                { lon: 13.4050, lat: 52.5200 }, // Berlin
+                { lon: -3.7038, lat: 40.4168 }, // Madrid
+
+                // Middle East
+                { lon: 55.2708, lat: 25.2048 } // Dubai
+            ];
+
+            resourceGroup.selectAll("circle")
+                .data(warehouses)
+                .enter().append("circle")
+                .attr("cx", d => projection([d.lon, d.lat])[0])
+                .attr("cy", d => projection([d.lon, d.lat])[1])
+                .attr("r", 4)
+                .attr("fill", "#00eaff")
+                .attr("stroke", "#fff")
+                .attr("stroke-width", 2);
+        }
+
+        function renderRoutes() {
+            if (!routeGroup) routeGroup = mapSvg.append("g").attr("class", "layer-routes");
+
+            // First render task-specific routes (clickable)
+            tasks.forEach(task => {
+                if (!task.route) return;
+
+                const p1 = projection(task.route.from);
+                const p2 = projection(task.route.to);
+                if (!p1 || !p2) return;
+
+                const dx = p2[0] - p1[0];
+                const dy = p2[1] - p1[1];
+                const mx = (p1[0] + p2[0]) / 2;
+                const my = (p1[1] + p2[1]) / 2;
+                const cx = mx - dy * 0.15;
+                const cy = my + dx * 0.15;
+
+                const color = getStatusColor(task.status);
+
+                // Create route path
+                const routePath = routeGroup.append("path")
+                    .attr("id", `route-${task.id}`)
+                    .attr("d", `M${p1[0]},${p1[1]} Q${cx},${cy} ${p2[0]},${p2[1]}`)
+                    .attr("fill", "none")
+                    .attr("stroke", color)
+                    .attr("stroke-width", 1.5)
+                    .attr("opacity", 0.6);
+
+                // Add shipping icons along the path
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                const numIcons = Math.min(Math.floor(distance / 100), 8); // Limit to max 8 icons
+
+                if (numIcons > 0) {
+                    for (let i = 0; i <= numIcons; i++) {
+                        const t = i / numIcons;
+                        const pointOnCurve = [
+                            (1 - t) * (1 - t) * p1[0] + 2 * (1 - t) * t * cx + t * t * p2[0],
+                            (1 - t) * (1 - t) * p1[1] + 2 * (1 - t) * t * cy + t * t * p2[1]
+                        ];
+
+                        // Create shipping icon group
+                        const iconGroup = routeGroup.append("g")
+                            .attr("class", `route-icon route-${task.id}-icon`)
+                            .attr("transform", `translate(${pointOnCurve[0]},${pointOnCurve[1]})`);
+
+                        // Add shipping box/truck icon
+                        iconGroup.append("rect")
+                            .attr("x", -4)
+                            .attr("y", -4)
+                            .attr("width", 8)
+                            .attr("height", 8)
+                            .attr("fill", color)
+                            .attr("opacity", 0.8)
+                            .attr("rx", 1);
+
+                        iconGroup.append("circle")
+                            .attr("r", 6)
+                            .attr("fill", "none")
+                            .attr("stroke", color)
+                            .attr("stroke-width", 1)
+                            .attr("opacity", 0.4);
+                    }
+                }
+            });
+
+            // Additional background routes for visual richness
+            const backgroundRoutes = [
+                // Asia routes
+                { from: [139.6503, 35.6762], to: [103.8198, 1.3521], color: "#00eaff" }, // Tokyo-Singapore
+                { from: [103.8198, 1.3521], to: [100.5018, 13.7563], color: "#00eaff" }, // Singapore-Bangkok
+                { from: [72.8777, 19.0760], to: [103.8198, 1.3521], color: "#00eaff" }, // Mumbai-Singapore
+                { from: [106.8456, -6.2088], to: [103.8198, 1.3521], color: "#888888" }, // Jakarta-Singapore
+                { from: [121.5654, 25.0330], to: [139.6503, 35.6762], color: "#00eaff" }, // Taipei-Tokyo
+
+                // Trans-Pacific
+                { from: [139.6503, 35.6762], to: [-118.2437, 34.0522], color: "#00eaff" }, // Tokyo-LA
+                { from: [103.8198, 1.3521], to: [151.2093, -33.8688], color: "#00eaff" }, // Singapore-Sydney
+                { from: [-74.0060, 40.7128], to: [-118.2437, 34.0522], color: "#ffcc00" }, // NY-LA
+
+                // Europe routes
+                { from: [-0.1278, 51.5074], to: [2.3522, 48.8566], color: "#00eaff" }, // London-Paris
+                { from: [2.3522, 48.8566], to: [13.4050, 52.5200], color: "#00eaff" }, // Paris-Berlin
+                { from: [13.4050, 52.5200], to: [37.6173, 55.7558], color: "#00eaff" }, // Berlin-Moscow
+                { from: [-3.7038, 40.4168], to: [2.3522, 48.8566], color: "#888888" }, // Madrid-Paris
+                { from: [-0.1278, 51.5074], to: [13.4050, 52.5200], color: "#00eaff" }, // London-Berlin
+
+                // Trans-Atlantic
+                { from: [-0.1278, 51.5074], to: [-74.0060, 40.7128], color: "#ffcc00" }, // London-NY
+                { from: [2.3522, 48.8566], to: [-74.0060, 40.7128], color: "#00eaff" }, // Paris-NY
+
+                // Americas
+                { from: [-99.1332, 19.4326], to: [-118.2437, 34.0522], color: "#888888" }, // Mexico-LA
+                { from: [-79.3832, 43.6532], to: [-74.0060, 40.7128], color: "#00eaff" }, // Toronto-NY
+                { from: [-46.6333, -23.5505], to: [-58.3816, -34.6037], color: "#00eaff" }, // Sao Paulo-Buenos Aires
+                { from: [-74.0060, 40.7128], to: [-99.1332, 19.4326], color: "#00eaff" }, // NY-Mexico
+                { from: [-46.6333, -23.5505], to: [-74.0060, 40.7128], color: "#888888" }, // Sao Paulo-NY
+
+                // Middle East & Asia
+                { from: [55.2708, 25.2048], to: [72.8777, 19.0760], color: "#00eaff" }, // Dubai-Mumbai
+                { from: [55.2708, 25.2048], to: [103.8198, 1.3521], color: "#00eaff" }, // Dubai-Singapore
+                { from: [55.2708, 25.2048], to: [2.3522, 48.8566], color: "#888888" }, // Dubai-Paris
+                { from: [37.6173, 55.7558], to: [139.6503, 35.6762], color: "#888888" }, // Moscow-Tokyo
+
+                // Inter-China
+                { from: [113.2644, 23.1291], to: [114.1095, 22.3964], color: "#33ff33" }, // Guangzhou-Shenzhen
+                { from: [121.4737, 31.2304], to: [114.3054, 30.5931], color: "#00eaff" }, // Shanghai-Wuhan
+                { from: [116.4074, 39.9042], to: [108.9398, 34.3416], color: "#888888" }  // Beijing-Xi'an
+            ];
+
+            backgroundRoutes.forEach((route, index) => {
+                const p1 = projection(route.from);
+                const p2 = projection(route.to);
+                if (!p1 || !p2) return;
+
+                const dx = p2[0] - p1[0];
+                const dy = p2[1] - p1[1];
+                const mx = (p1[0] + p2[0]) / 2;
+                const my = (p1[1] + p2[1]) / 2;
+                const cx = mx - dy * 0.15;
+                const cy = my + dx * 0.15;
+
+                routeGroup.append("path")
+                    .attr("class", "background-route")
+                    .attr("d", `M${p1[0]},${p1[1]} Q${cx},${cy} ${p2[0]},${p2[1]}`)
+                    .attr("fill", "none")
+                    .attr("stroke", route.color)
+                    .attr("stroke-width", 1)
+                    .attr("stroke-dasharray", "3,3")
+                    .attr("opacity", 0.4)
+                    .append("animate")
+                    .attr("attributeName", "stroke-dashoffset")
+                    .attr("from", "100")
+                    .attr("to", "0")
+                    .attr("dur", `${2 + index * 0.05}s`)
+                    .attr("repeatCount", "indefinite");
+            });
+        }
+
+        function renderTaskTable() {
+            const tbody = document.getElementById("taskTableBody");
+            tasks.forEach(task => {
+                const tr = document.createElement("tr");
+                tr.style.cursor = task.route ? "pointer" : "default";
+                tr.innerHTML = `
+                    <td>${task.name}</td>
+                    <td>${task.note}</td>
+                    <td><span class="status-badge status-${task.status}">${getStatusLabel(task.status)}</span></td>
+                `;
+
+                if (task.route) {
+                    tr.addEventListener('click', () => {
+                        if (selectedTaskId === task.id) {
+                            highlightRoute(null);
+                            tr.style.background = '';
+                        } else {
+                            tbody.querySelectorAll('tr').forEach(r => r.style.background = '');
+                            highlightRoute(task.id);
+                            tr.style.background = 'rgba(0, 234, 255, 0.15)';
+                        }
+                    });
+
+                    tr.addEventListener('mouseenter', () => {
+                        if (selectedTaskId !== task.id) {
+                            tr.style.background = 'rgba(0, 234, 255, 0.05)';
+                        }
+                    });
+
+                    tr.addEventListener('mouseleave', () => {
+                        if (selectedTaskId !== task.id) {
+                            tr.style.background = '';
+                        }
+                    });
+                }
+
+                tbody.appendChild(tr);
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            initMap();
+        });
+    </script>
+</body>
+
+</html>

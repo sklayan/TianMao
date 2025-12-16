@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>深度分析看板 - Double 11</title>
+    <link rel="stylesheet" href="./src/styles/main.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400;700&display=swap"
+        rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            background: #050a14;
+            color: #fff;
+            font-family: 'Roboto', sans-serif;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: rgba(10, 20, 40, 0.95);
+            border-bottom: 1px solid rgba(0, 234, 255, 0.3);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+        }
+
+        .page-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 24px;
+            background: linear-gradient(180deg, #fff, #00eaff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .back-button {
+            padding: 8px 20px;
+            background: rgba(10, 20, 40, 0.7);
+            border: 1px solid #00eaff;
+            color: #00eaff;
+            text-decoration: none;
+            font-weight: bold;
+            border-radius: 4px;
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: rgba(0, 234, 255, 0.15);
+            box-shadow: 0 0 15px rgba(0, 234, 255, 0.4);
+        }
+
+        .main-container {
+            margin-top: 80px;
+            padding: 20px 20px 40px 20px;
+            display: grid;
+            grid-template-columns: 350px 1fr 420px;
+            gap: 20px;
+        }
+
+        .panel {
+            background: rgba(10, 20, 35, 0.95);
+            border: 1px solid rgba(0, 234, 255, 0.3);
+            border-radius: 12px;
+            padding: 25px;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6),
+                0 0 0 1px rgba(0, 234, 255, 0.1) inset;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            height: calc(100vh - 120px);
+        }
+
+        .panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(0, 234, 255, 0.5), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+
+            0%,
+            100% {
+                opacity: 0.3;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+
+        .panel:hover {
+            border-color: rgba(0, 234, 255, 0.5);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8),
+                0 0 30px rgba(0, 234, 255, 0.15),
+                0 0 0 1px rgba(0, 234, 255, 0.2) inset;
+            transform: translateY(-2px);
+        }
+
+        .panel-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 18px;
+            color: #00eaff;
+            margin: 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(0, 234, 255, 0.2);
+            position: relative;
+        }
+
+        .panel-title::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 60px;
+            height: 2px;
+            background: #00eaff;
+            box-shadow: 0 0 10px #00eaff;
+        }
+
+        .chart-container {
+            flex: 1;
+            position: relative;
+            min-height: 180px;
+            max-height: 240px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            padding: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .chart-container:hover {
+            background: rgba(0, 0, 0, 0.3);
+            border-color: rgba(0, 234, 255, 0.2);
+        }
+
+        .order-list {
+            flex: 1;
+            overflow-y: auto;
+            margin: -10px;
+            padding: 10px;
+            max-height: calc(100vh - 320px);
+        }
+
+        .order-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .order-list::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+
+        .order-list::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, rgba(0, 234, 255, 0.5), rgba(0, 234, 255, 0.3));
+            border-radius: 4px;
+        }
+
+        .order-list::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, rgba(0, 234, 255, 0.7), rgba(0, 234, 255, 0.5));
+        }
+
+        .order-item {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-left: 3px solid transparent;
+            border-radius: 8px;
+            padding: 14px;
+            margin-bottom: 12px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .order-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 234, 255, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .order-item:hover::before {
+            left: 100%;
+        }
+
+        .order-item:hover {
+            background: linear-gradient(135deg, rgba(0, 234, 255, 0.15), rgba(0, 234, 255, 0.05));
+            border-color: rgba(0, 234, 255, 0.4);
+            border-left-color: #00eaff;
+            transform: translateX(8px);
+            box-shadow: -4px 0 20px rgba(0, 234, 255, 0.2);
+        }
+
+        .order-id {
+            font-weight: bold;
+            color: #00eaff;
+            font-size: 14px;
+            text-shadow: 0 0 10px rgba(0, 234, 255, 0.5);
+        }
+
+        .order-detail {
+            font-size: 12px;
+            color: #aaa;
+            margin-top: 6px;
+            line-height: 1.4;
+        }
+
+        .order-status {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            margin-top: 8px;
+            font-weight: 500;
+            border: 1px solid;
+            transition: all 0.3s;
+        }
+
+        .order-status:hover {
+            transform: scale(1.05);
+        }
+
+        .status-normal {
+            background: rgba(51, 255, 51, 0.15);
+            color: #33ff33;
+            border-color: rgba(51, 255, 51, 0.3);
+            box-shadow: 0 0 10px rgba(51, 255, 51, 0.2);
+        }
+
+        .status-warning {
+            background: rgba(255, 204, 0, 0.15);
+            color: #ffcc00;
+            border-color: rgba(255, 204, 0, 0.3);
+            box-shadow: 0 0 10px rgba(255, 204, 0, 0.2);
+        }
+
+        .status-urgent {
+            background: rgba(255, 51, 51, 0.15);
+            color: #ff3333;
+            border-color: rgba(255, 51, 51, 0.3);
+            box-shadow: 0 0 10px rgba(255, 51, 51, 0.2);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            flex-shrink: 0;
+            margin-top: auto;
+        }
+
+        .action-btn {
+            flex: 1;
+            min-width: 100px;
+            padding: 12px 16px;
+            background: linear-gradient(135deg, rgba(0, 234, 255, 0.2), rgba(0, 234, 255, 0.1));
+            border: 1px solid rgba(0, 234, 255, 0.4);
+            color: #00eaff;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .action-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(0, 234, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .action-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .action-btn:hover {
+            background: linear-gradient(135deg, rgba(0, 234, 255, 0.3), rgba(0, 234, 255, 0.15));
+            border-color: #00eaff;
+            box-shadow: 0 0 20px rgba(0, 234, 255, 0.4),
+                0 0 40px rgba(0, 234, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .action-btn:active {
+            transform: translateY(0);
+        }
+
+        .chart-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            transition: opacity 0.3s;
+        }
+
+        .legend-item:hover {
+            opacity: 0.7;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+        }
+
+        .filter-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            background: rgba(0, 234, 255, 0.2);
+            border: 1px solid #00eaff;
+            border-radius: 12px;
+            font-size: 11px;
+            margin: 5px 5px 5px 0;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .filter-badge:hover {
+            background: rgba(0, 234, 255, 0.3);
+            box-shadow: 0 0 10px rgba(0, 234, 255, 0.3);
+        }
+
+        /* Tooltip styles */
+        .chart-tooltip {
+            position: absolute;
+            background: rgba(10, 20, 40, 0.95);
+            border: 1px solid #00eaff;
+            border-radius: 6px;
+            padding: 10px 15px;
+            color: #fff;
+            font-size: 12px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 10px rgba(0, 234, 255, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .chart-tooltip.visible {
+            opacity: 1;
+        }
+
+        .tooltip-title {
+            font-weight: bold;
+            color: #00eaff;
+            margin-bottom: 5px;
+        }
+
+        .tooltip-value {
+            font-size: 14px;
+            color: #fff;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="top-bar">
+        <div class="page-title">深度分析看板</div>
+        <a href="index_bundled.html" class="back-button">
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
+                <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+            返回大屏
+        </a>
+    </div>
+
+    <div class="main-container">
+        <!-- Left Panel: Performance Monitoring -->
+        <div class="panel">
+            <h3 class="panel-title">效能监控</h3>
+
+            <div>
+                <h4 style="font-size: 14px; color: #ccc; margin: 0 0 10px 0;">时效对比折线图</h4>
+                <div class="chart-container" id="time-chart"></div>
+            </div>
+
+            <div style="flex: 1;">
+                <h4 style="font-size: 14px; color: #ccc; margin: 0 0 10px 0;">延误原因分布饼图</h4>
+                <div class="chart-container" id="delay-chart"></div>
+            </div>
+        </div>
+
+        <!-- Center Panel: Structural Analysis -->
+        <div class="panel">
+            <h3 class="panel-title">结构分析</h3>
+
+            <div>
+                <h4 style="font-size: 14px; color: #ccc; margin: 0 0 10px 0;">订单类型分布环形图</h4>
+                <div class="chart-container" id="order-type-chart" style="cursor: pointer;"></div>
+                <div id="order-type-filters" style="margin-top: 10px;"></div>
+            </div>
+
+            <div>
+                <h4 style="font-size: 14px; color: #ccc; margin: 0 0 10px 0;">运输方式占比形图</h4>
+                <div class="chart-container" id="transport-chart" style="cursor: pointer;"></div>
+                <div id="transport-filters" style="margin-top: 10px;"></div>
+            </div>
+        </div>
+
+        <!-- Right Panel: Drill Down -->
+        <div class="panel">
+            <h3 class="panel-title">归因下钻</h3>
+
+            <div style="flex: 1; display: flex; flex-direction: column;">
+                <h4 style="font-size: 14px; color: #ccc; margin: 0 0 10px 0;">动态订单列表</h4>
+                <div class="order-list" id="order-list"></div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="action-btn" onclick="exportData()">📤 导出</button>
+                <button class="action-btn" onclick="sendNotification()">🔔 通知</button>
+                <button class="action-btn" onclick="setupMonitoring()">👁 监控</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mock data
+        const timeData = [
+            { hour: '00:00', actual: 45, standard: 40 },
+            { hour: '04:00', actual: 42, standard: 40 },
+            { hour: '08:00', actual: 55, standard: 40 },
+            { hour: '12:00', actual: 68, standard: 40 },
+            { hour: '16:00', actual: 52, standard: 40 },
+            { hour: '20:00', actual: 48, standard: 40 }
+        ];
+
+        const delayReasons = [
+            { reason: '交通拥堵', value: 35 },
+            { reason: '天气影响', value: 15 },
+            { reason: '仓库延迟', value: 25 },
+            { reason: '订单激增', value: 20 },
+            { reason: '其他', value: 5 }
+        ];
+
+        const orderTypes = [
+            { type: '普通包裹', value: 450, color: '#00eaff' },
+            { type: '生鲜速递', value: 280, color: '#33ff33' },
+            { type: '大件物流', value: 180, color: '#ffcc00' },
+            { type: '跨境订单', value: 90, color: '#ff66cc' }
+        ];
+
+        const transportMethods = [
+            { method: '陆运', value: 520, color: '#00eaff' },
+            { method: '空运', value: 280, color: '#ff3333' },
+            { method: '海运', value: 180, color: '#33ff33' },
+            { method: '铁路', value: 20, color: '#ffcc00' }
+        ];
+
+        let allOrders = generateOrders();
+        let filteredOrders = [...allOrders];
+        let activeFilters = { orderType: null, transport: null };
+
+        function generateOrders() {
+            const orders = [];
+            const types = orderTypes.map(t => t.type);
+            const methods = transportMethods.map(t => t.method);
+            const statuses = ['normal', 'warning', 'urgent'];
+
+            for (let i = 0; i < 50; i++) {
+                orders.push({
+                    id: `ORD${String(i + 1001).padStart(6, '0')}`,
+                    type: types[Math.floor(Math.random() * types.length)],
+                    method: methods[Math.floor(Math.random() * methods.length)],
+                    from: ['上海', '北京', '广州', '深圳'][Math.floor(Math.random() * 4)],
+                    to: ['成都', '武汉', '西安', '杭州'][Math.floor(Math.random() * 4)],
+                    status: statuses[Math.floor(Math.random() * statuses.length)],
+                    time: `${Math.floor(Math.random() * 24)}:${String(Math.floor(Math.random() * 60)).padStart(2, '0')}`
+                });
+            }
+            return orders;
+        }
+
+        // Render time comparison line chart with smooth transitions
+        function renderTimeChart() {
+            const container = d3.select('#time-chart');
+
+            const margin = { top: 5, right: 20, bottom: 40, left: 40 };
+            const width = container.node().getBoundingClientRect().width - margin.left - margin.right;
+            const height = container.node().getBoundingClientRect().height - margin.top - margin.bottom;
+
+            // Check if SVG exists, if not create it
+            let svg = container.select('svg');
+            if (svg.empty()) {
+                svg = container.append('svg')
+                    .attr('width', '100%')
+                    .attr('height', '100%');
+                svg.append('g')
+                    .attr('class', 'chart-content')
+                    .attr('transform', `translate(${margin.left},${margin.top})`);
+            }
+
+            const chartGroup = svg.select('g.chart-content');
+            chartGroup.selectAll('*').remove();
+
+            const x = d3.scaleBand()
+                .domain(timeData.map(d => d.hour))
+                .range([0, width])
+                .padding(0.1);
+
+            const y = d3.scaleLinear()
+                .domain([0, d3.max(timeData, d => Math.max(d.actual, d.standard)) * 1.1])
+                .range([height, 0]);
+
+            // Lines with smooth curves
+            const line1 = d3.line()
+                .x(d => x(d.hour) + x.bandwidth() / 2)
+                .y(d => y(d.actual))
+                .curve(d3.curveMonotoneX); // Smooth curve
+
+            const line2 = d3.line()
+                .x(d => x(d.hour) + x.bandwidth() / 2)
+                .y(d => y(d.standard))
+                .curve(d3.curveMonotoneX); // Smooth curve
+
+            // Actual time line (red) with animation
+            const actualPath = chartGroup.append('path')
+                .datum(timeData)
+                .attr('fill', 'none')
+                .attr('stroke', '#ff3333')
+                .attr('stroke-width', 2.5)
+                .attr('d', line1)
+                .style('filter', 'drop-shadow(0 0 4px rgba(255, 51, 51, 0.6))');
+
+            // Animate path drawing
+            const actualPathLength = actualPath.node().getTotalLength();
+            actualPath
+                .attr('stroke-dasharray', actualPathLength)
+                .attr('stroke-dashoffset', actualPathLength)
+                .transition()
+                .duration(1500)
+                .ease(d3.easeQuadInOut)
+                .attr('stroke-dashoffset', 0);
+
+            // Standard time line (cyan) with animation
+            const standardPath = chartGroup.append('path')
+                .datum(timeData)
+                .attr('fill', 'none')
+                .attr('stroke', '#00eaff')
+                .attr('stroke-width', 2.5)
+                .attr('d', line2)
+                .style('filter', 'drop-shadow(0 0 4px rgba(0, 234, 255, 0.6))');
+
+            const standardPathLength = standardPath.node().getTotalLength();
+            standardPath
+                .attr('stroke-dasharray', standardPathLength)
+                .attr('stroke-dashoffset', standardPathLength)
+                .transition()
+                .duration(1500)
+                .ease(d3.easeQuadInOut)
+                .attr('stroke-dashoffset', 0);
+
+            // Add data points with animation
+            chartGroup.selectAll('.actual-point')
+                .data(timeData)
+                .enter().append('circle')
+                .attr('class', 'actual-point')
+                .attr('cx', d => x(d.hour) + x.bandwidth() / 2)
+                .attr('cy', d => y(d.actual))
+                .attr('r', 0)
+                .attr('fill', '#ff3333')
+                .attr('stroke', '#fff')
+                .attr('stroke-width', 2)
+                .style('filter', 'drop-shadow(0 0 3px rgba(255, 51, 51, 0.8))')
+                .transition()
+                .delay((d, i) => i * 200)
+                .duration(400)
+                .attr('r', 4);
+
+            chartGroup.selectAll('.standard-point')
+                .data(timeData)
+                .enter().append('circle')
+                .attr('class', 'standard-point')
+                .attr('cx', d => x(d.hour) + x.bandwidth() / 2)
+                .attr('cy', d => y(d.standard))
+                .attr('r', 0)
+                .attr('fill', '#00eaff')
+                .attr('stroke', '#fff')
+                .attr('stroke-width', 2)
+                .style('filter', 'drop-shadow(0 0 3px rgba(0, 234, 255, 0.8))')
+                .transition()
+                .delay((d, i) => i * 200)
+                .duration(400)
+                .attr('r', 4);
+
+            // Axes with visible labels
+            const xAxis = chartGroup.append('g')
+                .attr('class', 'x-axis')
+                .attr('transform', `translate(0,${height})`)
+                .call(d3.axisBottom(x));
+
+            xAxis.selectAll('text')
+                .attr('fill', '#ccc')
+                .attr('font-size', '10px')
+                .attr('font-weight', 'normal')
+                .style('text-anchor', 'middle');
+
+            xAxis.selectAll('path, line')
+                .attr('stroke', '#666')
+                .attr('stroke-width', 1);
+
+            const yAxis = chartGroup.append('g')
+                .attr('class', 'y-axis')
+                .call(d3.axisLeft(y).ticks(5));
+
+            yAxis.selectAll('text')
+                .attr('fill', '#ccc')
+                .attr('font-size', '10px')
+                .attr('font-weight', 'normal');
+
+            yAxis.selectAll('path, line')
+                .attr('stroke', '#666')
+                .attr('stroke-width', 1);
+
+            // Legend - positioned at top right corner
+            const legend = chartGroup.append('g').attr('transform', `translate(${width - 70}, 5)`);
+            legend.append('line').attr('x1', 0).attr('x2', 18).attr('stroke', '#ff3333').attr('stroke-width', 2.5);
+            legend.append('text').attr('x', 22).attr('y', 5).text('实际时效').style('fill', '#ccc').style('font-size', '10px');
+
+            legend.append('line').attr('x1', 0).attr('y1', 14).attr('x2', 18).attr('y2', 14).attr('stroke', '#00eaff').attr('stroke-width', 2.5);
+            legend.append('text').attr('x', 22).attr('y', 19).text('标准时效').style('fill', '#ccc').style('font-size', '10px');
+        }
+
+        // Render delay reasons pie chart
+        function renderDelayChart() {
+            const container = d3.select('#delay-chart');
+            container.selectAll('*').remove();
+
+            const width = container.node().getBoundingClientRect().width;
+            const height = container.node().getBoundingClientRect().height;
+            const radius = Math.min(width, height) / 2 - 20;
+
+            const svg = container.append('svg')
+                .attr('width', '100%')
+                .attr('height', '100%')
+                .append('g')
+                .attr('transform', `translate(${width / 2},${height / 2 - 10})`);
+
+            const color = d3.scaleOrdinal()
+                .domain(delayReasons.map(d => d.reason))
+                .range(['#ff3333', '#ffcc00', '#00eaff', '#33ff33', '#888']);
+
+            const pie = d3.pie().value(d => d.value);
+            const arc = d3.arc().innerRadius(0).outerRadius(radius);
+            const arcHover = d3.arc().innerRadius(0).outerRadius(radius + 10);
+
+            // Create tooltip
+            let tooltip = d3.select('.chart-tooltip');
+            if (tooltip.empty()) {
+                tooltip = d3.select('body').append('div')
+                    .attr('class', 'chart-tooltip');
+            }
+
+            const paths = svg.selectAll('path')
+                .data(pie(delayReasons))
+                .enter().append('path')
+                .attr('d', arc)
+                .attr('fill', d => color(d.data.reason))
+                .attr('stroke', '#0a1423')
+                .attr('stroke-width', 2)
+                .style('opacity', 0.8)
+                .style('cursor', 'pointer')
+                .on('mouseover', function (event, d) {
+                    d3.select(this)
+                        .transition()
+                        .duration(200)
+                        .attr('d', arcHover)
+                        .style('opacity', 1);
+
+                    tooltip.html(`
+                        <div class="tooltip-title">${d.data.reason}</div>
+                        <div class="tooltip-value">${d.data.value}%</div>
+                    `)
+                        .style('left', (event.pageX + 15) + 'px')
+                        .style('top', (event.pageY - 28) + 'px')
+                        .classed('visible', true);
+                })
+                .on('mouseout', function () {
+                    d3.select(this)
+                        .transition()
+                        .duration(200)
+                        .attr('d', arc)
+                        .style('opacity', 0.8);
+
+                    tooltip.classed('visible', false);
+                })
+                .on('mousemove', function (event) {
+                    tooltip
+                        .style('left', (event.pageX + 15) + 'px')
+                        .style('top', (event.pageY - 28) + 'px');
+                });
+
+            // Labels with percentages only
+            svg.selectAll('text')
+                .data(pie(delayReasons))
+                .enter().append('text')
+                .attr('transform', d => `translate(${arc.centroid(d)})`)
+                .attr('text-anchor', 'middle')
+                .style('fill', '#fff')
+                .style('font-size', '11px')
+                .style('font-weight', 'bold')
+                .style('pointer-events', 'none')
+                .text(d => `${d.data.value}%`);
+        }
+
+        // Render order type donut chart
+        function renderOrderTypeChart() {
+            const container = d3.select('#order-type-chart');
+            container.selectAll('*').remove();
+
+            const width = container.node().getBoundingClientRect().width;
+            const height = container.node().getBoundingClientRect().height;
+            const radius = Math.min(width, height) / 2 - 20;
+
+            const svg = container.append('svg')
+                .attr('width', '100%')
+                .attr('height', '100%')
+                .append('g')
+                .attr('transform', `translate(${width / 2},${height / 2})`);
+
+            const pie = d3.pie().value(d => d.value);
+            const arc = d3.arc().innerRadius(radius * 0.6).outerRadius(radius);
+
+            svg.selectAll('path')
+                .data(pie(orderTypes))
+                .enter().append('path')
+                .attr('d', arc)
+                .attr('fill', d => d.data.color)
+                .attr('stroke', '#0a1423')
+                .attr('stroke-width', 2)
+                .style('opacity', d => activeFilters.orderType && activeFilters.orderType !== d.data.type ? 0.3 : 0.8)
+                .on('click', function (event, d) {
+                    if (activeFilters.orderType === d.data.type) {
+                        activeFilters.orderType = null;
+                    } else {
+                        activeFilters.orderType = d.data.type;
+                    }
+                    updateFilters();
+                })
+                .on('mouseover', function () {
+                    d3.select(this).style('opacity', 1);
+                })
+                .on('mouseout', function (event, d) {
+                    d3.select(this).style('opacity', activeFilters.orderType && activeFilters.orderType !== d.data.type ? 0.3 : 0.8);
+                });
+
+            // Center text
+            svg.append('text')
+                .attr('text-anchor', 'middle')
+                .attr('y', -5)
+                .style('fill', '#00eaff')
+                .style('font-size', '24px')
+                .style('font-weight', 'bold')
+                .text(d3.sum(orderTypes, d => d.value));
+
+            svg.append('text')
+                .attr('text-anchor', 'middle')
+                .attr('y', 15)
+                .style('fill', '#aaa')
+                .style('font-size', '12px')
+                .text('总订单');
+        }
+
+        // Render transport method bar chart
+        function renderTransportChart() {
+            const container = d3.select('#transport-chart');
+            container.selectAll('*').remove();
+
+            const margin = { top: 20, right: 20, bottom: 30, left: 60 };
+            const width = container.node().getBoundingClientRect().width - margin.left - margin.right;
+            const height = container.node().getBoundingClientRect().height - margin.top - margin.bottom;
+
+            const svg = container.append('svg')
+                .attr('width', '100%')
+                .attr('height', '100%')
+                .append('g')
+                .attr('transform', `translate(${margin.left},${margin.top})`);
+
+            const x = d3.scaleLinear()
+                .domain([0, d3.max(transportMethods, d => d.value)])
+                .range([0, width]);
+
+            const y = d3.scaleBand()
+                .domain(transportMethods.map(d => d.method))
+                .range([0, height])
+                .padding(0.2);
+
+            svg.selectAll('rect')
+                .data(transportMethods)
+                .enter().append('rect')
+                .attr('x', 0)
+                .attr('y', d => y(d.method))
+                .attr('width', d => x(d.value))
+                .attr('height', y.bandwidth())
+                .attr('fill', d => d.color)
+                .style('opacity', d => activeFilters.transport && activeFilters.transport !== d.method ? 0.3 : 0.8)
+                .on('click', function (event, d) {
+                    if (activeFilters.transport === d.method) {
+                        activeFilters.transport = null;
+                    } else {
+                        activeFilters.transport = d.method;
+                    }
+                    updateFilters();
+                })
+                .on('mouseover', function () {
+                    d3.select(this).style('opacity', 1);
+                })
+                .on('mouseout', function (event, d) {
+                    d3.select(this).style('opacity', activeFilters.transport && activeFilters.transport !== d.method ? 0.3 : 0.8);
+                });
+
+            // Values - fix positioning to show inside bar or just after it
+            svg.selectAll('text.value')
+                .data(transportMethods)
+                .enter().append('text')
+                .attr('class', 'value')
+                .attr('x', d => {
+                    const barWidth = x(d.value);
+                    // If bar is too long, show number inside near the end
+                    if (barWidth > width * 0.8) {
+                        return barWidth - 35;
+                    }
+                    // Otherwise show after the bar
+                    return barWidth + 5;
+                })
+                .attr('y', d => y(d.method) + y.bandwidth() / 2 + 4)
+                .style('fill', d => {
+                    const barWidth = x(d.value);
+                    return barWidth > width * 0.8 ? '#fff' : '#fff';
+                })
+                .style('font-size', '12px')
+                .style('font-weight', 'bold')
+                .text(d => d.value);
+
+            svg.append('g')
+                .call(d3.axisLeft(y))
+                .style('color', '#666');
+        }
+
+        // Update filters and orders
+        function updateFilters() {
+            // Filter orders
+            filteredOrders = allOrders.filter(order => {
+                if (activeFilters.orderType && order.type !== activeFilters.orderType) return false;
+                if (activeFilters.transport && order.method !== activeFilters.transport) return false;
+                return true;
+            });
+
+            // Update filter badges
+            const orderTypeFilters = d3.select('#order-type-filters');
+            orderTypeFilters.html('');
+            if (activeFilters.orderType) {
+                orderTypeFilters.append('span')
+                    .attr('class', 'filter-badge')
+                    .text(`类型: ${activeFilters.orderType}`)
+                    .on('click', () => {
+                        activeFilters.orderType = null;
+                        updateFilters();
+                    });
+            }
+
+            const transportFilters = d3.select('#transport-filters');
+            transportFilters.html('');
+            if (activeFilters.transport) {
+                transportFilters.append('span')
+                    .attr('class', 'filter-badge')
+                    .text(`方式: ${activeFilters.transport}`)
+                    .on('click', () => {
+                        activeFilters.transport = null;
+                        updateFilters();
+                    });
+            }
+
+            renderOrderTypeChart();
+            renderTransportChart();
+            renderOrderList();
+        }
+
+        // Render order list  
+        function renderOrderList() {
+            const container = d3.select('#order-list');
+            container.html('');
+
+            const statusLabels = {
+                'normal': '正常',
+                'warning': '预警',
+                'urgent': '紧急'
+            };
+
+            filteredOrders.forEach(order => {
+                const item = container.append('div')
+                    .attr('class', 'order-item');
+
+                item.append('div')
+                    .attr('class', 'order-id')
+                    .text(order.id);
+
+                item.append('div')
+                    .attr('class', 'order-detail')
+                    .text(`${order.type} | ${order.method} | ${order.from} → ${order.to}`);
+
+                item.append('span')
+                    .attr('class', `order-status status-${order.status}`)
+                    .text(statusLabels[order.status]);
+            });
+
+            if (filteredOrders.length === 0) {
+                container.append('div')
+                    .style('text-align', 'center')
+                    .style('color', '#666')
+                    .style('padding', '40px 20px')
+                    .text('暂无匹配订单');
+            }
+        }
+
+        // Action buttons
+        function exportData() {
+            alert(`导出 ${filteredOrders.length} 条订单数据`);
+        }
+
+        function sendNotification() {
+            alert('已发送监控通知');
+        }
+
+        function setupMonitoring() {
+            alert('已设置实时监控');
+        }
+
+        // Real-time data update functions
+        let orderIdCounter = 1050;
+
+        function addNewOrder() {
+            const types = orderTypes.map(t => t.type);
+            const methods = transportMethods.map(t => t.method);
+            const statuses = ['normal', 'warning', 'urgent'];
+
+            const newOrder = {
+                id: `ORD${String(orderIdCounter++).padStart(6, '0')}`,
+                type: types[Math.floor(Math.random() * types.length)],
+                method: methods[Math.floor(Math.random() * methods.length)],
+                from: ['上海', '北京', '广州', '深圳', '杭州'][Math.floor(Math.random() * 5)],
+                to: ['成都', '武汉', '西安', '南京', '重庆'][Math.floor(Math.random() * 5)],
+                status: statuses[Math.floor(Math.random() * statuses.length)],
+                time: `${String(Math.floor(Math.random() * 24)).padStart(2, '0')}:${String(Math.floor(Math.random() * 60)).padStart(2, '0')}`
+            };
+
+            allOrders.unshift(newOrder);
+
+            // Update order type count
+            const typeIndex = orderTypes.findIndex(t => t.type === newOrder.type);
+            if (typeIndex !== -1) {
+                orderTypes[typeIndex].value++;
+            }
+
+            // Update transport method count
+            const methodIndex = transportMethods.findIndex(m => m.method === newOrder.method);
+            if (methodIndex !== -1) {
+                transportMethods[methodIndex].value++;
+            }
+
+            updateFilters();
+        }
+
+        function animateOrderCount() {
+            const totalOrders = d3.sum(orderTypes, d => d.value);
+            const centerText = d3.select('#order-type-chart svg g text'); // Select the first text element in the group
+
+            if (centerText.empty()) return;
+
+            const currentValue = parseInt(centerText.text()) || totalOrders - 1; // Fallback if text is not a number
+
+            if (currentValue < totalOrders) {
+                centerText.text(currentValue + 1);
+            }
+        }
+
+        // Initialize charts
+        renderTimeChart();
+        renderDelayChart();
+        renderOrderTypeChart();
+        renderTransportChart();
+        renderOrderList();
+
+        // Start real-time updates (slower pace: 5-8 seconds interval)
+        setInterval(() => {
+            addNewOrder();
+            setTimeout(animateOrderCount, 200);
+        }, 6000); // Add new order every 6 seconds
+
+        // Update line chart data gradually with more noticeable changes
+        function updateTimeChartData() {
+            // Randomly fluctuate actual time values with larger variation
+            timeData.forEach(point => {
+                const change = (Math.random() - 0.5) * 8; // ±4 variation (increased from ±2)
+                point.actual = Math.max(38, Math.min(75, point.actual + change));
+            });
+
+            renderTimeChart();
+        }
+
+        // Update line chart every 12 seconds (slower than other charts)
+        setInterval(updateTimeChartData, 12000);
+
+        // Redraw charts on window resize
+        window.addEventListener('resize', () => {
+            renderTimeChart();
+            renderDelayChart();
+            renderOrderTypeChart();
+            renderTransportChart();
+        });
+    </script>
+</body>
+
+</html>
