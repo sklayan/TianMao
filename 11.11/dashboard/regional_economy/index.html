@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Regional Economy Analysis - Double 11</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Microsoft+YaHei&display=swap"
+        rel="stylesheet">
+    <!-- ECharts CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+
+<body>
+    <!-- Back Button -->
+    <a href="../../index.html" class="back-button">
+        &lt; 返回大屏 (Back)
+    </a>
+
+    <!-- Header -->
+    <header class="dashboard-header">
+        <h1 class="festive-title">区域经济深度分析</h1>
+        <div class="subtitle">REGIONAL ECONOMIC ANALYSIS</div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Map Container -->
+        <div id="map-container">
+            <div class="map-controls">
+                <div class="map-btn" id="zoom-in" title="Zoom In">+</div>
+                <div class="map-btn" id="zoom-out" title="Zoom Out">-</div>
+                <div class="map-btn" id="reset-map" title="Reset View">⟲</div>
+            </div>
+            <div class="drill-crumb" id="drill-crumb">CHINA</div>
+            <div class="loading-overlay" id="loading">Loading Map Data...</div>
+            <!-- ECharts Instance will go here -->
+            <div id="echarts-map" style="width: 100%; height: 100%;"></div>
+        </div>
+
+        <!-- Right Data Panel -->
+        <div id="data-panel">
+            <div class="panel-title">REGIONAL INSIGHTS</div>
+
+            <!-- Dynamic Content Area -->
+            <div id="region-info">
+                <div class="region-detail-card">
+                    <div class="card-header">
+                        <span class="region-name-large">全国</span>
+                        <span class="region-en-name">CHINA</span>
+                    </div>
+
+                    <div class="stat-row">
+                        <div class="stat-label">Total GMV (Sales)</div>
+                        <div class="stat-bar-container">
+                            <div class="year-label">2015</div>
+                            <div class="bar-bg">
+                                <div class="bar-fill" style="width: 85%;"></div>
+                            </div>
+                            <div class="stat-value">¥912亿</div>
+                        </div>
+                        <div class="stat-bar-container">
+                            <div class="year-label">2014</div>
+                            <div class="bar-bg">
+                                <div class="bar-fill prev-year" style="width: 53%;"></div>
+                            </div>
+                            <div class="stat-value">¥571亿</div>
+                        </div>
+                    </div>
+
+                    <div class="growth-indicator">
+                        <div class="growth-icon">▲ 59.7%</div>
+                        <div class="growth-text">YoY Growth</div>
+                    </div>
+                </div>
+
+                <div style="font-size:12px; color:#8899aa; text-align:center; margin-top:30px;">
+                    Select a province on the map to view detailed regional breakdown.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logic -->
+    <script src="js/main.js"></script>
+</body>
+
+</html>

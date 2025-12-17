@@ -13,22 +13,18 @@
 </head>
 
 <body>
+    <!-- Background Particles -->
+    <canvas id="particle-canvas"></canvas>
     <div class="container">
         <!-- Header -->
         <header class="header">
             <div class="header-left"></div>
             <div class="header-center">
                 <div class="title-container">
-                    <div class="header-title">双十一销售结构分析</div>
-                    <div class="header-subtitle">SALES STRUCTURE ANALYSIS</div>
+                    <div class="main-title">双十一销售结构分析</div>
                 </div>
             </div>
             <div class="header-right">
-                <select id="time-selector">
-                    <option value="realtime">实时数据</option>
-                    <option value="today">今日累计</option>
-                    <option value="total">全程数据</option>
-                </select>
                 <div class="refresh-time">数据更新于: <span id="timestamp">--:--:--</span></div>
                 <button id="back-btn" class="back-btn" onclick="window.location.href='../../index.html'">返回大屏</button>
             </div>
@@ -38,10 +34,6 @@
         <main class="main-content">
             <!-- Left Column: Sales Channel Analysis -->
             <div class="column left-column">
-                <div class="panel-box">
-                    <div class="panel-header">各渠道销售额对比</div>
-                    <div class="chart-container" id="channel-sales-chart"></div>
-                </div>
                 <div class="panel-box">
                     <div class="panel-header">渠道转化指标</div>
                     <div class="kpi-cards" id="conversion-cards">
@@ -61,16 +53,16 @@
                     <div class="chart-container" id="category-rank-chart"></div>
                 </div>
                 <div class="panel-box">
-                    <div class="panel-header">品类销售趋势</div>
+                    <div class="panel-header" id="trend-chart-title">全品类销售趋势</div>
                     <div class="chart-container" id="category-trend-chart"></div>
                 </div>
                 <div class="row-split">
                     <div class="panel-box half-height">
-                        <div class="panel-header">热销品类词云</div>
+                        <div class="panel-header" id="wordcloud-title">全品类热销词云</div>
                         <div class="chart-container" id="wordcloud-chart"></div>
                     </div>
                     <div class="panel-box half-height">
-                        <div class="panel-header">毛利贡献度</div>
+                        <div class="panel-header" id="margin-title">全品类毛利贡献</div>
                         <div class="chart-container" id="margin-gauge-chart"></div>
                     </div>
                 </div>
@@ -78,13 +70,9 @@
 
             <!-- Right Column: Customer & Region Analysis -->
             <div class="column right-column">
-                <div class="panel-box map-panel">
-                    <div class="panel-header">区域销售热力图</div>
-                    <div class="chart-container" id="map-chart"></div>
-                </div>
-                <div class="panel-box">
-                    <div class="panel-header">城市销售额 TOP10</div>
-                    <div class="chart-container" id="city-rank-chart"></div>
+                <div class="panel-box large-panel">
+                    <div class="panel-header">价格带销售结构分析</div>
+                    <div class="chart-container" id="price-range-chart"></div>
                 </div>
                 <div class="panel-box">
                     <div class="panel-header">客户复购与客群</div>
