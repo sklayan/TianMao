@@ -414,6 +414,139 @@
             font-size: 14px;
             color: #fff;
         }
+
+        /* Notification Panel */
+        .notification-panel {
+            position: fixed;
+            top: 0;
+            right: -300px;
+            width: 300px;
+            height: 100%;
+            background: rgba(10, 20, 40, 0.95);
+            border-left: 1px solid #00eaff;
+            box-shadow: -5px 0 20px rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            backdrop-filter: blur(10px);
+        }
+
+        .notification-panel.open {
+            right: 0;
+        }
+
+        .panel-header-notif {
+            padding: 20px;
+            border-bottom: 1px solid rgba(0, 234, 255, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-title-notif {
+            color: #00eaff;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            font-size: 20px;
+            transition: color 0.3s;
+        }
+
+        .close-btn:hover {
+            color: #ff3333;
+        }
+
+        .notification-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .notif-item {
+            background: rgba(0, 234, 255, 0.05);
+            border: 1px solid rgba(0, 234, 255, 0.1);
+            margin-bottom: 10px;
+            padding: 12px;
+            border-radius: 4px;
+            border-left: 3px solid #00eaff;
+            animation: slideInRight 0.3s ease-out;
+        }
+
+        .notif-item.warning {
+            border-left-color: #ffcc00;
+        }
+
+        .notif-item.critical {
+            border-left-color: #ff3333;
+        }
+
+        .notif-time {
+            font-size: 10px;
+            color: #888;
+            margin-bottom: 4px;
+        }
+
+        .notif-msg {
+            font-size: 13px;
+            color: #fff;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Monitoring Effect */
+        .monitor-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 900;
+            overflow: hidden;
+            display: none;
+        }
+
+        .scanning-line {
+            position: absolute;
+            top: -10%;
+            left: 0;
+            width: 100%;
+            height: 10px;
+            background: linear-gradient(to bottom, transparent, rgba(0, 234, 255, 0.5), transparent);
+            animation: scan 3s linear infinite;
+        }
+
+        .panel.monitor-active {
+            border-color: #00eaff;
+            box-shadow: 0 0 15px rgba(0, 234, 255, 0.2);
+        }
+
+        @keyframes scan {
+            0% {
+                top: -10%;
+            }
+
+            100% {
+                top: 110%;
+            }
+        }
     </style>
 </head>
 
@@ -428,9 +561,22 @@
         </a>
     </div>
 
+    <div class="notification-panel" id="notificationPanel">
+        <div class="panel-header-notif">
+            <span class="panel-title-notif">系统通知</span>
+            <button class="close-btn" onclick="toggleNotificationPanel()">×</button>
+        </div>
+        <div class="notification-list" id="notificationList">
+            <!-- Notifications will be added here -->
+        </div>
+    </div>
+
     <div class="main-container">
         <!-- Left Panel: Performance Monitoring -->
         <div class="panel">
+            <div class="monitor-overlay">
+                <div class="scanning-line"></div>
+            </div>
             <h3 class="panel-title">效能监控</h3>
 
             <div>
@@ -446,6 +592,9 @@
 
         <!-- Center Panel: Structural Analysis -->
         <div class="panel">
+            <div class="monitor-overlay">
+                <div class="scanning-line"></div>
+            </div>
             <h3 class="panel-title">结构分析</h3>
 
             <div>
@@ -463,6 +612,9 @@
 
         <!-- Right Panel: Drill Down -->
         <div class="panel">
+            <div class="monitor-overlay">
+                <div class="scanning-line"></div>
+            </div>
             <h3 class="panel-title">归因下钻</h3>
 
             <div style="flex: 1; display: flex; flex-direction: column;">
@@ -471,9 +623,16 @@
             </div>
 
             <div class="action-buttons">
-                <button class="action-btn" onclick="exportData()">📤 导出</button>
-                <button class="action-btn" onclick="sendNotification()">🔔 通知</button>
-                <button class="action-btn" onclick="setupMonitoring()">👁 监控</button>
+                <button class="action-btn" onclick="handleExport()">
+                    📤 导出
+                </button>
+                <button class="action-btn" onclick="toggleNotificationPanel()">
+                    🔔 通知 <span id="notif-badge"
+                        style="display:none; width:8px; height:8px; background:red; border-radius:50%; position:absolute; top:10px; right:12px;"></span>
+                </button>
+                <button class="action-btn" id="monitor-btn" onclick="toggleMonitorMode()">
+                    👁 监控
+                </button>
             </div>
         </div>
     </div>
@@ -977,21 +1136,108 @@
             }
         }
 
-        // Action buttons
-        function exportData() {
-            alert(`导出 ${filteredOrders.length} 条订单数据`);
-        }
-
-        function sendNotification() {
-            alert('已发送监控通知');
-        }
-
-        function setupMonitoring() {
-            alert('已设置实时监控');
-        }
-
         // Real-time data update functions
         let orderIdCounter = 1050;
+        let updateInterval;
+        let isMonitoring = false;
+
+        // Action: Export to CSV
+        function handleExport() {
+            const btn = document.querySelector('button[onclick="handleExport()"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '⏳ 导出中...';
+            btn.style.opacity = 0.7;
+
+            setTimeout(() => {
+                // Convert filteredOrders to CSV
+                const headers = "Order ID,Type,Method,From,To,Status,Time\n";
+                const rows = filteredOrders.map(o =>
+                    `${o.id},${o.type},${o.method},${o.from},${o.to},${o.status},${o.time}`
+                ).join("\n");
+
+                const csvContent = "data:text/csv;charset=utf-8,\ufeff" + headers + rows;
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", "analysis_orders.csv");
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                btn.innerHTML = originalText;
+                btn.style.opacity = 1;
+                addNotification('数据导出完成: analysis_orders.csv', 'success');
+            }, 1000);
+        }
+
+        // Action: Toggle Notification Panel
+        function toggleNotificationPanel() {
+            const panel = document.getElementById('notificationPanel');
+            panel.classList.toggle('open');
+            if (panel.classList.contains('open')) {
+                document.getElementById('notif-badge').style.display = 'none';
+            }
+        }
+
+        function addNotification(msg, type = 'normal') {
+            const list = document.getElementById('notificationList');
+            const item = document.createElement('div');
+            item.className = `notif-item ${type}`;
+            const time = new Date().toLocaleTimeString();
+            item.innerHTML = `
+                <div class="notif-time">${time}</div>
+                <div class="notif-msg">${msg}</div>
+            `;
+            list.insertBefore(item, list.firstChild);
+
+            // Show badge if panel is closed
+            const panel = document.getElementById('notificationPanel');
+            if (!panel.classList.contains('open')) {
+                document.getElementById('notif-badge').style.display = 'block';
+            }
+        }
+
+        // Action: Toggle Monitor Mode
+        function toggleMonitorMode() {
+            isMonitoring = !isMonitoring;
+            const btn = document.getElementById('monitor-btn');
+            const overlays = document.querySelectorAll('.monitor-overlay');
+            const panels = document.querySelectorAll('.panel');
+
+            if (isMonitoring) {
+                btn.innerHTML = '👁 监控开启';
+                btn.style.boxShadow = '0 0 15px #00eaff';
+                btn.style.background = 'rgba(0, 234, 255, 0.3)';
+
+                overlays.forEach(o => o.style.display = 'block');
+                panels.forEach(p => p.classList.add('monitor-active'));
+
+                addNotification('实时监控模式已启动，刷新频率提升', 'critical');
+
+                // Speed up updates
+                clearInterval(updateInterval);
+                updateInterval = setInterval(() => {
+                    addNewOrder();
+                    setTimeout(animateOrderCount, 100);
+                }, 1500); // Fast speed
+            } else {
+                btn.innerHTML = '👁 监控';
+                btn.style.boxShadow = 'none';
+                btn.style.background = '';
+
+                overlays.forEach(o => o.style.display = 'none');
+                panels.forEach(p => p.classList.remove('monitor-active'));
+
+                addNotification('实时监控模式已关闭', 'normal');
+
+                // Reset speed
+                clearInterval(updateInterval);
+                updateInterval = setInterval(() => {
+                    addNewOrder();
+                    setTimeout(animateOrderCount, 200);
+                }, 6000); // Normal speed
+            }
+        }
 
         function addNewOrder() {
             const types = orderTypes.map(t => t.type);
@@ -1005,10 +1251,11 @@
                 from: ['上海', '北京', '广州', '深圳', '杭州'][Math.floor(Math.random() * 5)],
                 to: ['成都', '武汉', '西安', '南京', '重庆'][Math.floor(Math.random() * 5)],
                 status: statuses[Math.floor(Math.random() * statuses.length)],
-                time: `${String(Math.floor(Math.random() * 24)).padStart(2, '0')}:${String(Math.floor(Math.random() * 60)).padStart(2, '0')}`
+                time: new Date().toLocaleTimeString('en-GB').substring(0, 5)
             };
 
             allOrders.unshift(newOrder);
+            if (allOrders.length > 100) allOrders.pop(); // Keep list size manageable
 
             // Update order type count
             const typeIndex = orderTypes.findIndex(t => t.type === newOrder.type);
@@ -1045,11 +1292,16 @@
         renderTransportChart();
         renderOrderList();
 
-        // Start real-time updates (slower pace: 5-8 seconds interval)
-        setInterval(() => {
+        // Start normal interval
+        updateInterval = setInterval(() => {
             addNewOrder();
             setTimeout(animateOrderCount, 200);
-        }, 6000); // Add new order every 6 seconds
+        }, 6000);
+
+        // Simulated initial notification
+        setTimeout(() => {
+            addNotification('系统初始化完成，等待数据接入...', 'normal');
+        }, 1000);
 
         // Update line chart data gradually with more noticeable changes
         function updateTimeChartData() {
