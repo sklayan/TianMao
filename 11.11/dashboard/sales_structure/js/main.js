@@ -4,16 +4,16 @@ const charts = {};
 // Centralized Category Data
 let currentCategory = '全品类'; // Default
 const categoryStats = {
-    '美妆': { volume: 900, margin: 65, trendBase: 200 },
-    '数码': { volume: 850, margin: 25, trendBase: 180 },
-    '家电': { volume: 800, margin: 30, trendBase: 160 },
-    '服饰': { volume: 750, margin: 55, trendBase: 140 },
-    '食品': { volume: 700, margin: 40, trendBase: 120 },
-    '母婴': { volume: 650, margin: 45, trendBase: 100 },
-    '家居': { volume: 600, margin: 50, trendBase: 90 },
-    '运动': { volume: 550, margin: 48, trendBase: 80 },
-    '个护': { volume: 500, margin: 60, trendBase: 70 },
-    '生鲜': { volume: 450, margin: 35, trendBase: 60 }
+    '美妆': { volume: 452.5, margin: 65, trendBase: 200 },
+    '数码': { volume: 418.2, margin: 25, trendBase: 180 },
+    '家电': { volume: 385.6, margin: 30, trendBase: 160 },
+    '服饰': { volume: 356.8, margin: 55, trendBase: 140 },
+    '食品': { volume: 210.4, margin: 40, trendBase: 120 },
+    '母婴': { volume: 185.3, margin: 45, trendBase: 100 },
+    '家居': { volume: 160.7, margin: 50, trendBase: 90 },
+    '运动': { volume: 145.9, margin: 48, trendBase: 80 },
+    '个护': { volume: 120.1, margin: 60, trendBase: 70 },
+    '生鲜': { volume: 95.4, margin: 35, trendBase: 60 }
 };
 
 // Mock Data Generators
@@ -72,17 +72,72 @@ function initConversionCards() {
     renderConversionCards();
 }
 
-function renderConversionCards() {
+function renderConversionCards(data) {
     const container = document.getElementById('conversion-cards');
-    container.innerHTML = kpiData.map(item => `
-        <div class="kpi-card">
-            <div class="kpi-title">${item.title}</div>
-            <div class="kpi-value">${item.prefix || ''}${typeof item.value === 'number' ? item.value.toFixed(1) : item.value}${item.unit}</div>
-            <div class="kpi-trend ${item.up ? 'trend-up' : 'trend-down'}">
-                ${item.up ? '▲' : '▼'} ${item.trend}%
+    const displayData = data || kpiData;
+    // Icons mapping
+    const icons = ['🖱️', '🔄', '💰'];
+    
+    container.innerHTML = displayData.map((item, index) => `
+        <div class="kpi-card" onclick="handleKpiClick(this, ${index})">
+            <div class="kpi-header">
+                <div class="kpi-title">${item.title}</div>
+                <div class="kpi-icon-bg">${icons[index] || '📊'}</div>
             </div>
+            <div class="kpi-body">
+                <div class="kpi-value">
+                    ${item.prefix || ''}${typeof item.value === 'number' ? item.value.toFixed(1) : item.value}<span class="kpi-unit">${item.unit}</span>
+                </div>
+            </div>
+            <div class="kpi-footer">
+                <span class="trend-label">周同比</span>
+                <div class="kpi-trend ${item.up ? 'trend-up' : 'trend-down'}">
+                    ${item.up ? '▲' : '▼'} ${item.trend}%
+                </div>
+            </div>
+            <!-- Decorative background element -->
+            <div class="card-decoration"></div>
         </div>
     `).join('');
+}
+
+function handleKpiClick(element, index) {
+    // Remove active class from all cards
+    document.querySelectorAll('.kpi-card').forEach(card => card.classList.remove('active'));
+    // Add active class to clicked card
+    element.classList.add('active');
+    
+    // Simulate interaction: Update Traffic Source based on KPI
+    const kpi = kpiData[index];
+    if (charts.trafficSource) {
+        let newData = [];
+        if (kpi.title.includes('转化率')) {
+             newData = [
+                { value: 45, name: '直接访问' },
+                { value: 40, name: '搜索引擎' },
+                { value: 10, name: '社交媒体' },
+                { value: 3, name: '广告投放' },
+                { value: 2, name: '外部链接' }
+            ];
+        } else if (kpi.title.includes('点击率')) {
+             newData = [
+                { value: 10, name: '直接访问' },
+                { value: 20, name: '搜索引擎' },
+                { value: 40, name: '社交媒体' },
+                { value: 25, name: '广告投放' },
+                { value: 5, name: '外部链接' }
+            ];
+        } else {
+             newData = [
+                { value: 30, name: '直接访问' },
+                { value: 30, name: '搜索引擎' },
+                { value: 20, name: '社交媒体' },
+                { value: 10, name: '广告投放' },
+                { value: 10, name: '外部链接' }
+            ];
+        }
+        charts.trafficSource.setOption({ series: [{ data: newData }] });
+    }
 }
 
 // Data Stream Simulation
@@ -164,6 +219,20 @@ function initTrafficSourceChart() {
         ]
     };
     chart.setOption(option);
+
+    chart.on('click', function (params) {
+        // Simulate interaction: Click traffic source -> Update KPI
+        const source = params.name;
+        let newKpi = JSON.parse(JSON.stringify(kpiData)); // Deep copy
+        if (source === '社交媒体' || source === '广告投放') {
+            newKpi[0].value = +(newKpi[0].value * 1.2).toFixed(1); // CTR Up
+            newKpi[1].value = +(newKpi[1].value * 0.8).toFixed(1); // CVR Down
+        } else if (source === '搜索引擎' || source === '直接访问') {
+            newKpi[1].value = +(newKpi[1].value * 1.2).toFixed(1); // CVR Up
+        }
+        kpiData = newKpi;
+        renderConversionCards(newKpi);
+    });
 }
 
 // 5. Category Rank (Horizontal Bar)
@@ -173,26 +242,35 @@ function initCategoryRankChart() {
 
     const option = {
         tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
-        grid: { top: '5%', bottom: '5%', left: '20%', right: '10%', containLabel: true },
+        grid: { top: '5%', bottom: '5%', left: '20%', right: '15%', containLabel: true },
         xAxis: { type: 'value', show: false },
         yAxis: {
             type: 'category',
             data: Object.keys(categoryStats).reverse(),
-            axisLabel: { color: '#fff' },
+            axisLabel: { color: '#fff', fontSize: 13 },
             axisLine: { show: false },
             axisTick: { show: false }
         },
         series: [{
             type: 'bar',
             data: Object.keys(categoryStats).map(k => categoryStats[k].volume).reverse(),
-            label: { show: true, position: 'right', color: '#fff' },
+            label: { 
+                show: true, 
+                position: 'right', 
+                color: '#fff',
+                formatter: '{c} 亿元',
+                fontSize: 13,
+                fontWeight: 'bold',
+                fontFamily: 'DIN'
+            },
             itemStyle: {
                 color: new echarts.graphic.LinearGradient(1, 0, 0, 0, [
                     { offset: 0, color: '#00eaff' },
                     { offset: 1, color: '#0091ea' }
                 ]),
-                borderRadius: [0, 2, 2, 0]
-            }
+                borderRadius: [0, 4, 4, 0]
+            },
+            barWidth: '60%'
         }]
     };
     chart.setOption(option);
@@ -239,7 +317,7 @@ function initCategoryTrendChart() {
 
     const option = {
         tooltip: { trigger: 'axis' },
-        legend: { data: ['今年', '去年'], textStyle: { color: '#fff' } },
+        legend: { data: ['2025年实时', '2024年同期'], textStyle: { color: '#fff' } },
         grid: { top: '15%', bottom: '15%', left: '5%', right: '5%', containLabel: true },
         dataZoom: [
             { type: 'inside', start: 0, end: 100 },
@@ -258,7 +336,7 @@ function initCategoryTrendChart() {
         },
         series: [
             {
-                name: '今年',
+                name: '2025年实时',
                 type: 'line',
                 smooth: true,
                 data: dataCurrent,
@@ -268,7 +346,7 @@ function initCategoryTrendChart() {
                 animationEasing: 'linear'
             },
             {
-                name: '去年',
+                name: '2024年同期',
                 type: 'line',
                 smooth: true,
                 data: dataLast,
@@ -442,7 +520,12 @@ function initPriceRangeChart() {
 
     const option = {
         color: ['#00eaff', '#00b0ff', '#2979ff', '#304ffe', '#536dfe'],
-        tooltip: { trigger: 'item', formatter: '{a} <br/>{b} : {c} ({d}%)' },
+        tooltip: { 
+            trigger: 'item', 
+            formatter: function(params) {
+                return `${params.seriesName} <br/>${params.name} : ${params.value} 万单 (${params.percent}%)`;
+            }
+        },
         legend: {
             orient: 'vertical',
             left: 'left',
@@ -452,14 +535,14 @@ function initPriceRangeChart() {
         },
         series: [
             {
-                name: '价格带分布',
+                name: '价格带销量分布',
                 type: 'funnel',
                 left: '20%',
                 top: 20,
                 bottom: 20,
                 width: '70%',
                 min: 0,
-                max: 2500,
+                max: 25000, // Adjusted max for new scale
                 minSize: '0%',
                 maxSize: '100%',
                 sort: 'descending',
@@ -467,7 +550,8 @@ function initPriceRangeChart() {
                 label: {
                     show: true,
                     position: 'inside',
-                    color: '#fff'
+                    color: '#fff',
+                    formatter: '{c} 万单'
                 },
                 labelLine: {
                     length: 10,
@@ -486,12 +570,13 @@ function initPriceRangeChart() {
                     }
                 },
                 data: [
-                    { value: 1500, name: '0-100元' },
-                    { value: 2000, name: '100-300元' },
-                    { value: 1800, name: '300-500元' },
-                    { value: 1200, name: '500-1000元' },
-                    { value: 800, name: '1000-3000元' },
-                    { value: 400, name: '3000元+' }
+                    // Initial data for Total (approx 700 million orders total)
+                    { value: 15000, name: '0-100元' },
+                    { value: 20000, name: '100-300元' },
+                    { value: 18000, name: '300-500元' },
+                    { value: 12000, name: '500-1000元' },
+                    { value: 8000, name: '1000-3000元' },
+                    { value: 4000, name: '3000元+' }
                 ]
             }
         ]
@@ -505,34 +590,44 @@ function initRepurchaseChart() {
     charts.repurchase = chart;
 
     const option = {
-        tooltip: {},
+        tooltip: {
+            trigger: 'item',
+            backgroundColor: 'rgba(11, 15, 42, 0.9)',
+            borderColor: '#00eaff',
+            textStyle: { color: '#fff' },
+            formatter: function(params) {
+                const name = params.name;
+                const values = params.value;
+                // Indicators: Repurchase, AOV, Activity, Loyalty, Satisfaction
+                return `
+                    <div style="font-weight:bold; color:${params.color}; margin-bottom:5px;">${name}</div>
+                    复购率: ${values[0]}%<br/>
+                    客单价: ¥${values[1]}<br/>
+                    活跃度: ${values[2]}<br/>
+                    忠诚度: ${values[3]}<br/>
+                    满意度: ${values[4]}
+                `;
+            }
+        },
         radar: {
             indicator: [
                 { name: '复购率', max: 100 },
-                { name: '客单价', max: 1000 },
+                { name: '客单价', max: 1000 }, // Will be updated dynamically
                 { name: '活跃度', max: 100 },
                 { name: '忠诚度', max: 100 },
                 { name: '满意度', max: 100 }
             ],
-            axisName: { color: '#fff' }
+            axisName: { color: '#fff' },
+            splitArea: {
+                areaStyle: {
+                    color: ['rgba(255,255,255,0.05)', 'rgba(255,255,255,0.02)']
+                }
+            }
         },
         series: [{
             name: '客户群体分析',
             type: 'radar',
-            data: [
-                {
-                    value: [60, 450, 80, 70, 90],
-                    name: 'VIP客户',
-                    areaStyle: { color: 'rgba(255, 0, 51, 0.3)' },
-                    itemStyle: { color: '#ff0033' }
-                },
-                {
-                    value: [30, 200, 50, 40, 70],
-                    name: '普通客户',
-                    areaStyle: { color: 'rgba(0, 234, 255, 0.3)' },
-                    itemStyle: { color: '#00eaff' }
-                }
-            ]
+            data: [] // Initial data will be set by updateCategoryCharts
         }]
     };
     chart.setOption(option);
@@ -540,6 +635,21 @@ function initRepurchaseChart() {
 
 // Helper: Get Data for Category Interaction
 function getCategoryData(category) {
+    // Default KPI and Traffic Source Data for Total
+    let kpi = [
+        { title: '点击率 (CTR)', value: 4.5, unit: '%', trend: 0.5, up: true },
+        { title: '转化率 (CVR)', value: 2.1, unit: '%', trend: 0.1, up: false },
+        { title: '客单价', value: 350, unit: '', prefix: '¥', trend: 12, up: true }
+    ];
+    
+    let trafficSourceData = [
+        { value: 40, name: '直接访问' },
+        { value: 38, name: '搜索引擎' },
+        { value: 32, name: '社交媒体' },
+        { value: 30, name: '广告投放' },
+        { value: 28, name: '外部链接' }
+    ];
+
     if (category === '全品类') {
         const words = [
             { name: '智能手机', value: 10000 }, { name: '羽绒服', value: 6181 },
@@ -562,18 +672,89 @@ function getCategoryData(category) {
             dataCurrent.push(Math.floor(valC));
             dataLast.push(Math.floor(valL));
         }
+        // Total Orders ~ 700 million (70000 wan)
         const priceRange = [
-            { value: 1500, name: '0-100元' },
-            { value: 2000, name: '100-300元' },
-            { value: 1800, name: '300-500元' },
-            { value: 1200, name: '500-1000元' },
-            { value: 800, name: '1000-3000元' },
-            { value: 400, name: '3000元+' }
+            { value: 15000, name: '0-100元' },
+            { value: 20000, name: '100-300元' },
+            { value: 18000, name: '300-500元' },
+            { value: 12000, name: '500-1000元' },
+            { value: 8000, name: '1000-3000元' },
+            { value: 4000, name: '3000元+' }
         ];
-        return { words, margin, trend: { current: dataCurrent, last: dataLast }, priceRange };
+
+        // Generate Repurchase Data for Total
+        const aov = kpi[2].value;
+        const vipAov = Math.floor(aov * 2.2);
+        const normalAov = Math.floor(aov * 0.7);
+        const maxAov = Math.max(vipAov, 1000);
+
+        const repurchaseData = {
+            maxAov: maxAov,
+            data: [
+                {
+                    value: [30, normalAov, 50, 40, 70],
+                    name: '普通客户',
+                    areaStyle: { color: 'rgba(0, 234, 255, 0.3)' },
+                    itemStyle: { color: '#00eaff' },
+                    z: 2
+                },
+                {
+                    value: [60, vipAov, 80, 70, 90],
+                    name: 'VIP客户',
+                    areaStyle: { color: 'rgba(255, 0, 51, 0.3)' },
+                    itemStyle: { color: '#ff0033' },
+                    z: 1
+                }
+            ]
+        };
+
+        return { words, margin, trend: { current: dataCurrent, last: dataLast }, priceRange, kpi, trafficSource: trafficSourceData, repurchase: repurchaseData };
     }
 
     const stats = categoryStats[category] || categoryStats['美妆'];
+
+    // Customize KPI based on category characteristics
+    if (category === '美妆' || category === '个护') {
+        kpi = [
+            { title: '点击率 (CTR)', value: 5.2, unit: '%', trend: 0.8, up: true },
+            { title: '转化率 (CVR)', value: 3.5, unit: '%', trend: 0.3, up: true },
+            { title: '客单价', value: 280, unit: '', prefix: '¥', trend: 5, up: false }
+        ];
+        trafficSourceData = [
+            { value: 20, name: '直接访问' },
+            { value: 30, name: '搜索引擎' },
+            { value: 60, name: '社交媒体' }, // High social
+            { value: 40, name: '广告投放' },
+            { value: 10, name: '外部链接' }
+        ];
+    } else if (category === '数码' || category === '家电') {
+        kpi = [
+            { title: '点击率 (CTR)', value: 3.1, unit: '%', trend: 0.2, up: false },
+            { title: '转化率 (CVR)', value: 1.2, unit: '%', trend: 0.1, up: true },
+            { title: '客单价', value: 2500, unit: '', prefix: '¥', trend: 150, up: true }
+        ];
+        trafficSourceData = [
+            { value: 50, name: '直接访问' },
+            { value: 60, name: '搜索引擎' }, // High search
+            { value: 20, name: '社交媒体' },
+            { value: 30, name: '广告投放' },
+            { value: 15, name: '外部链接' }
+        ];
+    } else {
+        // Randomize slightly for others
+        kpi = [
+            { title: '点击率 (CTR)', value: +(3 + Math.random() * 2).toFixed(1), unit: '%', trend: 0.2, up: Math.random() > 0.5 },
+            { title: '转化率 (CVR)', value: +(1 + Math.random() * 2).toFixed(1), unit: '%', trend: 0.1, up: Math.random() > 0.5 },
+            { title: '客单价', value: Math.floor(100 + Math.random() * 400), unit: '', prefix: '¥', trend: 10, up: Math.random() > 0.5 }
+        ];
+        trafficSourceData = [
+            { value: Math.floor(Math.random() * 50), name: '直接访问' },
+            { value: Math.floor(Math.random() * 50), name: '搜索引擎' },
+            { value: Math.floor(Math.random() * 50), name: '社交媒体' },
+            { value: Math.floor(Math.random() * 50), name: '广告投放' },
+            { value: Math.floor(Math.random() * 50), name: '外部链接' }
+        ];
+    }
 
     const baseWords = {
         '美妆': ['面霜', '面膜', '口红', '精华', '粉底液', '防晒', '眼霜', '香水', '卸妆水', '眉笔'],
@@ -621,14 +802,59 @@ function getCategoryData(category) {
         priceDist = [10, 25, 30, 20, 10, 5]; // Mid prices
     }
     
+    // Calculate approximate total orders based on GMV and AOV
+    // GMV in Yi (10^8), AOV in Yuan
+    // Orders = GMV * 10^8 / AOV
+    // We want result in Wan (10^4) -> GMV * 10000 / AOV
+    const gmv = stats.volume;
+    const aov = kpi[2].value;
+    const totalOrdersWan = Math.floor((gmv * 10000) / aov);
+    
     // Add some randomness
     const ranges = ['0-100元', '100-300元', '300-500元', '500-1000元', '1000-3000元', '3000元+'];
     const priceData = priceDist.map((base, index) => ({
-        value: Math.floor((base + Math.random() * 10) * 50),
+        value: Math.floor((base / 100) * totalOrdersWan),
         name: ranges[index]
     }));
 
-    return { words, margin, trend: { current: dataCurrent, last: dataLast }, priceRange: priceData };
+    // Generate Repurchase Data consistent with AOV
+    const vipAov = Math.floor(aov * 2.2);
+    const normalAov = Math.floor(aov * 0.7);
+    const maxAov = Math.max(vipAov, 1000); // Dynamic max for radar axis
+
+    const repurchaseData = {
+        maxAov: maxAov,
+        data: [
+            {
+                value: [
+                    Math.floor(20 + Math.random() * 20), // Repurchase Rate
+                    normalAov, // AOV
+                    Math.floor(40 + Math.random() * 20), // Activity
+                    Math.floor(30 + Math.random() * 20), // Loyalty
+                    Math.floor(60 + Math.random() * 20)  // Satisfaction
+                ],
+                name: '普通客户',
+                areaStyle: { color: 'rgba(0, 234, 255, 0.3)' },
+                itemStyle: { color: '#00eaff' },
+                z: 2 // Ensure Normal is on top for tooltip priority
+            },
+            {
+                value: [
+                    Math.floor(60 + Math.random() * 20), // Repurchase Rate
+                    vipAov, // AOV
+                    Math.floor(80 + Math.random() * 10), // Activity
+                    Math.floor(70 + Math.random() * 20), // Loyalty
+                    Math.floor(85 + Math.random() * 10)  // Satisfaction
+                ],
+                name: 'VIP客户',
+                areaStyle: { color: 'rgba(255, 0, 51, 0.3)' },
+                itemStyle: { color: '#ff0033' },
+                z: 1
+            }
+        ]
+    };
+
+    return { words, margin, trend: { current: dataCurrent, last: dataLast }, priceRange: priceData, kpi, trafficSource: trafficSourceData, repurchase: repurchaseData };
 }
 
 function resetCategoryCharts() {
@@ -645,21 +871,37 @@ function updateCategoryCharts(category) {
 
     const data = getCategoryData(category);
 
+    // Update KPI Cards
+    kpiData = data.kpi; // Update global data so stream continues correctly
+    renderConversionCards(data.kpi);
+
+    // Update Traffic Source
+    if (charts.trafficSource) {
+        charts.trafficSource.setOption({
+            series: [{ data: data.trafficSource }]
+        });
+    }
+
     // Update Trend Chart
     if (charts.categoryTrend) {
         charts.categoryTrend.setOption({
             // title: { text: category + '销售趋势', textStyle: { color: '#fff', fontSize: 14 }, top: '5%', left: 'center' },
             series: [
-                { name: '今年', data: data.trend.current },
-                { name: '去年', data: data.trend.last }
+                { name: '2025年实时', data: data.trend.current },
+                { name: '2024年同期', data: data.trend.last }
             ]
         });
     }
 
     // Update Price Range Chart
     if (charts.priceRange) {
+        // Dynamic max calculation to ensure the funnel is always wide enough
+        const maxVal = Math.max(...data.priceRange.map(d => d.value));
         charts.priceRange.setOption({
-            series: [{ data: data.priceRange }]
+            series: [{ 
+                max: maxVal,
+                data: data.priceRange 
+            }]
         });
     }
 
@@ -674,6 +916,24 @@ function updateCategoryCharts(category) {
     if (charts.marginGauge) {
         charts.marginGauge.setOption({
             series: [{ data: [{ value: data.margin, name: '毛利率' }] }]
+        });
+    }
+
+    // Update Repurchase Chart
+    if (charts.repurchase) {
+        charts.repurchase.setOption({
+            radar: {
+                indicator: [
+                    { name: '复购率', max: 100 },
+                    { name: '客单价', max: data.repurchase.maxAov * 1.2 }, // Add buffer
+                    { name: '活跃度', max: 100 },
+                    { name: '忠诚度', max: 100 },
+                    { name: '满意度', max: 100 }
+                ]
+            },
+            series: [{
+                data: data.repurchase.data
+            }]
         });
     }
 }
