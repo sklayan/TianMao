@@ -69,42 +69,39 @@
                     <div class="panel-header">地域分布：用户来源</div>
                     <div class="chart-container" id="user-map"></div>
                     
-                    <!-- Super User Card (Hidden by default) -->
-                    <div id="super-user-card" class="user-card hidden">
-                        <div class="card-header">
-                            <div class="avatar"></div>
-                            <div class="user-info">
-                                <div class="user-id">ID: 8848_Titan</div>
-                                <div class="user-tag">超级会员</div>
-                            </div>
-                            <div class="close-btn" onclick="closeUserCard()">×</div>
+                    <!-- Regional Persona Modal (Hidden by default) -->
+                    <div id="region-modal" class="region-modal hidden">
+                        <div class="modal-header">
+                            <div class="region-title" id="region-title">地区名称</div>
+                            <div class="close-btn" onclick="closeRegionModal()">×</div>
                         </div>
-                        <div class="card-body">
-                            <div class="stat-row">
-                                <span>年度消费:</span> <span class="highlight">¥ 128,400</span>
+                        <div class="modal-body">
+                            <div class="region-tagline" id="region-tagline">--</div>
+                            <div class="region-metrics">
+                                <div class="metric-item">
+                                    <div class="metric-label">熬夜指数</div>
+                                    <div class="metric-bar-bg"><div class="metric-bar" id="metric-night" style="width: 0%"></div></div>
+                                    <div class="metric-val" id="val-night">0</div>
+                                </div>
+                                <div class="metric-item">
+                                    <div class="metric-label">价格敏感度</div>
+                                    <div class="metric-bar-bg"><div class="metric-bar" id="metric-price" style="width: 0%"></div></div>
+                                    <div class="metric-val" id="val-price">0</div>
+                                </div>
+                                <div class="metric-item">
+                                    <div class="metric-label">新品尝鲜欲</div>
+                                    <div class="metric-bar-bg"><div class="metric-bar" id="metric-new" style="width: 0%"></div></div>
+                                    <div class="metric-val" id="val-new">0</div>
+                                </div>
                             </div>
-                            <div class="stat-row">
-                                <span>偏好关键词:</span> <span>数码 / 极客 / 摄影</span>
-                            </div>
-                            <div class="radar-mini" id="user-radar-mini"></div>
+                            <div class="region-chart-container" id="region-chart"></div>
                         </div>
-                    </div>
-
-                    <!-- Time Slider -->
-                    <div class="time-control">
-                        <div class="time-label">11.01</div>
-                        <input type="range" min="1" max="11" value="11" class="time-slider" id="time-slider" oninput="updateTime(this.value)">
-                        <div class="time-label">11.11</div>
                     </div>
                 </div>
             </div>
 
             <!-- Right Column -->
             <div class="column right-column">
-                <div class="panel-box">
-                    <div class="panel-header">趣味属性：星座分布</div>
-                    <div class="chart-container" id="zodiac-chart"></div>
-                </div>
                 <div class="panel-box">
                     <div class="panel-header">消费属性：消费能力</div>
                     <div class="chart-container" id="consumption-chart"></div>
