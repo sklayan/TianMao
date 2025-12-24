@@ -326,11 +326,133 @@
             font-size: 1.1em;
             text-shadow: 0 0 5px rgba(0, 234, 255, 0.5);
         }
+
+        /* Filter Styles */
+        .filter-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+            flex-shrink: 0;
+        }
+
+        .filter-bar::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        .filter-bar::-webkit-scrollbar-thumb {
+            background: rgba(0, 234, 255, 0.2);
+            border-radius: 2px;
+        }
+
+        .filter-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #aaa;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .filter-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        .filter-btn.active {
+            background: rgba(0, 234, 255, 0.2);
+            border-color: #00eaff;
+            color: #00eaff;
+            box-shadow: 0 0 10px rgba(0, 234, 255, 0.1);
+        }
+
+        /* Legend Styles */
+        .map-legend {
+            position: absolute;
+            bottom: 30px;
+            left: 60px;
+            width: fit-content;
+            min-width: 120px;
+            background: rgba(10, 20, 35, 0.6);
+            border: 1px solid rgba(0, 234, 255, 0.2);
+            backdrop-filter: blur(4px);
+            padding: 8px 30px 8px 15px;
+            /* Added right padding for length */
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 5px;
+            z-index: 10;
+            transform: scale(0.9);
+            transform-origin: bottom left;
+        }
+
+        .legend-title {
+            font-size: 11px;
+            font-weight: bold;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 3px;
+            letter-spacing: 1px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .legend-symbol {
+            width: 15px;
+            height: 2px;
+            position: relative;
+        }
+
+        .legend-symbol.solid {
+            background: #fff;
+            height: 2px;
+            box-shadow: 0 0 4px #fff;
+        }
+
+        .legend-symbol.dashed {
+            background: transparent;
+            border-bottom: 1px dashed rgba(0, 234, 255, 0.8);
+        }
+
+        .legend-point {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #00eaff;
+            border: 1px solid #fff;
+        }
     </style>
 </head>
 
 <body>
-    <div id="map-container"></div>
+    <div id="map-container">
+        <div class="map-legend">
+            <div class="legend-title">图例</div>
+            <div class="legend-item">
+                <div class="legend-symbol solid" style="background: #00eaff; box-shadow: 0 0 5px #00eaff;"></div>
+                <span>选中任务</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-symbol dashed"></div>
+                <span>其他航线</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-point"></div>
+                <span>物流节点</span>
+            </div>
+        </div>
+    </div>
 
     <div class="top-bar">
         <div style="display: flex; align-items: center;">
@@ -361,6 +483,14 @@
                     <div class="stat-val" style="color: #ffcc00;">4</div>
                     <div class="stat-label">待处理异常</div>
                 </div>
+            </div>
+
+            <div class="filter-bar">
+                <button class="filter-btn active" onclick="filterTasks('all')">全部</button>
+                <button class="filter-btn" onclick="filterTasks('transit')">运输中</button>
+                <button class="filter-btn" onclick="filterTasks('loading')">装货中</button>
+                <button class="filter-btn" onclick="filterTasks('pending')">待处理</button>
+                <button class="filter-btn" onclick="filterTasks('done')">已送达</button>
             </div>
 
             <div class="task-table-container">
@@ -448,7 +578,7 @@
                 route: { from: [121.4737, 31.2304], to: [113.2644, 23.1291] },
                 effect: {
                     savings: "4.1%",
-                    warning: "注意：夜间装货,预计明早6点完成"
+                    warning: "夜间装货,预计明早6点完成"
                 }
             },
             {
@@ -540,6 +670,24 @@
         }
 
         let selectedTaskId = null;
+        let currentFilter = 'all';
+
+        function filterTasks(status) {
+            currentFilter = status;
+            // Update buttons
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                // Remove active class from all
+                btn.classList.remove('active');
+
+                // Add active class to clicked button (simple matching based on onclick attribute)
+                if (btn.getAttribute('onclick').includes(`'${status}'`)) {
+                    btn.classList.add('active');
+                }
+            });
+
+            // Re-render table
+            renderTaskTable();
+        }
 
         function highlightRoute(taskId) {
             tasks.forEach(task => {
@@ -756,9 +904,9 @@
                     .attr("d", `M${p1[0]},${p1[1]} Q${cx},${cy} ${p2[0]},${p2[1]}`)
                     .attr("fill", "none")
                     .attr("stroke", route.color)
-                    .attr("stroke-width", 1)
+                    .attr("stroke-width", 1.5)
                     .attr("stroke-dasharray", "3,3")
-                    .attr("opacity", 0.4)
+                    .attr("opacity", 0.8)
                     .append("animate")
                     .attr("attributeName", "stroke-dashoffset")
                     .attr("from", "100")
@@ -770,7 +918,12 @@
 
         function renderTaskTable() {
             const tbody = document.getElementById("taskTableBody");
+            tbody.innerHTML = ''; // Clear existing content
+
             tasks.forEach(task => {
+                // Filter logic
+                if (currentFilter !== 'all' && task.status !== currentFilter) return;
+
                 const tr = document.createElement("tr");
                 tr.style.cursor = task.route ? "pointer" : "default";
                 tr.innerHTML = `

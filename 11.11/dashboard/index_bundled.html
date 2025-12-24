@@ -171,6 +171,15 @@
       cursor: pointer;
     }
 
+    .tag.clickable {
+      transition: all 0.2s;
+    }
+
+    .tag.clickable:hover {
+      background: rgba(0, 234, 255, 0.3);
+      box-shadow: 0 0 5px rgba(0, 234, 255, 0.5);
+    }
+
     .modal-chart-container {
       flex: 1;
       background: rgba(0, 0, 0, 0.2);
@@ -242,6 +251,129 @@
       text-transform: uppercase;
       display: block;
     }
+
+    /* Header Action Buttons */
+    .header-actions {
+      position: absolute;
+      right: 30px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      gap: 15px;
+      z-index: 100;
+    }
+
+    .action-btn {
+      background: rgba(10, 20, 40, 0.6);
+      border: 1px solid rgba(0, 234, 255, 0.3);
+      color: #00eaff;
+      padding: 8px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Microsoft YaHei', sans-serif;
+      font-size: 14px;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(4px);
+      outline: none;
+      min-width: 100px;
+      justify-content: center;
+    }
+
+    .action-btn svg {
+      width: 16px;
+      height: 16px;
+      fill: currentColor;
+    }
+
+    .action-btn:hover {
+      background: rgba(0, 234, 255, 0.15);
+      box-shadow: 0 0 15px rgba(0, 234, 255, 0.3);
+      border-color: #00eaff;
+      transform: translateY(-2px);
+      text-shadow: 0 0 5px rgba(0, 234, 255, 0.5);
+    }
+
+    .action-btn:active {
+      transform: translateY(0);
+    }
+
+    .action-btn.active {
+      background: rgba(0, 234, 255, 0.2);
+      box-shadow: 0 0 15px rgba(0, 234, 255, 0.5);
+      color: #fff;
+      border-color: #00eaff;
+    }
+
+    /* Notification Badge */
+    .action-btn .badge-dot {
+      position: absolute;
+      top: -3px;
+      right: -3px;
+      width: 8px;
+      height: 8px;
+      background: #ff3333;
+      border-radius: 50%;
+      box-shadow: 0 0 5px #ff3333;
+      display: none;
+    }
+
+    .action-btn .badge-dot.visible {
+      display: block;
+    }
+
+    /* Toast Notification */
+    .toast-container {
+      position: fixed;
+      top: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+    }
+
+    .toast {
+      background: rgba(5, 15, 30, 0.9);
+      border: 1px solid rgba(0, 234, 255, 0.5);
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 4px;
+      box-shadow: 0 0 20px rgba(0, 234, 255, 0.3);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      animation: slideDown 0.3s ease-out;
+      pointer-events: auto;
+      min-width: 300px;
+    }
+
+    .toast.success {
+      border-color: var(--success-green);
+      box-shadow: 0 0 15px rgba(50, 255, 50, 0.2);
+    }
+
+    .toast.info {
+      border-color: var(--accent-blue);
+    }
+
+    @keyframes slideDown {
+      from {
+        transform: translateY(-20px);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
   </style>
 </head>
 
@@ -255,9 +387,25 @@
       返回大屏
     </a>
     <header class="dashboard-header">
+      <!-- Back button styling adjusted to not conflict or removed if redundant, 
+           but based on request, these are NEW buttons. 
+           We'll check if the back button conflicts. 
+           The back button is absolute positioned at top:25px right:30px.
+           Our new buttons will be absolute right: 30px, so we should move the back button or place these to the left of it.
+           However, looking at the layout, let's place these centrally or shift the back button. 
+           Actually, let's put these buttons on the right, and maybe move the "Return" button to the Left or keep it as is.
+           Wait, the "Back to Dashboard" button is at top:25px, right:30px.
+           I should move the new buttons to the left of it or below it. 
+           Let's place the new buttons to the right, and move the existing "Back" button to the left side or adjust position.
+           Let's try placing the new buttons at the top right, and move the back button to top left?
+           No, user is used to back button.
+           Let's place these buttons in the center-right, or just `margin-right: 120px` to clear the back button.
+      -->
       <h1><span class="festive-title">双十一菜鸟网络</span></h1>
       <span class="subtitle">CAINIAO NETWORK</span>
       <div class="header-decoration"></div>
+
+
     </header>
 
     <main class="dashboard-grid">
@@ -325,14 +473,17 @@
             <div style="margin-bottom: 10px;">
               <span class="info-label">可支援仓库</span>
               <div style="display: flex; gap: 10px; margin-top: 5px;" id="support-warehouses">
-                <span class="tag">杭州仓</span>
-                <span class="tag">苏州仓</span>
-                <span class="tag">南京仓</span>
+                <span class="tag clickable" onclick="openWarehouseByName('杭州仓')">杭州仓</span>
+                <span class="tag clickable" onclick="openWarehouseByName('苏州仓')">苏州仓</span>
+                <span class="tag clickable" onclick="openWarehouseByName('南京仓')">南京仓</span>
               </div>
             </div>
             <div>
               <span class="info-label">本月被支援记录</span>
-              <span class="info-value" id="support-history">15 次</span>
+              <span class="info-value" id="support-history"></span>
+              <script>
+                document.getElementById('support-history').textContent = (Math.floor(Math.random() * 18) + 8) + ' 次';
+              </script>
             </div>
           </div>
         </div>
@@ -1204,6 +1355,109 @@
       document.getElementById('warehouse-modal').classList.remove('active');
     }
 
+    function getWarehouseContext(name) {
+      if (name.includes('上海')) {
+        return {
+          neighbors: [
+            { id: 's1', name: '昆山供应商', type: 'supplier' },
+            { id: 'w1', name: '苏州分仓', type: 'warehouse' },
+            { id: 'c1', name: '无锡转运中心', type: 'customer' }
+          ],
+          links: [
+            { source: 's1', target: 'center', type: 'supply' },
+            { source: 'center', target: 'w1', type: 'transfer' },
+            { source: 'center', target: 'c1', type: 'distribute' }
+          ],
+          support: ['杭州仓', '苏州仓', '南京仓']
+        };
+      } else if (name.includes('杭州')) {
+        return {
+          neighbors: [
+            { id: 's1', name: '宁波供应商', type: 'supplier' },
+            { id: 'c1', name: '绍兴分仓', type: 'warehouse' },
+            { id: 'c2', name: '义乌分拨', type: 'customer' }
+          ],
+          links: [
+            { source: 's1', target: 'center', type: 'supply' },
+            { source: 'center', target: 'c1', type: 'transfer' },
+            { source: 'center', target: 'c2', type: 'distribute' }
+          ],
+          support: ['上海一号仓', '嘉兴仓', '金华仓']
+        };
+      } else if (name.includes('苏州')) {
+        return {
+          neighbors: [
+            { id: 's1', name: '昆山供应商', type: 'supplier' },
+            { id: 'w1', name: '常熟分仓', type: 'warehouse' },
+            { id: 'c1', name: '张家港转运', type: 'customer' }
+          ],
+          links: [
+            { source: 's1', target: 'center', type: 'supply' },
+            { source: 'center', target: 'w1', type: 'transfer' },
+            { source: 'center', target: 'c1', type: 'distribute' }
+          ],
+          support: ['上海一号仓', '无锡仓', '常州仓']
+        };
+      } else if (name.includes('南京')) {
+        return {
+          neighbors: [
+            { id: 's1', name: '镇江供应商', type: 'supplier' },
+            { id: 'w1', name: '扬州分仓', type: 'warehouse' },
+            { id: 'c1', name: '滁州转运', type: 'customer' }
+          ],
+          links: [
+            { source: 's1', target: 'center', type: 'supply' },
+            { source: 'center', target: 'w1', type: 'transfer' },
+            { source: 'center', target: 'c1', type: 'distribute' }
+          ],
+          support: ['合肥仓', '芜湖仓', '马鞍山仓']
+        };
+      } else if (name.includes('广州') || name.includes('Guangzhou')) {
+        return {
+          neighbors: [
+            { id: 's1', name: '佛山供应商', type: 'supplier' },
+            { id: 'w1', name: '东莞分仓', type: 'warehouse' },
+            { id: 'c1', name: '深圳转运', type: 'customer' }
+          ],
+          links: [
+            { source: 's1', target: 'center', type: 'supply' },
+            { source: 'center', target: 'w1', type: 'transfer' },
+            { source: 'center', target: 'c1', type: 'distribute' }
+          ],
+          support: ['深圳仓', '佛山仓', '中山仓']
+        };
+      } else if (name.includes('北京') || name.includes('Beijing')) {
+        return {
+          neighbors: [
+            { id: 's1', name: '天津供应商', type: 'supplier' },
+            { id: 'w1', name: '廊坊分仓', type: 'warehouse' },
+            { id: 'c1', name: '保定转运', type: 'customer' }
+          ],
+          links: [
+            { source: 's1', target: 'center', type: 'supply' },
+            { source: 'center', target: 'w1', type: 'transfer' },
+            { source: 'center', target: 'c1', type: 'distribute' }
+          ],
+          support: ['天津仓', '石家庄仓', '唐山仓']
+        };
+      } else {
+        // Default fallback
+        return {
+          neighbors: [
+            { id: 's1', name: '华东供应商', type: 'supplier' },
+            { id: 'c1', name: '核心分销商', type: 'customer' },
+            { id: 'w1', name: '备用分仓', type: 'warehouse' }
+          ],
+          links: [
+            { source: 's1', target: 'center', type: 'supply' },
+            { source: 'center', target: 'c1', type: 'distribute' },
+            { source: 'center', target: 'w1', type: 'transfer' }
+          ],
+          support: ['上海一号仓', '武汉仓', '成都仓']
+        };
+      }
+    }
+
     function openWarehouseDetail(warehouse) {
       const modal = document.getElementById('warehouse-modal');
       document.getElementById('modal-title').innerText = warehouse.name + '详情';
@@ -1222,16 +1476,39 @@
       badge.style.borderColor = statusInfo.color;
       badge.style.boxShadow = `0 0 8px ${statusInfo.color}40`;
 
-      // Randomize data for demo
-      document.getElementById('info-area').innerText = Math.floor(Math.random() * 50000 + 10000).toLocaleString() + ' m²';
-      document.getElementById('info-capacity').innerText = Math.floor(Math.random() * 10000 + 5000).toLocaleString() + ' m²';
-      document.getElementById('info-stock').innerText = Math.floor(Math.random() * 40 + 50) + '%';
-      document.getElementById('info-staff').innerText = Math.floor(Math.random() * 200 + 50) + ' 人';
+      // Refined Data Generation
+      const totalArea = Math.floor(Math.random() * 30000 + 20000); // 20k - 50k
+      const stockPercent = Math.floor(Math.random() * 40 + 50); // 50% - 90%
+      const availableCapacity = Math.floor(totalArea * (1 - stockPercent / 100));
+      const staffCount = Math.floor(totalArea / 150) + Math.floor(Math.random() * 20 - 10);
+
+      document.getElementById('info-area').innerText = totalArea.toLocaleString() + ' m²';
+      document.getElementById('info-capacity').innerText = availableCapacity.toLocaleString() + ' m²';
+      document.getElementById('info-stock').innerText = stockPercent + '%';
+      document.getElementById('info-staff').innerText = staffCount + ' 人';
 
       document.getElementById('op-inbound').innerText = Math.floor(Math.random() * 5000 + 1000).toLocaleString() + ' 单';
       document.getElementById('op-outbound').innerText = Math.floor(Math.random() * 5000 + 1000).toLocaleString() + ' 单';
       document.getElementById('op-pending').innerText = Math.floor(Math.random() * 200);
       document.getElementById('op-efficiency').innerText = (90 + Math.random() * 10).toFixed(1) + '%';
+
+      const context = getWarehouseContext(warehouse.name);
+      const supportContainer = document.getElementById('support-warehouses');
+      if (supportContainer) {
+        supportContainer.innerHTML = '';
+        // 过滤掉当前仓库自己
+        const filteredSupport = context.support.filter(name => !warehouse.name.includes(name.replace('仓', '')) && !name.includes(warehouse.name.replace('仓', '').replace('详情', '')));
+        filteredSupport.forEach(name => {
+          const span = document.createElement('span');
+          span.className = 'tag clickable';
+          span.onclick = () => openWarehouseByName(name);
+          span.innerText = name;
+          supportContainer.appendChild(span);
+        });
+      }
+
+      // 更新被支援记录次数为随机值
+      document.getElementById('support-history').textContent = (Math.floor(Math.random() * 18) + 8) + ' 次';
 
       modal.classList.add('active');
 
@@ -1240,6 +1517,17 @@
         renderInventoryChart();
         renderNetworkChart(warehouse.name);
       }, 100);
+    }
+
+    function openWarehouseByName(name) {
+      // Mock a warehouse object for the switch
+      const mockWarehouse = {
+        name: name,
+        status: Math.random() > 0.7 ? 'warning' : 'normal',
+        // Maintain current values or randomize slightly for effect
+        capacity: Math.floor(Math.random() * 100)
+      };
+      openWarehouseDetail(mockWarehouse);
     }
 
     function renderInventoryChart() {
@@ -1280,6 +1568,22 @@
 
       g.append('g').call(d3.axisLeft(y).ticks(5)).attr('color', '#88a');
 
+      // Add Axis Units
+      g.append('text')
+        .attr('x', 5)
+        .attr('y', -5)
+        .attr('fill', '#88a')
+        .style('font-size', '10px')
+        .text('数量 (件)');
+
+      g.append('text')
+        .attr('x', innerWidth)
+        .attr('y', innerHeight + 25) // Below the axis line
+        .attr('text-anchor', 'end')
+        .attr('fill', '#88a')
+        .style('font-size', '10px')
+        .text('时间 (h)');
+
       // Lines
       const lineIn = d3.line().x(d => x(d.hour)).y(d => y(d.inbound)).curve(d3.curveMonotoneX);
       const lineOut = d3.line().x(d => x(d.hour)).y(d => y(d.outbound)).curve(d3.curveMonotoneX);
@@ -1296,6 +1600,14 @@
 
       legend.append('rect').attr('x', 0).attr('y', 15).attr('width', 10).attr('height', 2).attr('fill', '#ff3333');
       legend.append('text').attr('x', 15).attr('y', 20).text('出库').attr('fill', '#ccc').style('font-size', '10px');
+
+      legend.append('line')
+        .attr('x1', 0).attr('y1', 31)
+        .attr('x2', 10).attr('y2', 31)
+        .attr('stroke', '#ffcc00')
+        .attr('stroke-width', 2)
+        .attr('stroke-dasharray', '3,2');
+      legend.append('text').attr('x', 15).attr('y', 35).text('库存').attr('fill', '#ccc').style('font-size', '10px');
     }
 
     function renderNetworkChart(centerName) {
@@ -1340,22 +1652,14 @@
       feMerge.append("feMergeNode").attr("in", "coloredBlur");
       feMerge.append("feMergeNode").attr("in", "SourceGraphic");
 
+      const context = getWarehouseContext(centerName);
+
       const nodes = [
         { id: 'center', name: centerName, type: 'warehouse' },
-        { id: 's1', name: '供应商A', type: 'supplier' },
-        { id: 's2', name: '供应商B', type: 'supplier' },
-        { id: 'c1', name: '客户X', type: 'customer' },
-        { id: 'c2', name: '客户Y', type: 'customer' },
-        { id: 'w1', name: '兄弟仓1', type: 'warehouse' },
+        ...context.neighbors
       ];
 
-      const links = [
-        { source: 's1', target: 'center', type: 'supply' },
-        { source: 's2', target: 'center', type: 'supply' },
-        { source: 'center', target: 'c1', type: 'distribute' },
-        { source: 'center', target: 'c2', type: 'distribute' },
-        { source: 'center', target: 'w1', type: 'transfer' },
-      ];
+      const links = context.links;
 
       const simulation = d3.forceSimulation(nodes)
         .force('link', d3.forceLink(links).id(d => d.id).distance(100))
@@ -1455,6 +1759,25 @@
       }, 800);
 
       container.dataset.interval = interval;
+
+      // Legend
+      const legend = svg.append('g').attr('transform', `translate(${width - 90}, ${height - 80})`);
+
+      const legendItems = [
+        { color: '#00eaff', text: '仓库' }, // Warehouse
+        { color: '#ffcc00', text: '供应商' }, // Supplier
+        { color: '#ff3333', text: '分销商' } // Distributor
+      ];
+
+      legendItems.forEach((item, i) => {
+        const row = legend.append('g').attr('transform', `translate(0, ${i * 20})`);
+        row.append('circle').attr('r', 4).attr('fill', item.color).attr('stroke', '#fff').attr('stroke-width', 1);
+        row.append('text').attr('x', 15).attr('y', 4)
+          .text(item.text)
+          .attr('fill', '#ccc')
+          .style('font-size', '10px')
+          .style('text-shadow', '0 0 2px #000');
+      });
     }
 
     // ==========================================
@@ -1473,6 +1796,101 @@
     dataStream.start();
 
     console.log('Dashboard Initialized');
+    // ==========================================
+    // Interaction Handlers
+    // ==========================================
+
+    // Toast Notification Helper
+    function showToast(message, type = 'info') {
+      let container = document.getElementById('toast-container');
+      if (!container) {
+        container = document.createElement('div');
+        container.id = 'toast-container';
+        container.className = 'toast-container';
+        document.body.appendChild(container);
+      }
+
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.innerHTML = `
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+          ${type === 'success'
+          ? '<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>'
+          : '<path d="M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>'}
+        </svg>
+        <span>${message}</span>
+      `;
+
+      container.appendChild(toast);
+
+      // Remove after 3 seconds
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(-20px)';
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    // Export Functionality
+    function handleExport() {
+      const btn = document.querySelector('button[onclick="handleExport()"]');
+      const originalText = btn.innerHTML;
+
+      btn.innerHTML = `<svg class="spinner" viewBox="0 0 50 50" style="width:16px;height:16px;animation:rotate 2s linear infinite;"><circle cx="25" cy="25" r="20" fill="none" stroke="currentColor" stroke-width="5"></circle></svg> 导出中...`;
+      btn.style.opacity = '0.7';
+      btn.style.pointerEvents = 'none';
+
+      // Simulate API call/processing
+      setTimeout(() => {
+        showToast('数据导出成功 (Report_20251111.csv)', 'success');
+        btn.innerHTML = originalText;
+        btn.style.opacity = '1';
+        btn.style.pointerEvents = 'auto';
+      }, 2000);
+    }
+
+    // Notification Logic
+    let isMonitorMode = false;
+
+    function toggleNotifications() {
+      // For demo, just show a summary toast and clear badge
+      const badge = document.getElementById('notice-dot');
+      if (badge.classList.contains('visible')) {
+        badge.classList.remove('visible');
+        showToast('已标记所有通知为已读', 'success');
+      } else {
+        showToast('暂无新通知', 'info');
+      }
+    }
+
+    // Monitor Mode
+    function toggleMonitorMode() {
+      isMonitorMode = !isMonitorMode;
+      const btn = document.getElementById('btn-monitor');
+
+      if (isMonitorMode) {
+        btn.classList.add('active');
+        showToast('实时监控模式已开启', 'success');
+        document.body.style.boxShadow = 'inset 0 0 50px rgba(0, 234, 255, 0.2)';
+        // Speed up animations or data stream here if real app
+      } else {
+        btn.classList.remove('active');
+        showToast('实时监控模式已关闭', 'info');
+        document.body.style.boxShadow = 'none';
+      }
+    }
+
+    // Simulate incoming notifications slightly
+    setInterval(() => {
+      if (Math.random() > 0.8) {
+        const badge = document.getElementById('notice-dot');
+        if (badge && !badge.classList.contains('visible')) {
+          badge.classList.add('visible');
+          showToast('收到新的系统预警', 'info');
+        }
+      }
+    }, 15000);
+
   </script>
 </body>
 
