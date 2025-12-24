@@ -26,14 +26,14 @@ function formatNumber(num) {
 function initAllCharts() {
     initParticles(); // New: Particle Background
     initScanEffect(); // New: Holographic Scan
-    
+
     initGenderChart();
     initAgeChart();
     initOccupationChart(); // Updated: DNA Helix Style
     initConsumptionChart();
     initInterestChart(); // Updated: Galaxy Style
     initUserMap(); // Updated: 3D Map
-    
+
     // Handle Resize
     window.addEventListener('resize', () => {
         Object.values(charts).forEach(chart => chart && chart.resize());
@@ -50,10 +50,10 @@ function initParticles() {
     particleCtx = canvas.getContext('2d');
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    
+
     const particles = [];
     const particleCount = 100;
-    
+
     class Particle {
         constructor() {
             this.x = Math.random() * canvas.width;
@@ -75,23 +75,23 @@ function initParticles() {
             particleCtx.fill();
         }
     }
-    
+
     for (let i = 0; i < particleCount; i++) particles.push(new Particle());
-    
+
     function animate() {
         particleCtx.clearRect(0, 0, canvas.width, canvas.height);
         particles.forEach(p => {
             p.update();
             p.draw();
         });
-        
+
         // Draw connections
         particleCtx.strokeStyle = 'rgba(0, 234, 255, 0.1)';
         for (let i = 0; i < particles.length; i++) {
             for (let j = i; j < particles.length; j++) {
                 const dx = particles[i].x - particles[j].x;
                 const dy = particles[i].y - particles[j].y;
-                const dist = Math.sqrt(dx*dx + dy*dy);
+                const dist = Math.sqrt(dx * dx + dy * dy);
                 if (dist < 100) {
                     particleCtx.beginPath();
                     particleCtx.moveTo(particles[i].x, particles[i].y);
@@ -128,9 +128,9 @@ function initGenderChart() {
     charts.gender = chart;
 
     const option = {
-        tooltip: { 
+        tooltip: {
             trigger: 'item',
-            formatter: function(params) {
+            formatter: function (params) {
                 if (params.name === 'other') return '';
                 return `${params.seriesName}: ${params.value}%`;
             }
@@ -178,12 +178,12 @@ function initGenderChart() {
                 type: 'pie',
                 radius: ['55%', '70%'],
                 center: ['30%', '55%'],
-                label: { 
-                    show: true, 
-                    position: 'center', 
-                    formatter: '{b}\n{c}%', 
-                    color: '#2979ff', 
-                    fontSize: 14, 
+                label: {
+                    show: true,
+                    position: 'center',
+                    formatter: '{b}\n{c}%',
+                    color: '#2979ff',
+                    fontSize: 14,
                     lineHeight: 20
                 },
                 labelLine: { show: false },
@@ -197,12 +197,12 @@ function initGenderChart() {
                 type: 'pie',
                 radius: ['55%', '70%'],
                 center: ['70%', '55%'],
-                label: { 
-                    show: true, 
-                    position: 'center', 
-                    formatter: '{b}\n{c}%', 
-                    color: '#00eaff', 
-                    fontSize: 14, 
+                label: {
+                    show: true,
+                    position: 'center',
+                    formatter: '{b}\n{c}%',
+                    color: '#00eaff',
+                    fontSize: 14,
                     lineHeight: 20
                 },
                 labelLine: { show: false },
@@ -214,7 +214,7 @@ function initGenderChart() {
         ]
     };
     chart.setOption(option);
-    
+
     // Interaction: Filter & Linkage
     chart.on('click', function (params) {
         if (params.name !== 'other') {
@@ -249,12 +249,12 @@ function initAgeChart() {
     charts.age = chart;
     const categories = ['60后', '70后', '80后', '90后', '00后'];
     const data = [1200000, 2000000, 4500000, 6800000, 3500000];
-    
+
     const option = {
-        tooltip: { 
+        tooltip: {
             trigger: 'axis',
             axisPointer: { type: 'shadow' },
-            formatter: function(params) {
+            formatter: function (params) {
                 let res = params[0].name + '<br/>';
                 params.forEach(p => {
                     if (p.seriesType === 'bar') {
@@ -265,14 +265,14 @@ function initAgeChart() {
             }
         },
         grid: { top: '20%', bottom: '10%', left: '5%', right: '5%', containLabel: true },
-        xAxis: { 
-            data: categories, 
-            axisTick: { show: false }, 
-            axisLine: { lineStyle: { color: 'rgba(255,255,255,0.1)' } }, 
-            axisLabel: { color: '#fff', fontSize: 12, interval: 0 } 
+        xAxis: {
+            data: categories,
+            axisTick: { show: false },
+            axisLine: { lineStyle: { color: 'rgba(255,255,255,0.1)' } },
+            axisLabel: { color: '#fff', fontSize: 12, interval: 0 }
         },
-        yAxis: { 
-            show: true, 
+        yAxis: {
+            show: true,
             splitLine: { lineStyle: { color: 'rgba(255,255,255,0.05)', type: 'dashed' } },
             axisLabel: { color: 'rgba(255,255,255,0.5)', formatter: (val) => formatNumber(val) }
         },
@@ -323,9 +323,9 @@ function initOccupationChart() {
     const data = [1100000, 1700000, 700000, 1300000, 1600000, 900000];
 
     const option = {
-        tooltip: { 
+        tooltip: {
             trigger: 'item',
-            formatter: function(params) {
+            formatter: function (params) {
                 let res = params.name + '<br/>';
                 const indicators = ['服务员', '学生', '公务员', '个体', '白领', '教职工'];
                 params.value.forEach((val, index) => {
@@ -336,8 +336,8 @@ function initOccupationChart() {
         },
         radar: {
             indicator: categories.map(name => ({ name, max: 2000000 })),
-            radius: '65%',
-            center: ['50%', '50%'],
+            radius: '55%',
+            center: ['50%', '53%'],
             splitNumber: 4,
             axisName: {
                 color: '#fff',
@@ -390,11 +390,11 @@ function initConsumptionChart() {
     const chart = echarts.init(document.getElementById('consumption-chart'));
     charts.consumption = chart;
     const option = {
-        tooltip: { 
-            trigger: 'item', 
-            formatter: function(params) {
+        tooltip: {
+            trigger: 'item',
+            formatter: function (params) {
                 return params.name + ': ' + formatNumber(params.value);
-            } 
+            }
         },
         series: [{
             name: '消费能力',
@@ -423,15 +423,15 @@ function initInterestChart() {
     charts.interest = chart;
 
     const data = [
-        {name: '数码', value: 900000}, {name: '美妆', value: 850000}, {name: '运动', value: 800000},
-        {name: '家居', value: 750000}, {name: '母婴', value: 700000}, {name: '美食', value: 650000},
-        {name: '旅游', value: 600000}, {name: '阅读', value: 550000}, {name: '电影', value: 500000},
-        {name: '游戏', value: 450000}, {name: '摄影', value: 400000}, {name: '宠物', value: 350000}
+        { name: '数码', value: 900000 }, { name: '美妆', value: 850000 }, { name: '运动', value: 800000 },
+        { name: '家居', value: 750000 }, { name: '母婴', value: 700000 }, { name: '美食', value: 650000 },
+        { name: '旅游', value: 600000 }, { name: '阅读', value: 550000 }, { name: '电影', value: 500000 },
+        { name: '游戏', value: 450000 }, { name: '摄影', value: 400000 }, { name: '宠物', value: 350000 }
     ];
 
     const option = {
-        tooltip: { 
-            formatter: function(params) {
+        tooltip: {
+            formatter: function (params) {
                 return `<div style="text-align:center;font-weight:bold;margin-bottom:5px;">${params.name}</div>
                         <div style="font-size:12px;color:rgba(255,255,255,0.8);">
                         兴趣人群: <span style="color:#00eaff;font-family:DIN;font-size:14px;">${formatNumber(params.value)}</span>
@@ -444,9 +444,9 @@ function initInterestChart() {
         series: [{
             type: 'graph',
             layout: 'force',
-            force: { 
-                repulsion: 250, 
-                gravity: 0.3, 
+            force: {
+                repulsion: 250,
+                gravity: 0.3,
                 edgeLength: 50,
                 layoutAnimation: true
             },
@@ -458,7 +458,7 @@ function initInterestChart() {
                 value: d.value,
                 symbolSize: Math.sqrt(d.value) / 15, // Adjusted scaling for better proportion
                 itemStyle: {
-                    color: i === 0 ? '#ffcc00' : `rgba(${Math.random()*50}, ${Math.random()*200+55}, 255, 0.8)`, // Center is gold
+                    color: i === 0 ? '#ffcc00' : `rgba(${Math.random() * 50}, ${Math.random() * 200 + 55}, 255, 0.8)`, // Center is gold
                     shadowBlur: 10,
                     shadowColor: '#fff'
                 }
@@ -482,9 +482,9 @@ function initUserMap() {
     }));
 
     const option = {
-        tooltip: { 
+        tooltip: {
             show: true,
-            formatter: function(params) {
+            formatter: function (params) {
                 if (!params.value) return params.name;
                 return `<div style="font-size:14px;font-weight:bold;color:#fff;margin-bottom:5px;">${params.name}</div>
                         <div style="font-size:12px;color:rgba(255,255,255,0.8);">
@@ -531,7 +531,7 @@ function initUserMap() {
     chart.on('click', function (params) {
         // Stop rotation on interaction
         chart.setOption({ series: [{ viewControl: { autoRotate: false } }] });
-        
+
         if (params.name) {
             showRegionModal(params.name);
             updateDashboardByRegion(params.name); // Linkage Update
@@ -545,45 +545,45 @@ function initUserMap() {
 function showRegionModal(regionName) {
     const modal = document.getElementById('region-modal');
     modal.classList.remove('hidden');
-    
+
     document.getElementById('region-title').textContent = regionName + ' 用户画像';
-    
+
     // Generate Mock Data based on region name hash
-    const hash = regionName.split('').reduce((a,b)=>a+b.charCodeAt(0),0);
+    const hash = regionName.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
     const nightIndex = (hash * 13) % 40 + 60; // 60-100
     const priceIndex = (hash * 7) % 60 + 20; // 20-80
     const newIndex = (hash * 23) % 50 + 40; // 40-90
-    
+
     const taglines = ['精致生活家', '硬核科技党', '养生佛系派', '夜猫子部落', '性价比猎手', '奢华体验官'];
     document.getElementById('region-tagline').textContent = taglines[hash % taglines.length];
-    
+
     // Update Bars
     document.getElementById('metric-night').style.width = nightIndex + '%';
     document.getElementById('val-night').textContent = nightIndex + '分';
-    
+
     document.getElementById('metric-price').style.width = priceIndex + '%';
     document.getElementById('val-price').textContent = priceIndex + '分';
-    
+
     document.getElementById('metric-new').style.width = newIndex + '%';
     document.getElementById('val-new').textContent = newIndex + '分';
-    
+
     // Init Region Chart (e.g., Preferred Shopping Time)
     const chartDom = document.getElementById('region-chart');
     // Dispose old instance if exists
     const oldChart = echarts.getInstanceByDom(chartDom);
     if (oldChart) oldChart.dispose();
-    
+
     const chart = echarts.init(chartDom);
     chart.setOption({
         title: { text: '下单时段偏好', left: 'center', textStyle: { color: '#fff', fontSize: 12 } },
-        tooltip: { 
+        tooltip: {
             trigger: 'axis',
             formatter: '{b}: {c}%' // Add unit to tooltip
         },
         grid: { top: 30, bottom: 35, left: 30, right: 10 },
-        xAxis: { 
-            type: 'category', 
-            data: ['早\n(6-12点)', '中\n(12-18点)', '晚\n(18-24点)', '夜\n(0-6点)'], 
+        xAxis: {
+            type: 'category',
+            data: ['早\n(6-12点)', '中\n(12-18点)', '晚\n(18-24点)', '夜\n(0-6点)'],
             axisLine: { lineStyle: { color: '#666' } },
             axisLabel: { interval: 0, fontSize: 10, lineHeight: 14 }
         },
@@ -592,9 +592,9 @@ function showRegionModal(regionName) {
             type: 'bar',
             name: '占比',
             data: [
-                (hash * 3) % 50 + 10, 
-                (hash * 5) % 60 + 20, 
-                (hash * 7) % 80 + 20, 
+                (hash * 3) % 50 + 10,
+                (hash * 5) % 60 + 20,
+                (hash * 7) % 80 + 20,
                 (hash * 11) % 90 + 10
             ],
             itemStyle: { color: '#00eaff', borderRadius: [2, 2, 0, 0] },
@@ -615,7 +615,7 @@ function closeUserCard() {
 // Reset Dashboard to Global View
 function resetDashboardToGlobal() {
     console.log("Resetting dashboard to global view");
-    
+
     // Reset Headers
     const updateHeader = (chartId, suffix) => {
         const chartEl = document.getElementById(chartId);
@@ -665,19 +665,19 @@ function resetDashboardToGlobal() {
     }
     if (charts.interest) {
         const interestData = [
-            {name: '数码', value: 900000}, {name: '美妆', value: 850000}, {name: '运动', value: 800000},
-            {name: '家居', value: 750000}, {name: '母婴', value: 700000}, {name: '美食', value: 650000},
-            {name: '旅游', value: 600000}, {name: '阅读', value: 550000}, {name: '电影', value: 500000},
-            {name: '游戏', value: 450000}, {name: '摄影', value: 400000}, {name: '宠物', value: 350000}
+            { name: '数码', value: 900000 }, { name: '美妆', value: 850000 }, { name: '运动', value: 800000 },
+            { name: '家居', value: 750000 }, { name: '母婴', value: 700000 }, { name: '美食', value: 650000 },
+            { name: '旅游', value: 600000 }, { name: '阅读', value: 550000 }, { name: '电影', value: 500000 },
+            { name: '游戏', value: 450000 }, { name: '摄影', value: 400000 }, { name: '宠物', value: 350000 }
         ];
         charts.interest.setOption({
-            series: [{ 
+            series: [{
                 data: interestData.map((d, i) => ({
                     name: d.name,
                     value: d.value,
                     symbolSize: Math.sqrt(d.value) / 15,
                     itemStyle: {
-                        color: i === 0 ? '#ffcc00' : `rgba(${Math.random()*50}, ${Math.random()*200+55}, 255, 0.8)`,
+                        color: i === 0 ? '#ffcc00' : `rgba(${Math.random() * 50}, ${Math.random() * 200 + 55}, 255, 0.8)`,
                         shadowBlur: 10,
                         shadowColor: '#fff'
                     }
@@ -688,7 +688,7 @@ function resetDashboardToGlobal() {
 
     // Restart Simulation (which will overwrite data with global randoms)
     startDataSimulation();
-    
+
     // Resume Map Rotation
     if (charts.map) {
         charts.map.setOption({ series: [{ viewControl: { autoRotate: true } }] });
@@ -704,13 +704,13 @@ function filterData(type, value) {
     // Flash effect on all charts to simulate filtering
     const allCharts = [charts.interest, charts.consumption];
     allCharts.forEach(c => {
-        if(c) {
+        if (c) {
             c.showLoading({ text: 'Filtering...', color: '#00eaff', maskColor: 'rgba(11, 15, 42, 0.8)' });
             setTimeout(() => {
                 c.hideLoading();
                 // Here you would normally fetch new data. We will just shuffle data for demo.
                 const opt = c.getOption();
-                if(opt.series[0].data) {
+                if (opt.series[0].data) {
                     opt.series[0].data.sort(() => Math.random() - 0.5);
                     c.setOption(opt);
                 }
@@ -733,7 +733,7 @@ function startDataSimulation() {
         let maleVal = 60 + (Math.random() * 4 - 2); // 58-62
         maleVal = parseFloat(maleVal.toFixed(1)); // Round to 1 decimal
         let femaleVal = parseFloat((100 - maleVal).toFixed(1));
-        
+
         charts.gender.setOption({
             series: [
                 {
@@ -767,7 +767,7 @@ function startDataSimulation() {
     // 3. Simulate Occupation Changes (Radar)
     simulationIntervals.push(setInterval(() => {
         if (!charts.occupation) return;
-        
+
         // Generate new random data
         const newData = [1100000, 1700000, 700000, 1300000, 1600000, 900000].map(v => {
             return Math.min(2000000, Math.max(500000, v + Math.floor(Math.random() * 100000 - 50000)));
@@ -801,15 +801,15 @@ function startDataSimulation() {
     // 6. Simulate KPI Numbers (Total Users & New User Rate)
     const totalUserEl = document.getElementById('total-user-num');
     const newUserRateEl = document.getElementById('new-user-rate');
-    
+
     let currentTotalUsers = 8942105;
-    
+
     simulationIntervals.push(setInterval(() => {
         // Increase total users
         const increase = Math.floor(Math.random() * 50 + 10);
         currentTotalUsers += increase;
         if (totalUserEl) totalUserEl.textContent = currentTotalUsers.toLocaleString();
-        
+
         // Fluctuate new user rate
         if (newUserRateEl) {
             const rate = 12.5 + (Math.random() * 0.4 - 0.2);
@@ -827,18 +827,18 @@ function stopDataSimulation() {
 function updateDashboardByRegion(regionName) {
     // Stop random simulation to show stable regional data
     stopDataSimulation();
-    
+
     console.log("Updating dashboard for:", regionName);
 
     // 1. Define Regional Characteristics (Logic)
     // Hash based generation for consistency
-    const hash = regionName.split('').reduce((a,b)=>a+b.charCodeAt(0),0);
-    
+    const hash = regionName.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
+
     // Factors (0.0 - 1.0)
     let economicFactor = 0.5; // Economy level
     let techFactor = 0.3;     // Tech industry presence
     let ageFactor = 0.5;      // 0: Young, 1: Old
-    
+
     // Custom Logic for Key Provinces
     if (['北京', '上海', '广东', '浙江', '江苏'].includes(regionName)) {
         economicFactor = 0.9;
@@ -876,10 +876,10 @@ function updateDashboardByRegion(regionName) {
     // 2. Update Gender Chart
     // Tech/Industrial areas might have more males? Or balanced.
     // Let's say Tech areas have slightly more males.
-    let maleRatio = 50 + (techFactor * 10) + (Math.random() * 5 - 2.5); 
+    let maleRatio = 50 + (techFactor * 10) + (Math.random() * 5 - 2.5);
     maleRatio = parseFloat(Math.min(70, Math.max(30, maleRatio)).toFixed(1));
     const femaleRatio = parseFloat((100 - maleRatio).toFixed(1));
-    
+
     charts.gender.setOption({
         series: [
             { data: [{ value: maleRatio, name: '男性', itemStyle: { color: '#2979ff' } }, { value: femaleRatio, name: 'other', itemStyle: { color: 'rgba(255,255,255,0.1)' }, label: { show: false }, tooltip: { show: false } }] },
@@ -911,7 +911,7 @@ function updateDashboardByRegion(regionName) {
         6000000 * (1.5 - ageFactor), // 90s
         3000000 * (1.5 - ageFactor)  // 00s
     ].map(v => Math.floor(v));
-    
+
     charts.age.setOption({
         series: [{ data: ageData }, { data: ageData }]
     });
@@ -923,7 +923,7 @@ function updateDashboardByRegion(regionName) {
     const midHigh = totalConsumption * (0.3 + economicFactor * 0.2);
     const mid = totalConsumption * 0.3;
     const low = totalConsumption - high - midHigh - mid;
-    
+
     charts.consumption.setOption({
         series: [{
             data: [
@@ -940,28 +940,28 @@ function updateDashboardByRegion(regionName) {
     // Female ratio -> Beauty, Baby
     // Age factor -> Health, Tea? (Not in list, but maybe Reading/Travel)
     const interestData = [
-        {name: '数码', value: 900000 * (1 + techFactor)}, 
-        {name: '美妆', value: 850000 * (femaleRatio / 50)}, 
-        {name: '运动', value: 800000},
-        {name: '家居', value: 750000 * (1 + ageFactor)}, 
-        {name: '母婴', value: 700000 * (femaleRatio / 50)}, 
-        {name: '美食', value: 650000},
-        {name: '旅游', value: 600000 * (1 + economicFactor)}, 
-        {name: '阅读', value: 550000}, 
-        {name: '电影', value: 500000},
-        {name: '游戏', value: 450000 * (1 + techFactor - ageFactor)}, 
-        {name: '摄影', value: 400000}, 
-        {name: '宠物', value: 350000}
+        { name: '数码', value: 900000 * (1 + techFactor) },
+        { name: '美妆', value: 850000 * (femaleRatio / 50) },
+        { name: '运动', value: 800000 },
+        { name: '家居', value: 750000 * (1 + ageFactor) },
+        { name: '母婴', value: 700000 * (femaleRatio / 50) },
+        { name: '美食', value: 650000 },
+        { name: '旅游', value: 600000 * (1 + economicFactor) },
+        { name: '阅读', value: 550000 },
+        { name: '电影', value: 500000 },
+        { name: '游戏', value: 450000 * (1 + techFactor - ageFactor) },
+        { name: '摄影', value: 400000 },
+        { name: '宠物', value: 350000 }
     ];
-    
+
     charts.interest.setOption({
-        series: [{ 
+        series: [{
             data: interestData.map((d, i) => ({
                 name: d.name,
                 value: Math.floor(d.value),
                 symbolSize: Math.sqrt(d.value) / 15,
                 itemStyle: {
-                    color: i === 0 ? '#ffcc00' : `rgba(${Math.random()*50}, ${Math.random()*200+55}, 255, 0.8)`,
+                    color: i === 0 ? '#ffcc00' : `rgba(${Math.random() * 50}, ${Math.random() * 200 + 55}, 255, 0.8)`,
                     shadowBlur: 10,
                     shadowColor: '#fff'
                 }
