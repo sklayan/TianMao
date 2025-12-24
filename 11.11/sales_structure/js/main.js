@@ -26,7 +26,7 @@ async function initMap() {
 
 function initAllCharts() {
     initChannelSalesChart();
-    initConversionCards();
+    initSalesFunnelChart();
     initTrafficSourceChart();
     initCategoryRankChart();
     initCategoryTrendChart();
@@ -77,45 +77,67 @@ function initChannelSalesChart() {
     chart.setOption(option);
 }
 
-// 3. Conversion Cards
-let kpiData = [
-    { title: '点击率 (CTR)', value: 4.5, unit: '%', trend: 0.5, up: true },
-    { title: '转化率 (CVR)', value: 2.1, unit: '%', trend: 0.1, up: false },
-    { title: '客单价', value: 350, unit: '', prefix: '¥', trend: 12, up: true }
-];
+// 3. Sales Funnel Chart
+function initSalesFunnelChart() {
+    const chart = echarts.init(document.getElementById('sales-funnel-chart'));
+    charts.salesFunnel = chart;
 
-function initConversionCards() {
-    renderConversionCards();
-}
-
-function renderConversionCards() {
-    const container = document.getElementById('conversion-cards');
-    container.innerHTML = kpiData.map(item => `
-        <div class="kpi-card">
-            <div class="kpi-title">${item.title}</div>
-            <div class="kpi-value">${item.prefix || ''}${typeof item.value === 'number' ? item.value.toFixed(1) : item.value}${item.unit}</div>
-            <div class="kpi-trend ${item.up ? 'trend-up' : 'trend-down'}">
-                ${item.up ? '▲' : '▼'} ${item.trend}%
-            </div>
-        </div>
-    `).join('');
+    const option = {
+        tooltip: {
+            trigger: 'item',
+            formatter: '{a} <br/>{b} : {c}%'
+        },
+        color: ['#00eaff', '#00ccff', '#00aaff', '#0088ff', '#0066ff'],
+        series: [
+            {
+                name: '销售漏斗',
+                type: 'funnel',
+                left: '10%',
+                top: 20,
+                bottom: 20,
+                width: '80%',
+                min: 0,
+                max: 100,
+                minSize: '0%',
+                maxSize: '100%',
+                sort: 'descending',
+                gap: 2,
+                label: {
+                    show: true,
+                    position: 'inside',
+                    color: '#fff'
+                },
+                itemStyle: {
+                    borderColor: '#fff',
+                    borderWidth: 0
+                },
+                data: [
+                    { value: 100, name: '展现' },
+                    { value: 80, name: '点击' },
+                    { value: 60, name: '访问' },
+                    { value: 40, name: '咨询' },
+                    { value: 20, name: '订单' }
+                ]
+            }
+        ]
+    };
+    chart.setOption(option);
 }
 
 // Data Stream Simulation
 function startDataStream() {
     setInterval(() => {
-        // 1. Update KPI Data
-        kpiData.forEach(item => {
-            if (item.title === '客单价') {
-                item.value += Math.floor((Math.random() - 0.5) * 5);
-            } else {
-                const change = (Math.random() - 0.5) * 0.1;
-                item.value = Math.max(0, item.value + change);
-            }
-            // Randomly flip trend direction
-            if (Math.random() > 0.9) item.up = !item.up;
-        });
-        renderConversionCards();
+        // 1. Update Sales Funnel
+        if (charts.salesFunnel) {
+            const newData = [
+                { value: 100, name: '展现' },
+                { value: Math.floor(Math.random() * 10 + 75), name: '点击' },
+                { value: Math.floor(Math.random() * 10 + 55), name: '访问' },
+                { value: Math.floor(Math.random() * 10 + 35), name: '咨询' },
+                { value: Math.floor(Math.random() * 5 + 15), name: '订单' }
+            ];
+            charts.salesFunnel.setOption({ series: [{ data: newData }] });
+        }
 
         // 2. Update Channel Sales (Bar Chart)
         if (charts.channelSales) {

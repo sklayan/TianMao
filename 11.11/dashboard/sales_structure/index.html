@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>双十一销售结构分析</title>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/modal.css">
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/echarts-wordcloud@2.1.0/dist/echarts-wordcloud.min.js"></script>
     <!-- World Map Data -->
@@ -35,10 +36,8 @@
             <!-- Left Column: Sales Channel Analysis -->
             <div class="column left-column">
                 <div class="panel-box">
-                    <div class="panel-header">渠道转化指标</div>
-                    <div class="kpi-cards" id="conversion-cards">
-                        <!-- Cards will be injected by JS -->
-                    </div>
+                    <div class="panel-header">支付方式与用户增长</div>
+                    <div class="chart-container" id="payment-user-chart"></div>
                 </div>
                 <div class="panel-box">
                     <div class="panel-header">流量来源分布</div>
@@ -80,6 +79,19 @@
                 </div>
             </div>
         </main>
+    </div>
+
+    <!-- Traffic Source Detail Modal -->
+    <div id="traffic-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="modal-title">流量来源详情</div>
+                <button class="modal-close" onclick="closeTrafficModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <!-- Content injected by JS -->
+            </div>
+        </div>
     </div>
 
     <script src="js/main.js"></script>

@@ -40,7 +40,7 @@ async function initMap() {
 
 function initAllCharts() {
     initParticles(); // New: Particle Background
-    initConversionCards();
+    initPaymentUserChart();
     initTrafficSourceChart();
     initCategoryRankChart();
     initCategoryTrendChart();
@@ -61,112 +61,146 @@ function initAllCharts() {
     });
 }
 
-// 3. Conversion Cards
-let kpiData = [
-    { title: '点击率 (CTR)', value: 4.5, unit: '%', trend: 0.5, up: true },
-    { title: '转化率 (CVR)', value: 2.1, unit: '%', trend: 0.1, up: false },
-    { title: '客单价', value: 350, unit: '', prefix: '¥', trend: 12, up: true }
-];
+// 3. Payment & User Growth Chart (Pie + Bar)
+function initPaymentUserChart() {
+    const chart = echarts.init(document.getElementById('payment-user-chart'));
+    charts.paymentUser = chart;
 
-function initConversionCards() {
-    renderConversionCards();
-}
-
-function renderConversionCards(data) {
-    const container = document.getElementById('conversion-cards');
-    const displayData = data || kpiData;
-    // Icons mapping
-    const icons = ['🖱️', '🔄', '💰'];
-    
-    container.innerHTML = displayData.map((item, index) => `
-        <div class="kpi-card" onclick="handleKpiClick(this, ${index})">
-            <div class="kpi-header">
-                <div class="kpi-title">${item.title}</div>
-                <div class="kpi-icon-bg">${icons[index] || '📊'}</div>
-            </div>
-            <div class="kpi-body">
-                <div class="kpi-value">
-                    ${item.prefix || ''}${typeof item.value === 'number' ? item.value.toFixed(1) : item.value}<span class="kpi-unit">${item.unit}</span>
-                </div>
-            </div>
-            <div class="kpi-footer">
-                <span class="trend-label">周同比</span>
-                <div class="kpi-trend ${item.up ? 'trend-up' : 'trend-down'}">
-                    ${item.up ? '▲' : '▼'} ${item.trend}%
-                </div>
-            </div>
-            <!-- Decorative background element -->
-            <div class="card-decoration"></div>
-        </div>
-    `).join('');
-}
-
-function handleKpiClick(element, index) {
-    // Remove active class from all cards
-    document.querySelectorAll('.kpi-card').forEach(card => card.classList.remove('active'));
-    // Add active class to clicked card
-    element.classList.add('active');
-    
-    // Simulate interaction: Update Traffic Source based on KPI
-    const kpi = kpiData[index];
-    if (charts.trafficSource) {
-        let newData = [];
-        if (kpi.title.includes('转化率')) {
-             newData = [
-                { value: 45, name: '直接访问' },
-                { value: 40, name: '搜索引擎' },
-                { value: 10, name: '社交媒体' },
-                { value: 3, name: '广告投放' },
-                { value: 2, name: '外部链接' }
-            ];
-        } else if (kpi.title.includes('点击率')) {
-             newData = [
-                { value: 10, name: '直接访问' },
-                { value: 20, name: '搜索引擎' },
-                { value: 40, name: '社交媒体' },
-                { value: 25, name: '广告投放' },
-                { value: 5, name: '外部链接' }
-            ];
-        } else {
-             newData = [
-                { value: 30, name: '直接访问' },
-                { value: 30, name: '搜索引擎' },
-                { value: 20, name: '社交媒体' },
-                { value: 10, name: '广告投放' },
-                { value: 10, name: '外部链接' }
-            ];
-        }
-        charts.trafficSource.setOption({ series: [{ data: newData }] });
-    }
+    const option = {
+        tooltip: { 
+            trigger: 'item',
+            formatter: function(params) {
+                if (params.seriesName === '支付方式') {
+                    return `${params.marker}${params.name} : ${params.value}%`;
+                } else {
+                    return `${params.marker}${params.name} : ${params.value}万人`;
+                }
+            }
+        },
+        title: [
+            { text: '无线支付占比', left: '12%', top: '5%', textStyle: { color: 'rgba(255,255,255,0.7)', fontSize: 12 } },
+            { text: '消费者人数', left: '62%', top: '5%', textStyle: { color: 'rgba(255,255,255,0.7)', fontSize: 12 } }
+        ],
+        grid: {
+            left: '55%',
+            right: '5%',
+            top: '25%',
+            bottom: '15%',
+            containLabel: true
+        },
+        xAxis: {
+            type: 'category',
+            data: ['2024年', '2025年'],
+            axisLabel: { color: '#fff' },
+            axisLine: { lineStyle: { color: 'rgba(255,255,255,0.3)' } },
+            axisTick: { show: false }
+        },
+        yAxis: {
+            type: 'value',
+            splitLine: { show: false },
+            axisLabel: { show: false }
+        },
+        graphic: [
+            {
+                type: 'text',
+                left: '25%',
+                top: '53%',
+                style: {
+                    text: '📱',
+                    font: '30px sans-serif',
+                    textAlign: 'center',
+                    fill: '#fff'
+                }
+            }
+        ],
+        series: [
+            // Pie Chart (Left)
+            {
+                name: '支付方式',
+                type: 'pie',
+                radius: ['45%', '65%'],
+                center: ['25%', '55%'],
+                label: {
+                    show: true,
+                    position: 'outside',
+                    formatter: '{d}%',
+                    color: '#fff'
+                },
+                labelLine: { show: true, length: 5, length2: 5 },
+                data: [
+                    { value: 85, name: '无线端', itemStyle: { color: '#00eaff' } },
+                    { value: 15, name: 'PC端', itemStyle: { color: '#2979ff' } }
+                ]
+            },
+            // Bar Chart (Right)
+            {
+                name: '消费者人数',
+                type: 'bar',
+                barWidth: '40%',
+                data: [
+                    { value: 4500, itemStyle: { color: '#2979ff' } },
+                    { value: 6800, itemStyle: { color: '#00eaff' } }
+                ],
+                label: {
+                    show: true,
+                    position: 'top',
+                    color: '#fff',
+                    formatter: '{c}万'
+                }
+            }
+        ]
+    };
+    chart.setOption(option);
 }
 
 // Data Stream Simulation
 function startDataStream() {
-    setInterval(() => {
-        // 1. Update KPI Data
-        kpiData.forEach(item => {
-            if (item.title === '客单价') {
-                item.value += Math.floor((Math.random() - 0.5) * 5);
-            } else {
-                const change = (Math.random() - 0.5) * 0.1;
-                item.value = Math.max(0, item.value + change);
-            }
-            // Randomly flip trend direction
-            if (Math.random() > 0.9) item.up = !item.up;
-        });
-        renderConversionCards();
+    // State for smoother animations
+    let currentUsers = 6800;
+    let mobileShare = 85.0;
 
-        // 2. Update Channel Sales (Bar Chart)
-        if (charts.channelSales) {
-            const newSalesData = generateRandomData(5, 50, 300);
-            charts.channelSales.setOption({ series: [{ data: newSalesData }] });
+    setInterval(() => {
+        // 1. Update Payment & User Chart
+        if (charts.paymentUser) {
+            // Mobile share: very subtle fluctuation around 85%
+            if (Math.random() > 0.5) {
+                mobileShare += (Math.random() - 0.5) * 0.1;
+                // Clamp between 84% and 86%
+                mobileShare = Math.max(84, Math.min(86, mobileShare));
+            }
+            
+            const mobileVal = parseFloat(mobileShare.toFixed(2));
+            const pcVal = parseFloat((100 - mobileVal).toFixed(2));
+            
+            // User count: strictly increasing (simulating growth)
+            // Add 0-2 users every cycle
+            currentUsers += Math.floor(Math.random() * 3);
+
+            charts.paymentUser.setOption({
+                series: [
+                    { data: [{ value: mobileVal, name: '无线端', itemStyle: { color: '#00eaff' } }, { value: pcVal, name: 'PC端', itemStyle: { color: '#2979ff' } }] },
+                    { data: [{ value: 4500, itemStyle: { color: '#2979ff' } }, { value: currentUsers, itemStyle: { color: '#00eaff' } }] }
+                ]
+            });
+        }
+
+        // 2. Update Category Rank (Bar Chart)
+        if (charts.categoryRank) {
+            const option = charts.categoryRank.getOption();
+            const data = option.series[0].data;
+            // Slightly fluctuate values to simulate real-time sales
+            const newData = data.map(val => {
+                const change = Math.floor(Math.random() * 5); // Only increase or stay same
+                return val + change;
+            });
+            charts.categoryRank.setOption({ series: [{ data: newData }] });
         }
 
         // 3. Update Category Trend (Line Chart)
         if (charts.categoryTrend) {
             const option = charts.categoryTrend.getOption();
             const data = option.series[0].data;
-            // Slowly increase the last value to simulate real-time sales
+            // Slowly increase the last value
             const lastIdx = data.length - 1;
             data[lastIdx] = data[lastIdx] + Math.floor(Math.random() * 5);
             charts.categoryTrend.setOption({ series: [{ data: data }] });
@@ -179,13 +213,113 @@ function startDataStream() {
                 baseMargin = categoryStats[currentCategory].margin;
             }
 
-            // Fluctuate slightly around base margin (+/- 2%)
-            const fluctuation = (Math.random() - 0.5) * 4;
+            // Fluctuate slightly around base margin (+/- 0.5%)
+            const fluctuation = (Math.random() - 0.5) * 1;
             const newVal = +(baseMargin + fluctuation).toFixed(2);
             
             charts.marginGauge.setOption({
                 series: [{ data: [{ value: newVal, name: '毛利率' }] }]
             });
+        }
+
+        // 5. Update Price Range (Funnel)
+        if (charts.priceRange) {
+            const option = charts.priceRange.getOption();
+            const data = option.series[0].data;
+            const newData = data.map(item => {
+                // Sales only increase
+                const change = Math.floor(Math.random() * 10);
+                return { ...item, value: item.value + change };
+            });
+            charts.priceRange.setOption({ series: [{ data: newData }] });
+        }
+
+        // 6. Update Repurchase (Radar) - Very subtle breathing
+        if (charts.repurchase) {
+             const option = charts.repurchase.getOption();
+             const seriesData = option.series[0].data;
+             const newData = seriesData.map(group => {
+                 const newValues = group.value.map((val, idx) => {
+                     // Index 1 is AOV (Money), others are % or score
+                     const range = idx === 1 ? 2 : 0.5;
+                     const change = (Math.random() - 0.5) * range;
+                     let res = val + change;
+                     if (idx !== 1) res = Math.max(0, Math.min(100, res));
+                     return parseFloat(res.toFixed(1));
+                 });
+                 return { ...group, value: newValues };
+             });
+             charts.repurchase.setOption({ series: [{ data: newData }] });
+        }
+
+        // 7. Update Traffic Source (Pie)
+        if (charts.trafficSource) {
+            const option = charts.trafficSource.getOption();
+            const data = option.series[0].data;
+            // Slowly increase values to simulate incoming traffic
+            const newData = data.map(item => {
+                // Increase by a small amount (0 ~ 0.05) to simulate real-time traffic accumulation
+                // Since unit is '万次' (10k), 0.01 = 100 visits
+                const change = Math.random() * 0.05; 
+                return { ...item, value: parseFloat((item.value + change).toFixed(2)) };
+            });
+            charts.trafficSource.setOption({ series: [{ data: newData }] });
+
+            // 8. Update Traffic Details (Modal Data)
+            Object.keys(trafficDetails).forEach(key => {
+                const detail = trafficDetails[key];
+                
+                // Update Trend (Fluctuate last point only, don't shift days)
+                const lastIdx = detail.trend.length - 1;
+                const change = Math.floor((Math.random() - 0.5) * 10);
+                detail.trend[lastIdx] = Math.max(0, detail.trend[lastIdx] + change);
+
+                // Update Metrics (Simulate fluctuation)
+                // 0: Duration (seconds), 1: Bounce Rate (%), 2: New User (%)
+                // Duration
+                detail.metrics[0].raw += Math.floor((Math.random() - 0.5) * 5);
+                const m = Math.floor(detail.metrics[0].raw / 60);
+                const s = detail.metrics[0].raw % 60;
+                detail.metrics[0].value = `${m}m ${s.toString().padStart(2, '0')}s`;
+
+                // Bounce Rate
+                detail.metrics[1].raw = Math.max(0, Math.min(100, detail.metrics[1].raw + (Math.random() - 0.5) * 2));
+                detail.metrics[1].value = `${detail.metrics[1].raw.toFixed(0)}%`;
+
+                // New User
+                detail.metrics[2].raw = Math.max(0, Math.min(100, detail.metrics[2].raw + (Math.random() - 0.5) * 2));
+                detail.metrics[2].value = `${detail.metrics[2].raw.toFixed(0)}%`;
+            });
+
+            // If Modal is Open, Update UI
+            if (currentModalSource && trafficDetails[currentModalSource]) {
+                const detail = trafficDetails[currentModalSource];
+                
+                // Update Main Value & Percent from Chart Data
+                const currentItem = newData.find(i => i.name === currentModalSource);
+                if (currentItem) {
+                    const total = newData.reduce((sum, i) => sum + i.value, 0);
+                    const percent = ((currentItem.value / total) * 100).toFixed(2);
+                    
+                    const valEl = document.getElementById('modal-traffic-val');
+                    const perEl = document.getElementById('modal-traffic-percent');
+                    if (valEl) valEl.textContent = `${currentItem.value}万次`;
+                    if (perEl) perEl.textContent = `${percent}%`;
+                }
+
+                // Update Metrics
+                detail.metrics.forEach((m, i) => {
+                    const el = document.getElementById(`metric-val-${i}`);
+                    if (el) el.textContent = m.value;
+                });
+
+                // Update Chart
+                if (charts.modalTrend) {
+                    charts.modalTrend.setOption({
+                        series: [{ data: detail.trend }]
+                    });
+                }
+            }
         }
 
     }, 2000); // Update every 2 seconds
@@ -199,7 +333,7 @@ function initTrafficSourceChart() {
     const option = {
         // Unified Blue/Cyan Theme with Gold Accent
         color: ['#2979ff', '#00eaff', '#00b0ff', '#40c4ff', '#82b1ff', '#ffcc00'],
-        tooltip: { trigger: 'item', formatter: '{a} <br/>{b} : {c} ({d}%)' },
+        tooltip: { trigger: 'item', formatter: '{a} <br/>{b} : {c}万次 ({d}%)' },
         series: [
             {
                 name: '流量来源',
@@ -220,19 +354,136 @@ function initTrafficSourceChart() {
     };
     chart.setOption(option);
 
+    // Interaction: Click to show details
     chart.on('click', function (params) {
-        // Simulate interaction: Click traffic source -> Update KPI
-        const source = params.name;
-        let newKpi = JSON.parse(JSON.stringify(kpiData)); // Deep copy
-        if (source === '社交媒体' || source === '广告投放') {
-            newKpi[0].value = +(newKpi[0].value * 1.2).toFixed(1); // CTR Up
-            newKpi[1].value = +(newKpi[1].value * 0.8).toFixed(1); // CVR Down
-        } else if (source === '搜索引擎' || source === '直接访问') {
-            newKpi[1].value = +(newKpi[1].value * 1.2).toFixed(1); // CVR Up
-        }
-        kpiData = newKpi;
-        renderConversionCards(newKpi);
+        showTrafficDetails(params.name, params.value, params.percent);
     });
+}
+
+// Traffic Source Details Data
+let currentModalSource = null; // Track open modal source
+const trafficDetails = {
+    '直接访问': {
+        desc: '用户直接输入网址或通过收藏夹访问，反映了品牌的高忠诚度。',
+        metrics: [
+            { label: '平均停留时长', value: '5m 30s', raw: 330 }, // raw in seconds
+            { label: '跳出率', value: '25%', raw: 25 },
+            { label: '新用户占比', value: '15%', raw: 15 }
+        ],
+        trend: [120, 132, 101, 134, 90, 230, 210]
+    },
+    '搜索引擎': {
+        desc: '来自百度、谷歌等搜索引擎的自然流量和付费流量。',
+        metrics: [
+            { label: '平均停留时长', value: '3m 10s', raw: 190 },
+            { label: '跳出率', value: '45%', raw: 45 },
+            { label: '新用户占比', value: '60%', raw: 60 }
+        ],
+        trend: [220, 182, 191, 234, 290, 330, 310]
+    },
+    '社交媒体': {
+        desc: '来自微博、抖音、小红书等社交平台的引流。',
+        metrics: [
+            { label: '平均停留时长', value: '4m 45s', raw: 285 },
+            { label: '跳出率', value: '35%', raw: 35 },
+            { label: '新用户占比', value: '75%', raw: 75 }
+        ],
+        trend: [150, 232, 201, 154, 190, 330, 410]
+    },
+    '广告投放': {
+        desc: '通过展示广告、信息流广告等付费渠道获取的流量。',
+        metrics: [
+            { label: '平均停留时长', value: '2m 20s', raw: 140 },
+            { label: '跳出率', value: '55%', raw: 55 },
+            { label: '新用户占比', value: '85%', raw: 85 }
+        ],
+        trend: [320, 332, 301, 334, 390, 330, 320]
+    },
+    '外部链接': {
+        desc: '来自合作伙伴、友链或其他网站的引荐流量。',
+        metrics: [
+            { label: '平均停留时长', value: '3m 50s', raw: 230 },
+            { label: '跳出率', value: '40%', raw: 40 },
+            { label: '新用户占比', value: '40%', raw: 40 }
+        ],
+        trend: [820, 932, 901, 934, 1290, 1330, 1320]
+    }
+};
+
+function showTrafficDetails(name, value, percent) {
+    const modal = document.getElementById('traffic-modal');
+    const title = document.getElementById('modal-title');
+    const body = document.getElementById('modal-body');
+    
+    if (!modal) return;
+
+    currentModalSource = name; // Set current source
+
+    const details = trafficDetails[name] || {
+        desc: '暂无详细描述',
+        metrics: [],
+        trend: [0,0,0,0,0,0,0]
+    };
+
+    title.textContent = `${name} - 详细分析`;
+    
+    let metricsHtml = details.metrics.map((m, i) => `
+        <div class="detail-item">
+            <span class="detail-label">${m.label}</span>
+            <span class="detail-value" id="metric-val-${i}">${m.value}</span>
+        </div>
+    `).join('');
+
+    body.innerHTML = `
+        <div style="margin-bottom: 20px; color: #ccc;">${details.desc}</div>
+        <div class="detail-item">
+            <span class="detail-label">当前流量</span>
+            <span class="detail-value" style="color: var(--accent-color); font-size: 24px;" id="modal-traffic-val">${value}万次</span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">占比</span>
+            <span class="detail-value" id="modal-traffic-percent">${percent}%</span>
+        </div>
+        <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 15px 0;">
+        ${metricsHtml}
+        <div class="detail-chart" id="modal-trend-chart"></div>
+    `;
+
+    modal.style.display = 'flex';
+
+    // Init mini chart in modal
+    setTimeout(() => {
+        const chartDom = document.getElementById('modal-trend-chart');
+        if (chartDom) {
+            // Dispose existing instance if any to avoid warning
+            const existingChart = echarts.getInstanceByDom(chartDom);
+            if (existingChart) existingChart.dispose();
+
+            const myChart = echarts.init(chartDom);
+            charts.modalTrend = myChart; // Store reference
+
+            const option = {
+                title: { text: '近7日流量趋势', textStyle: { color: '#fff', fontSize: 12 }, left: 'center', top: 10 },
+                grid: { top: 40, bottom: 20, left: 30, right: 20 },
+                xAxis: { type: 'category', data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'], axisLabel: { color: '#ccc', fontSize: 10 } },
+                yAxis: { type: 'value', axisLabel: { color: '#ccc', fontSize: 10 }, splitLine: { lineStyle: { color: 'rgba(255,255,255,0.1)' } } },
+                series: [{
+                    data: details.trend,
+                    type: 'line',
+                    smooth: true,
+                    areaStyle: { opacity: 0.3, color: '#00eaff' },
+                    itemStyle: { color: '#00eaff' }
+                }]
+            };
+            myChart.setOption(option);
+        }
+    }, 100);
+}
+
+window.closeTrafficModal = function() {
+    const modal = document.getElementById('traffic-modal');
+    if (modal) modal.style.display = 'none';
+    currentModalSource = null; // Clear current source
 }
 
 // 5. Category Rank (Horizontal Bar)
@@ -871,16 +1122,9 @@ function updateCategoryCharts(category) {
 
     const data = getCategoryData(category);
 
-    // Update KPI Cards
-    kpiData = data.kpi; // Update global data so stream continues correctly
-    renderConversionCards(data.kpi);
+    // KPI Cards removed
 
-    // Update Traffic Source
-    if (charts.trafficSource) {
-        charts.trafficSource.setOption({
-            series: [{ data: data.trafficSource }]
-        });
-    }
+    // Traffic Source update removed (Static)
 
     // Update Trend Chart
     if (charts.categoryTrend) {

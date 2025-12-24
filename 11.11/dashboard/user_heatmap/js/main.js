@@ -699,24 +699,140 @@ function resetDashboardToGlobal() {
     }
 }
 
+// Age Group Profiles for Interaction
+let currentAgeGroup = null;
+const ageProfiles = {
+    '00后': {
+        consumption: [
+            { value: 1500000, name: '高消费' },
+            { value: 2500000, name: '中高消费' },
+            { value: 4500000, name: '中等消费' },
+            { value: 5500000, name: '低消费' }
+        ],
+        interest: [
+            { name: '游戏', value: 950000 }, { name: '动漫', value: 880000 }, { name: '零食', value: 820000 },
+            { name: '美妆', value: 750000 }, { name: '数码', value: 700000 }, { name: '宠物', value: 650000 },
+            { name: '运动', value: 500000 }, { name: '潮玩', value: 450000 }, { name: '服饰', value: 400000 },
+            { name: '学习', value: 300000 }, { name: '音乐', value: 250000 }, { name: '社交', value: 200000 }
+        ],
+        occupation: [500000, 2500000, 100000, 300000, 800000, 200000] // High Student
+    },
+    '90后': {
+        consumption: [
+            { value: 3500000, name: '高消费' },
+            { value: 4500000, name: '中高消费' },
+            { value: 3500000, name: '中等消费' },
+            { value: 2000000, name: '低消费' }
+        ],
+        interest: [
+            { name: '数码', value: 920000 }, { name: '旅游', value: 890000 }, { name: '美妆', value: 850000 },
+            { name: '理财', value: 780000 }, { name: '美食', value: 720000 }, { name: '宠物', value: 680000 },
+            { name: '运动', value: 600000 }, { name: '家居', value: 550000 }, { name: '汽车', value: 500000 },
+            { name: '摄影', value: 450000 }, { name: '电影', value: 400000 }, { name: '阅读', value: 350000 }
+        ],
+        occupation: [1200000, 200000, 600000, 1500000, 2000000, 500000] // High White Collar/Freelance
+    },
+    '80后': {
+        consumption: [
+            { value: 5500000, name: '高消费' },
+            { value: 4000000, name: '中高消费' },
+            { value: 2500000, name: '中等消费' },
+            { value: 1000000, name: '低消费' }
+        ],
+        interest: [
+            { name: '母婴', value: 980000 }, { name: '房产', value: 900000 }, { name: '汽车', value: 850000 },
+            { name: '理财', value: 820000 }, { name: '家居', value: 780000 }, { name: '健康', value: 700000 },
+            { name: '旅游', value: 650000 }, { name: '美食', value: 600000 }, { name: '数码', value: 500000 },
+            { name: '阅读', value: 400000 }, { name: '茶酒', value: 350000 }, { name: '运动', value: 300000 }
+        ],
+        occupation: [800000, 50000, 1200000, 1800000, 2200000, 1000000] // High Civil Servant/Teacher/White Collar
+    },
+    '70后': {
+        consumption: [
+            { value: 4000000, name: '高消费' },
+            { value: 3500000, name: '中高消费' },
+            { value: 3000000, name: '中等消费' },
+            { value: 1500000, name: '低消费' }
+        ],
+        interest: [
+            { name: '健康', value: 950000 }, { name: '茶酒', value: 880000 }, { name: '新闻', value: 800000 },
+            { name: '家居', value: 750000 }, { name: '理财', value: 700000 }, { name: '旅游', value: 600000 },
+            { name: '汽车', value: 550000 }, { name: '阅读', value: 500000 }, { name: '园艺', value: 450000 },
+            { name: '美食', value: 400000 }, { name: '摄影', value: 300000 }, { name: '运动', value: 200000 }
+        ],
+        occupation: [600000, 0, 1500000, 1500000, 1000000, 1200000] // High Civil Servant/Teacher
+    },
+    '60后': {
+        consumption: [
+            { value: 2000000, name: '高消费' },
+            { value: 3000000, name: '中高消费' },
+            { value: 4000000, name: '中等消费' },
+            { value: 2500000, name: '低消费' }
+        ],
+        interest: [
+            { name: '养生', value: 900000 }, { name: '戏曲', value: 850000 }, { name: '新闻', value: 800000 },
+            { name: '园艺', value: 750000 }, { name: '茶艺', value: 700000 }, { name: '旅游', value: 600000 },
+            { name: '棋牌', value: 550000 }, { name: '美食', value: 500000 }, { name: '阅读', value: 400000 },
+            { name: '健康', value: 350000 }, { name: '家居', value: 300000 }, { name: '宠物', value: 200000 }
+        ],
+        occupation: [400000, 0, 1000000, 1200000, 500000, 800000] // Retired/Other (Simulated)
+    }
+};
+
 // Filter Logic (Animation)
 function filterData(type, value) {
-    // Flash effect on all charts to simulate filtering
-    const allCharts = [charts.interest, charts.consumption];
-    allCharts.forEach(c => {
-        if (c) {
-            c.showLoading({ text: 'Filtering...', color: '#00eaff', maskColor: 'rgba(11, 15, 42, 0.8)' });
-            setTimeout(() => {
-                c.hideLoading();
-                // Here you would normally fetch new data. We will just shuffle data for demo.
-                const opt = c.getOption();
-                if (opt.series[0].data) {
-                    opt.series[0].data.sort(() => Math.random() - 0.5);
-                    c.setOption(opt);
-                }
-            }, 800);
+    if (type === 'age' && ageProfiles[value]) {
+        currentAgeGroup = value;
+        const profile = ageProfiles[value];
+
+        // Update Consumption Chart
+        if (charts.consumption) {
+            charts.consumption.setOption({
+                series: [{
+                    data: profile.consumption.map(item => ({
+                        ...item,
+                        itemStyle: {
+                            color: item.name === '高消费' ? '#2979ff' :
+                                   item.name === '中高消费' ? '#00eaff' :
+                                   item.name === '中等消费' ? '#00b0ff' : '#80d8ff'
+                        }
+                    }))
+                }]
+            });
         }
-    });
+
+        // Update Interest Chart
+        if (charts.interest) {
+            const newInterestData = profile.interest.map((d, i) => ({
+                name: d.name,
+                value: d.value,
+                symbolSize: Math.sqrt(d.value) / 15,
+                itemStyle: {
+                    color: i === 0 ? '#ffcc00' : `rgba(${Math.random() * 50}, ${Math.random() * 200 + 55}, 255, 0.8)`,
+                    shadowBlur: 10,
+                    shadowColor: '#fff'
+                }
+            }));
+            
+            charts.interest.setOption({
+                series: [{
+                    data: newInterestData
+                }]
+            });
+        }
+
+        // Update Occupation Chart
+        if (charts.occupation && profile.occupation) {
+            charts.occupation.setOption({
+                series: [{
+                    data: [{
+                        value: profile.occupation,
+                        name: '用户数量'
+                    }]
+                }]
+            });
+        }
+    }
 }
 
 // Global Simulation Intervals
@@ -768,9 +884,16 @@ function startDataSimulation() {
     simulationIntervals.push(setInterval(() => {
         if (!charts.occupation) return;
 
+        let baseData;
+        if (currentAgeGroup && ageProfiles[currentAgeGroup] && ageProfiles[currentAgeGroup].occupation) {
+            baseData = ageProfiles[currentAgeGroup].occupation;
+        } else {
+            baseData = [1100000, 1700000, 700000, 1300000, 1600000, 900000];
+        }
+
         // Generate new random data
-        const newData = [1100000, 1700000, 700000, 1300000, 1600000, 900000].map(v => {
-            return Math.min(2000000, Math.max(500000, v + Math.floor(Math.random() * 100000 - 50000)));
+        const newData = baseData.map(v => {
+            return Math.min(2000000, Math.max(0, v + Math.floor(Math.random() * 100000 - 50000)));
         });
 
         charts.occupation.setOption({
@@ -786,17 +909,65 @@ function startDataSimulation() {
     // 4. Simulate Consumption Funnel
     simulationIntervals.push(setInterval(() => {
         if (!charts.consumption) return;
+        
+        let baseData;
+        if (currentAgeGroup && ageProfiles[currentAgeGroup]) {
+            baseData = ageProfiles[currentAgeGroup].consumption;
+        } else {
+            baseData = [
+                { value: 6000000, name: '高消费' },
+                { value: 4000000, name: '中高消费' },
+                { value: 2000000, name: '中等消费' },
+                { value: 1000000, name: '低消费' }
+            ];
+        }
+
+        const newData = baseData.map(item => ({
+            ...item,
+            value: item.value + (Math.random() - 0.5) * 50000, // Fluctuate
+            itemStyle: {
+                color: item.name === '高消费' ? '#2979ff' :
+                       item.name === '中高消费' ? '#00eaff' :
+                       item.name === '中等消费' ? '#00b0ff' : '#80d8ff'
+            }
+        }));
+
         charts.consumption.setOption({
-            series: [{
-                data: [
-                    { value: 6000000 + Math.random() * 100000, name: '高消费', itemStyle: { color: '#2979ff' } },
-                    { value: 4000000 + Math.random() * 100000, name: '中高消费', itemStyle: { color: '#00eaff' } },
-                    { value: 2000000 + Math.random() * 100000, name: '中等消费', itemStyle: { color: '#00b0ff' } },
-                    { value: 1000000 + Math.random() * 50000, name: '低消费', itemStyle: { color: '#80d8ff' } }
-                ]
-            }]
+            series: [{ data: newData }]
         });
     }, 3500));
+
+    // 5. Simulate Interest Chart (Galaxy)
+    simulationIntervals.push(setInterval(() => {
+        if (!charts.interest) return;
+
+        let baseData;
+        if (currentAgeGroup && ageProfiles[currentAgeGroup]) {
+            baseData = ageProfiles[currentAgeGroup].interest;
+        } else {
+            baseData = [
+                { name: '数码', value: 900000 }, { name: '美妆', value: 850000 }, { name: '运动', value: 800000 },
+                { name: '家居', value: 750000 }, { name: '母婴', value: 700000 }, { name: '美食', value: 650000 },
+                { name: '旅游', value: 600000 }, { name: '阅读', value: 550000 }, { name: '电影', value: 500000 },
+                { name: '游戏', value: 450000 }, { name: '摄影', value: 400000 }, { name: '宠物', value: 350000 }
+            ];
+        }
+
+        const newData = baseData.map((d, i) => ({
+            name: d.name,
+            value: d.value + (Math.random() - 0.5) * 20000,
+            symbolSize: Math.sqrt(d.value) / 15,
+            itemStyle: {
+                color: i === 0 ? '#ffcc00' : `rgba(${Math.random() * 50}, ${Math.random() * 200 + 55}, 255, 0.8)`,
+                shadowBlur: 10,
+                shadowColor: '#fff'
+            }
+        }));
+
+        charts.interest.setOption({
+            series: [{ data: newData }]
+        });
+    }, 4000));
 
     // 6. Simulate KPI Numbers (Total Users & New User Rate)
     const totalUserEl = document.getElementById('total-user-num');
