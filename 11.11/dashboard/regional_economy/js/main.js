@@ -9,12 +9,12 @@ let navHistory = [];
 
 // Mock Data for Right Panel
 const mockData = {
-    '100000': { name: '全国', en: 'China', gmv15: 912, gmv14: 571, growth: 59.7 },
-    '420000': { name: '湖北省', en: 'Hubei', gmv15: 45, gmv14: 28, growth: 60.7 },
-    '440000': { name: '广东省', en: 'Guangdong', gmv15: 98, gmv14: 75, growth: 30.6 },
-    '330000': { name: '浙江省', en: 'Zhejiang', gmv15: 88, gmv14: 68, growth: 29.4 },
+    '100000': { name: '全国', en: 'China', gmv25: 912, gmv24: 571, growth: 59.7 },
+    '420000': { name: '湖北省', en: 'Hubei', gmv25: 45, gmv24: 28, growth: 60.7 },
+    '440000': { name: '广东省', en: 'Guangdong', gmv25: 98, gmv24: 75, growth: 30.6 },
+    '330000': { name: '浙江省', en: 'Zhejiang', gmv25: 88, gmv24: 68, growth: 29.4 },
     // Default fallback for others
-    'default': { name: '未知区域', en: 'Region', gmv15: 30, gmv14: 20, growth: 50.0 }
+    'default': { name: '未知区域', en: 'Region', gmv25: 30, gmv24: 20, growth: 50.0 }
 };
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -265,10 +265,30 @@ function updatePanel(adcode, name) {
 
     // Auto-generate some realistic looking data based on adcode hash if not mocked
     if (!mockData[adcode]) {
-        const seed = parseInt(adcode) || 123;
-        data.gmv15 = (seed % 100) + 20;
-        data.gmv14 = data.gmv15 * 0.7;
-        data.growth = ((data.gmv15 - data.gmv14) / data.gmv14 * 100).toFixed(1);
+        // Hierarchical Scaling Logic
+        let level = 'county';
+        if (adcode.endsWith('0000')) level = 'province';
+        else if (adcode.endsWith('00')) level = 'city';
+
+        // Better Seed: Sum of char codes to avoid '00' endings causing identical seeds
+        const seed = adcode.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+        const randomVal = (seed % 100) / 100; // 0.00 - 0.99
+
+        let baseGMV;
+        if (level === 'province') {
+            baseGMV = 100 + (randomVal * 200); // 100 - 300 for Provinces
+        } else if (level === 'city') {
+            baseGMV = 20 + (randomVal * 60);   // 20 - 80 for Cities/Prefectures
+        } else {
+            baseGMV = 1 + (randomVal * 14);    // 1 - 15 for Counties/Districts
+        }
+
+        data.gmv25 = parseFloat(baseGMV.toFixed(1));
+
+        // Randomize growth factor (0.6 - 0.9)
+        const randomFactor = 0.6 + ((seed * 13) % 40) / 100;
+        data.gmv24 = parseFloat((data.gmv25 * randomFactor).toFixed(1));
+        data.growth = ((data.gmv25 - data.gmv24) / data.gmv24 * 100).toFixed(1);
     }
 
     const panelHTML = `
@@ -281,18 +301,18 @@ function updatePanel(adcode, name) {
             <div class="stat-row">
                 <div class="stat-label">Total GMV (Sales)</div>
                 <div class="stat-bar-container">
-                    <div class="year-label">2015</div>
+                    <div class="year-label">2025</div>
                     <div class="bar-bg">
                         <div class="bar-fill" style="width: 85%;"></div>
                     </div>
-                    <div class="stat-value">¥${data.gmv15}亿</div>
+                    <div class="stat-value">¥${data.gmv25}亿</div>
                 </div>
                 <div class="stat-bar-container">
-                    <div class="year-label">2014</div>
+                    <div class="year-label">2024</div>
                     <div class="bar-bg">
-                        <div class="bar-fill prev-year" style="width: ${data.gmv14 / data.gmv15 * 85}%;"></div>
+                        <div class="bar-fill prev-year" style="width: ${data.gmv24 / data.gmv25 * 85}%;"></div>
                     </div>
-                    <div class="stat-value">¥${(data.gmv14).toFixed(1)}亿</div>
+                    <div class="stat-value">¥${(data.gmv24).toFixed(1)}亿</div>
                 </div>
             </div>
 
@@ -306,13 +326,13 @@ function updatePanel(adcode, name) {
            <h4 style="color:#00eaff; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:5px;">TOP AREAS IN ${data.name}</h4>
            <ul style="list-style:none; padding:0; margin-top:10px; font-size:12px; color:#ccc;">
                <li style="display:flex; justify-content:space-between; margin-bottom:5px;">
-                   <span>1. ${getTopAreas(adcode, data.name)[0]}</span> <span style="color:#fff;">¥${(data.gmv15 * 0.4).toFixed(1)}亿</span>
+                   <span>1. ${getTopAreas(adcode, data.name)[0]}</span> <span style="color:#fff;">¥${(data.gmv25 * 0.4).toFixed(1)}亿</span>
                </li>
                <li style="display:flex; justify-content:space-between; margin-bottom:5px;">
-                   <span>2. ${getTopAreas(adcode, data.name)[1]}</span> <span style="color:#fff;">¥${(data.gmv15 * 0.25).toFixed(1)}亿</span>
+                   <span>2. ${getTopAreas(adcode, data.name)[1]}</span> <span style="color:#fff;">¥${(data.gmv25 * 0.25).toFixed(1)}亿</span>
                </li>
                <li style="display:flex; justify-content:space-between; margin-bottom:5px;">
-                   <span>3. ${getTopAreas(adcode, data.name)[2]}</span> <span style="color:#fff;">¥${(data.gmv15 * 0.15).toFixed(1)}亿</span>
+                   <span>3. ${getTopAreas(adcode, data.name)[2]}</span> <span style="color:#fff;">¥${(data.gmv25 * 0.15).toFixed(1)}亿</span>
                </li>
            </ul>
         </div>

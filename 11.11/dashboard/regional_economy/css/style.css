@@ -318,7 +318,8 @@ body {
 }
 
 .stat-value {
-    width: 60px;
+    width: 100px;
+    white-space: nowrap;
     text-align: right;
     font-size: 14px;
     color: #fff;

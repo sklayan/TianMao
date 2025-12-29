@@ -517,6 +517,10 @@
       }
 
       start() {
+        // 立即发送初始数据，无需等待
+        const initialData = this.generateData();
+        this.notify(initialData);
+
         this.intervalId = setInterval(() => {
           const data = this.generateData();
           this.notify(data);
@@ -810,7 +814,11 @@
           .attr('stroke-width', d => d.volume === 'high' ? 2 : 1)
           .attr('stroke-opacity', 0.6);
 
-        this.routesGroup.selectAll('.route')
+        // 首先设置路径和样式
+        const allRoutes = this.routesGroup.selectAll('.route');
+        const self = this;
+
+        allRoutes
           .attr('stroke', d => this.getRouteColor(d.status))
           .attr('stroke-width', d => d.status === 'urgent' ? 3 : 2)
           .style('filter', d => `drop-shadow(0 0 ${d.status === 'urgent' ? '5px' : '3px'} ${this.getRouteColor(d.status)})`)
@@ -820,6 +828,27 @@
             if (!source || !target) return null;
             return this.generateCurve(source, target);
           });
+
+        // 为新添加的航线添加渐进式动画
+        routesEnter.each(function (d, i) {
+          const path = d3.select(this);
+          const node = this;
+
+          // 等待 d 属性被设置后再计算长度
+          setTimeout(() => {
+            if (node.getTotalLength) {
+              const length = node.getTotalLength();
+              path
+                .attr('stroke-dasharray', length)
+                .attr('stroke-dashoffset', length)
+                .transition()
+                .duration(1200)
+                .delay(i * 80) // 每条线延迟80ms，逐条出现
+                .ease(d3.easeQuadOut)
+                .attr('stroke-dashoffset', 0);
+            }
+          }, 50);
+        });
       }
 
       generateCurve(source, target) {
@@ -983,15 +1012,43 @@
       }
 
       update(data) {
+        // 动画辅助函数：数字计数动画
+        const animateNumber = (element, targetValue, duration = 800, isFloat = false) => {
+          if (!element) return;
+          const startValue = parseFloat(element.innerText.replace(/,/g, '')) || 0;
+          const startTime = performance.now();
+
+          const animate = (currentTime) => {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            // easeOutQuad
+            const eased = 1 - Math.pow(1 - progress, 2);
+            const currentValue = startValue + (targetValue - startValue) * eased;
+
+            if (isFloat) {
+              element.innerText = currentValue.toFixed(1) + '%';
+            } else {
+              element.innerText = Math.floor(currentValue).toLocaleString();
+            }
+
+            if (progress < 1) {
+              requestAnimationFrame(animate);
+            }
+          };
+
+          requestAnimationFrame(animate);
+        };
+
         // Update Utilization
         const util = data.globalStats.warehouseUtilization;
         const utilBar = document.getElementById('total-utilization');
         const utilText = document.getElementById('utilization-text');
 
         if (utilBar && utilText) {
+          utilBar.style.transition = 'width 0.8s ease-out, background-color 0.5s';
           utilBar.style.width = `${util}%`;
           utilBar.style.backgroundColor = util > 90 ? 'var(--alert-red)' : (util > 70 ? 'var(--accent-orange)' : 'var(--accent-blue)');
-          utilText.innerText = `${util.toFixed(1)}%`;
+          animateNumber(utilText, util, 800, true);
         }
 
         // Update Counts
@@ -1000,8 +1057,8 @@
 
         const highLoadEl = document.getElementById('high-load-count');
         const idleEl = document.getElementById('idle-count');
-        if (highLoadEl) highLoadEl.innerText = highLoad;
-        if (idleEl) idleEl.innerText = idle;
+        animateNumber(highLoadEl, highLoad, 600);
+        animateNumber(idleEl, idle, 600);
 
         // Update Tasks
         const totalTasks = Math.floor(data.globalStats.totalOrders / 100000);
@@ -1011,13 +1068,13 @@
         const activeEl = document.getElementById('active-tasks');
         const pendingEl = document.getElementById('pending-tasks');
 
-        if (totalEl) totalEl.innerText = totalTasks.toLocaleString();
-        if (activeEl) activeEl.innerText = activeTasks.toLocaleString();
-        if (pendingEl) pendingEl.innerText = Math.floor(activeTasks * 0.5).toLocaleString();
+        animateNumber(totalEl, totalTasks, 1000);
+        animateNumber(activeEl, activeTasks, 800);
+        animateNumber(pendingEl, Math.floor(activeTasks * 0.5), 800);
 
         // Update KPI
         const avgRespEl = document.getElementById('avg-response');
-        if (avgRespEl) avgRespEl.innerText = Math.floor(100 + Math.random() * 50);
+        if (avgRespEl) animateNumber(avgRespEl, Math.floor(100 + Math.random() * 50), 600);
 
         // Update Cost Savings (Mock data)
         const costSavingsEl = document.querySelector('.kpi-value.orange');
